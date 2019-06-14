@@ -12,7 +12,10 @@ class Query(models.Model):
 
     @property
     def csv_file_uri(self):
-        if self.csv_file is not None:
+        print(self.csv_file == "")
+        print(self.file)
+        print(self.file is not False and self.csv_file != "")
+        if self.file is not False and self.csv_file != "":
             return BASE_URL[:-1] + self.csv_file.url
         return ""
 
@@ -32,7 +35,7 @@ class QueryUser(models.Model):
 
 
 class QueryFilter(models.Model):
-    query = models.ForeignKey(Query, on_delete=models.CASCADE)
+    query = models.OneToOneField(Query, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=40, null=True, blank=True)

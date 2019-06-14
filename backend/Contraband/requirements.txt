@@ -1,0 +1,11 @@
+asn1crypto==0.24.0
+cffi==1.12.3
+cryptography==2.7
+Django==2.2.2
+django-cleanup==3.2.0
+django-cors-headers==3.0.2
+djangorestframework==3.9.4
+pycparser==2.19
+pytz==2019.1
+six==1.12.0
+sqlparse==0.3.0
