@@ -1,5 +1,5 @@
 from django.db import models
-from Contraband.settings import BASE_URL
+from contraband.settings import BASE_URL
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 

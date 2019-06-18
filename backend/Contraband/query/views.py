@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
-from Contraband.settings import BASE_DIR
+from contraband.settings import BASE_DIR
 from os import rename, remove
 
 
