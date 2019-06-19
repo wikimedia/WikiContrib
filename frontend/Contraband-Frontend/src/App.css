@@ -1,0 +1,14 @@
+#query_create .ui.card {
+  border: none;
+  /* background: green; */
+  box-shadow: 0px 0px 0px 0px;
+}
+
+.steps {
+  cursor: pointer;
+}
+
+.step_line {
+  stroke: lightgray;
+  stroke-width: 2;
+}
