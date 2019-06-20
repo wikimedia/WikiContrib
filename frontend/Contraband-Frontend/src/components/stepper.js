@@ -40,15 +40,18 @@ export default class Stepper extends Component {
 
     return (
       <React.Fragment>
-        <Grid style={{ marginTop: 70 }}>
+        <Grid style={{ paddingTop: 30 }}>
           <Grid.Row>
             <Grid.Column computer={4} tablet={1} mobile={1} />
 
             <Grid.Column computer={8} tablet={14} mobile={14}>
-              <Card style={{ width: "100%", textAlign: "center" }}>
+              <Card
+                style={{ width: "100%", textAlign: "center" }}
+                className="stepper"
+              >
                 <div style={{ display: "inline" }}>
                   {arr.map((obj, i) => (
-                    <React.Fragment>
+                    <React.Fragment key={i}>
                       <Popup
                         trigger={
                           <svg width="58px" height="80px" className="steps">
@@ -56,7 +59,7 @@ export default class Stepper extends Component {
                               cx="32"
                               cy="25"
                               r="22"
-                              stroke-width="1"
+                              strokeWidth="1"
                               fill={
                                 i + 1 === this.props.step
                                   ? "lightblue"
@@ -76,7 +79,7 @@ export default class Stepper extends Component {
                               <text
                                 x="32"
                                 y="25"
-                                text-anchor="middle"
+                                textAnchor="middle"
                                 dy=".3em"
                                 fill="white"
                                 style={{ fontSize: 20 }}
@@ -88,7 +91,7 @@ export default class Stepper extends Component {
                             <text
                               x="25"
                               y="60"
-                              text-anchor="middle"
+                              textAnchor="middle"
                               dy=".3em"
                               fill="black"
                             >

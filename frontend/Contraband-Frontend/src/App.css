@@ -1,4 +1,4 @@
-#query_create .ui.card {
+.ui.card.stepper {
   border: none;
   /* background: green; */
   box-shadow: 0px 0px 0px 0px;
@@ -11,4 +11,38 @@
 .step_line {
   stroke: lightgray;
   stroke-width: 2;
+}
+
+.ui.card.query_create {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: #f3f3f3;
+}
+
+.user_input {
+  border: none;
+  border-radius: 20px;
+  background: #e7e7e7;
+  padding: 10px;
+}
+
+#messages {
+  left: 10px !important;
+  bottom: 30px !important;
+  width: calc(100px + 20vw) !important;
+  position: fixed !important;
+  z-index: 1002 !important;
+}
+
+.drag_drop {
+  background: rgb(240, 233, 233);
+  padding: 10px;
+  color: #a18383;
+  font-weight: bold;
+  width: "80%";
+  text-align: center;
+  border: 1px dashed rgb(196, 194, 194);
+  border-radius: 10px;
+  cursor: pointer;
 }
