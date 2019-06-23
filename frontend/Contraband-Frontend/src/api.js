@@ -2,13 +2,15 @@
  All the Global Constants are declared here.
 */
 
-const BASE_API_URI = "http://tools.wmflabs.org/contraband/";
+const BASE_API_URI = "http://127.0.0.1:8000/";
 
 // method: POST
-export const QueryCreate = BASE_API_URI + "/query/add/user/";
+export const QueryCreateApi = BASE_API_URI + "query/add/user/";
 // method: GET, PATCH, DELETE
-export const QueryDetail = BASE_API_URI + "query/<hash>/update/user/";
+export const QueryDetailApi = BASE_API_URI + "query/<hash>/update/user/";
 // method: POST
-export const filterCreate = BASE_API_URI + "query/<hash>/add/filter/";
+export const filterCreateApi = BASE_API_URI + "query/<hash>/add/filter/";
 // method: GET, PATCH, DELETE
-export const filterDetail = BASE_API_URI + "query/<hash>/update/filter/";
+export const filterDetailApi = BASE_API_URI + "query/<hash>/update/filter/";
+// method: POST
+export const queryExist = BASE_API_URI + "query/<hash>/check/";

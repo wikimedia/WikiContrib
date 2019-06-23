@@ -13,7 +13,8 @@
   stroke-width: 2;
 }
 
-.ui.card.query_create {
+.ui.card.query_create,
+.ui.card.query_add_filter {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
@@ -25,6 +26,10 @@
   border-radius: 20px;
   background: #e7e7e7;
   padding: 10px;
+}
+
+.user_input:focus {
+  box-shadow: 1px 1px 1px #888888;
 }
 
 #messages {
@@ -45,4 +50,48 @@
   border: 1px dashed rgb(196, 194, 194);
   border-radius: 10px;
   cursor: pointer;
+}
+
+.divide {
+  border: 0.4px solid rgb(214, 214, 214);
+  margin: 10px;
+}
+
+.ui.icon.labeled.input.filter_input,
+.ui.icon.labeled.input.filter_input,
+.ui.left.icon.input.filter_input,
+.ui.left.icon.input.filter_input {
+  width: 90%;
+  margin: 10px;
+}
+
+.ui.label.label {
+  border-radius: 20px;
+}
+
+#start_date_input,
+#end_date_input,
+#status_input,
+#project_input {
+  border: none;
+  padding: 12px;
+}
+
+#start_date_input,
+#end_date_input {
+  border-radius: 0px 20px 20px 0px;
+}
+
+#status_input,
+#project_input {
+  border-radius: 20px;
+}
+
+#status_input:focus,
+#project_input:focus {
+  box-shadow: 1px 1px 1px #888888;
+}
+
+.line.placeholder_line {
+  height: 0px !important;
 }

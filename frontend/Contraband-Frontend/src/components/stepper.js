@@ -72,7 +72,7 @@ export default class Stepper extends Component {
                               <path
                                 d="M23 29 L29 35 L44 19"
                                 stroke="white"
-                                stroke-width="3"
+                                strokeWidth="3"
                                 fill="none"
                               />
                             ) : (
