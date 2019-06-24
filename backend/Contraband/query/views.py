@@ -164,10 +164,6 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                 except ValueError:
                     file_path = BASE_DIR + "/uploads/" + self.kwargs['hash'] + ".csv"
                 if int(request.data['chunk']) is 1:
-                    try:
-                        remove(file_path)
-                    except FileNotFoundError:
-                        pass
                     with open(file_path + ".part", 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
                 else:
@@ -175,9 +171,11 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     with open(file_path + ".part", "ab") as destination:
                         destination.write(request.data['csv_file'].read())
 
-                print(int(request.data['complete']))
-
                 if int(request.data['complete']) == 0:
+                    try:
+                        remove(file_path)
+                    except FileNotFoundError:
+                        pass
                     rename(file_path + ".part", file_path)
                     self.get_object().queryuser_set.all().delete()
                     query = self.get_object()
