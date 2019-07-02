@@ -9,6 +9,9 @@ from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
 from contraband.settings import BASE_DIR
 from os import rename, remove
+import asyncio
+import time
+from aiohttp import ClientSession
 
 
 def create_hash():
@@ -176,12 +179,12 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                         remove(file_path)
                     except FileNotFoundError:
                         pass
-                    rename(file_path + ".part", file_path)
                     self.get_object().queryuser_set.all().delete()
                     query = self.get_object()
                     query.file = True
                     query.csv_file = file_path
                     query.save()
+                    rename(file_path + ".part", file_path)
 
                     return Response({
                         "message": self.get_object().hash_code,
@@ -251,9 +254,63 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
     def get_object(self):
         return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
 
+    def get(self, request, *args, **kwargs):
+        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        if QueryFilter.objects.filter(query=query).exists():
+            return super(QueryFilterView, self).get(request, *args, **kwargs)
+        else:
+            return Response({
+                "project": "",
+                "status": "",
+                "start_time": None,
+                "end_time": None
+            })
+
+    def patch(self, request, *args, **kwargs):
+        if QueryFilter.objects.filter(query__hash_code=self.kwargs['hash']).exists():
+            return super(QueryFilterView, self).patch(request, *args, **kwargs)
+        else:
+            kwargs = request.data.copy()
+            kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+            query_filter = QueryFilter.objects.create(**kwargs)
+            return Response({
+                "start_time": query_filter.start_time,
+                "end_time": query_filter.end_time,
+                "status": query_filter.status,
+                "project": query_filter.project
+            })
+
     def delete(self, request, *args, **kwargs):
         super(QueryFilterView, self).delete(request, *args, **kwargs)
         return Response({
             "message": "Successfully deleted filters",
             "error": 0
         })
+
+
+async def fetch(url, session):
+    async with session.get(url) as response:
+        data = await response.read()
+        return data
+
+
+async def get_data(loop):
+    start_time = time.time()
+    tasks = []
+    url = "http://dummy.restapiexample.com/api/v1/employees"
+    async with ClientSession() as session:
+        for i in range(0, 25):
+            task = loop.create_task((fetch(url, session)))
+            tasks.append(task)
+
+        await asyncio.gather(*tasks)
+        return time.time() - start_time
+
+
+class test(APIView):
+
+    def get(self, request, *args, **kwargs):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        data = loop.run_until_complete(get_data(loop))
+        return Response({"Data": data})

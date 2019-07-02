@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AddQueryUser, QueryAddFilter, QueryFilterView, QueryRetrieveUpdateDeleteView, CheckQuery
+from .views import AddQueryUser, QueryAddFilter, QueryFilterView, QueryRetrieveUpdateDeleteView, CheckQuery, test
 
 urlpatterns = [
     # Query: Create,Read, Update, Delete
@@ -11,6 +11,9 @@ urlpatterns = [
     path('<hash>/update/filter/', QueryFilterView.as_view()),
 
     # Check if Query and QueryFilter Exist
-    path('<hash>/check/', CheckQuery.as_view())
+    path('<hash>/check/', CheckQuery.as_view()),
+
+    # Test
+    path('test/', test.as_view()),
 
 ]
