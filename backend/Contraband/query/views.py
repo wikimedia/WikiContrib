@@ -1,8 +1,10 @@
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import status
 from .models import Query, QueryFilter, QueryUser
+from datetime import timedelta
 from django.utils.crypto import get_random_string
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -85,27 +87,26 @@ class AddQueryUser(CreateAPIView):
                                BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv")
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
-
-                        query = {
-                            "hash_code": query_obj.hash_code,
-                            "pk": query_obj.pk,
-                            "csv_file_uri": query_obj.csv_file_uri
-                        }
+                        QueryFilter.objects.create(
+                            query=query_obj,
+                            start_time=timezone.now(),
+                            end_time=timezone.now() - timedelta(days=365)
+                        )
 
                 if int(request.data['complete']) is 0:
-                    return Response(query)
+                    return redirect("Asda")
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
-                if len(request.data['users']) > 200:
-                    return Response({
-                        'message': 'At a maximum of 200 entities can be given for a query',
-                        'error': 0
-                    }, status=status.HTTP_400_BAD_REQUEST)
                 request.data['hash_code'] = create_hash()
                 with transaction.atomic():
                     # Add the Query
                     query = super(AddQueryUser, self).post(request, *args, **kwargs)
+                    QueryFilter.objects.create(
+                        query=get_object_or_404(Query, hash_code=query.data['hash_code']),
+                        start_time=timezone.now(),
+                        end_time=timezone.now() - timedelta(days=365)
+                    )
 
                     # Add the usernames & platforms to the query
                     temp = 1
@@ -129,11 +130,7 @@ class AddQueryUser(CreateAPIView):
                             'error': 1
                         }, status=status.HTTP_400_BAD_REQUEST)
 
-                return Response({
-                        "hash_code": query.data['hash_code'],
-                        "pk": query.data['pk'],
-                        "csv_file_uri": query.data['csv_file_uri']
-                        })
+                return redirect("Asdad")
         except KeyError:
             return Response({
                 'message': 'Fill the form completely!',
@@ -230,20 +227,6 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         return Response({
             "message": "Successfully deleted the Query",
             "error": 0
-        })
-
-
-class QueryAddFilter(CreateAPIView):
-    serializer_class = QueryFilterSerializer
-    http_method_names = ['post']
-
-    def create(self, request, *args, **kwargs):
-        s = QueryFilterSerializer(data=request.data)
-        s.is_valid(raise_exception=True)
-        QueryFilter.objects.create(query=get_object_or_404(Query, hash_code=self.kwargs['hash']), **s.validated_data)
-        return Response({
-            'message': 'Successfully added filters!',
-            'error': 0
         })
 
 

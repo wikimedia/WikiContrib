@@ -39,7 +39,6 @@ class QueryFilter(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=40, null=True, blank=True)
-    project = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.query.__str__()

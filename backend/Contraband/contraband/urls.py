@@ -21,7 +21,8 @@ from contraband import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('query/', include('query.urls'))
+    path('query/', include('query.urls')),
+    path('result/', include('result.urls'))
 ]
 
 if settings.DEBUG:
