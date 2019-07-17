@@ -70,6 +70,11 @@ class AddQueryUser(CreateAPIView):
                     if int(request.data['complete']) == 0:
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
+                        QueryFilter.objects.create(
+                            query=query_obj,
+                            start_time=timezone.now() - timedelta(days=365),
+                            end_time=timezone.now()
+                        )
                         query = {
                             "hash_code": query_obj.hash_code,
                             "pk": query_obj.pk,
@@ -89,12 +94,12 @@ class AddQueryUser(CreateAPIView):
                         query_obj.save()
                         QueryFilter.objects.create(
                             query=query_obj,
-                            start_time=timezone.now(),
-                            end_time=timezone.now() - timedelta(days=365)
+                            start_time=timezone.now() - timedelta(days=365),
+                            end_time=timezone.now()
                         )
 
                 if int(request.data['complete']) is 0:
-                    return redirect("Asda")
+                    return redirect('result', hash=query_obj.hash_code)
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
@@ -104,8 +109,8 @@ class AddQueryUser(CreateAPIView):
                     query = super(AddQueryUser, self).post(request, *args, **kwargs)
                     QueryFilter.objects.create(
                         query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                        start_time=timezone.now(),
-                        end_time=timezone.now() - timedelta(days=365)
+                        start_time=timezone.now() - timedelta(days=365),
+                        end_time=timezone.now()
                     )
 
                     # Add the usernames & platforms to the query
@@ -130,7 +135,7 @@ class AddQueryUser(CreateAPIView):
                             'error': 1
                         }, status=status.HTTP_400_BAD_REQUEST)
 
-                return redirect("Asdad")
+                return redirect('result', hash=query.data['hash_code'])
         except KeyError:
             return Response({
                 'message': 'Fill the form completely!',
@@ -251,7 +256,25 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
 
     def patch(self, request, *args, **kwargs):
         if QueryFilter.objects.filter(query__hash_code=self.kwargs['hash']).exists():
-            return super(QueryFilterView, self).patch(request, *args, **kwargs)
+            commit_status = self.get_object().status
+            commit_start = self.get_object().start_time
+            commit_end = self.get_object().end_time
+            if 'username' not in request.data:
+                return Response({'message': 'Fill the form completetly', 'error': 1},
+                                status=status.HTTP_400_BAD_REQUEST)
+            data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
+            request.session['data'] = {
+                "username": request.data['username'],
+                "query": self.get_object()
+            }
+            if data['status'] != commit_status:
+                if commit_start != data['start_time'] or commit_end != data['end_time']:
+                    return redirect('result-update')
+                else:
+                    return redirect('result-status-update')
+            else:
+                # User has changed the timestamp, perform the request again.
+                return redirect('result-update')
         else:
             kwargs = request.data.copy()
             kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
@@ -297,3 +320,7 @@ class test(APIView):
         asyncio.set_event_loop(loop)
         data = loop.run_until_complete(get_data(loop))
         return Response({"Data": data})
+
+
+# whenever time is changed, perform the entire request process again.
+# whenever status is changed, get the details from the db and update the server.

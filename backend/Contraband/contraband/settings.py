@@ -141,6 +141,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
+API_TOKEN = "api-hfubeyafa7gd7vwfi7jvz4nbskut"
 CORS_ORIGIN_ALLOW_ALL = True
 
 try:
