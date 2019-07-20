@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
-from .models import Query, QueryFilter, QueryUser
+from .models import Query, QueryFilter
 from datetime import timedelta
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404, redirect
@@ -11,9 +11,6 @@ from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
 from contraband.settings import BASE_DIR
 from os import rename, remove
-import asyncio
-import time
-from aiohttp import ClientSession
 
 
 def create_hash():
@@ -64,6 +61,7 @@ class AddQueryUser(CreateAPIView):
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part"
                     else:
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv"
+
                     with open(filename, 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
 
@@ -75,11 +73,6 @@ class AddQueryUser(CreateAPIView):
                             start_time=timezone.now() - timedelta(days=365),
                             end_time=timezone.now()
                         )
-                        query = {
-                            "hash_code": query_obj.hash_code,
-                            "pk": query_obj.pk,
-                            "csv_file_uri": query_obj.csv_file_uri
-                        }
                 else:
                     # Append the file to the already created CSV file
 
@@ -99,6 +92,7 @@ class AddQueryUser(CreateAPIView):
                         )
 
                 if int(request.data['complete']) is 0:
+                    print("came here: " + str(request.data['chunk']))
                     return redirect('result', hash=query_obj.hash_code)
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
@@ -188,11 +182,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     query.save()
                     rename(file_path + ".part", file_path)
 
-                    return Response({
-                        "message": self.get_object().hash_code,
-                        "chunk": request.data['chunk'],
-                        "error": 0
-                    })
+                    return redirect('result', hash=self.get_object().hash_code)
                 else:
                     return Response({
                         "message": "Successfully updated.",
@@ -216,10 +206,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                             s = QueryUserSerializer(data=data)
                             s.is_valid(raise_exception=True)
                             s.save()
-                return Response({
-                    "message": "Updated successfully",
-                    "error": 0
-                })
+                return redirect('result', hash=self.get_object().hash_code)
 
         except KeyError:
             return Response({
@@ -237,7 +224,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
 class QueryFilterView(RetrieveUpdateDestroyAPIView):
     serializer_class = QueryFilterSerializer
-    http_method_names = ['get', 'patch', 'delete']
+    http_method_names = ['get', 'patch']
 
     def get_object(self):
         return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
@@ -260,12 +247,12 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             commit_start = self.get_object().start_time
             commit_end = self.get_object().end_time
             if 'username' not in request.data:
-                return Response({'message': 'Fill the form completetly', 'error': 1},
+                return Response({'message': 'Fill the form completely', 'error': 1},
                                 status=status.HTTP_400_BAD_REQUEST)
             data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
             request.session['data'] = {
                 "username": request.data['username'],
-                "query": self.get_object()
+                "query": self.get_object().query.hash_code
             }
             if data['status'] != commit_status:
                 if commit_start != data['start_time'] or commit_end != data['end_time']:
@@ -278,49 +265,9 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
         else:
             kwargs = request.data.copy()
             kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
-            query_filter = QueryFilter.objects.create(**kwargs)
-            return Response({
-                "start_time": query_filter.start_time,
-                "end_time": query_filter.end_time,
-                "status": query_filter.status,
-                "project": query_filter.project
-            })
-
-    def delete(self, request, *args, **kwargs):
-        super(QueryFilterView, self).delete(request, *args, **kwargs)
-        return Response({
-            "message": "Successfully deleted filters",
-            "error": 0
-        })
-
-
-async def fetch(url, session):
-    async with session.get(url) as response:
-        data = await response.read()
-        return data
-
-
-async def get_data(loop):
-    start_time = time.time()
-    tasks = []
-    url = "http://dummy.restapiexample.com/api/v1/employees"
-    async with ClientSession() as session:
-        for i in range(0, 25):
-            task = loop.create_task((fetch(url, session)))
-            tasks.append(task)
-
-        await asyncio.gather(*tasks)
-        return time.time() - start_time
-
-
-class test(APIView):
-
-    def get(self, request, *args, **kwargs):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        data = loop.run_until_complete(get_data(loop))
-        return Response({"Data": data})
-
-
-# whenever time is changed, perform the entire request process again.
-# whenever status is changed, get the details from the db and update the server.
+            QueryFilter.objects.create(**kwargs)
+            request.session['data'] = {
+                "username": request.data['username'],
+                "query": kwargs['query'].hash_code
+            }
+            return redirect('result-update')

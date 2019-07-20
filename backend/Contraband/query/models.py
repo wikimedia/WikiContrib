@@ -12,9 +12,6 @@ class Query(models.Model):
 
     @property
     def csv_file_uri(self):
-        print(self.csv_file == "")
-        print(self.file)
-        print(self.file is not False and self.csv_file != "")
         if self.file is not False and self.csv_file != "":
             return BASE_URL[:-1] + self.csv_file.url
         return ""

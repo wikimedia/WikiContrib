@@ -11,7 +11,7 @@ class QuerySerializer(ModelSerializer):
 
 
 class QueryUserSerializer(ModelSerializer):
-    fullname = CharField(required=False, allow_blank=True)
+    fullname = CharField(required=False, allow_blank=False)
     gerrit_username = CharField(required=False, allow_blank=True)
     github_username = CharField(required=False, allow_blank=True)
     phabricator_username = CharField(required=False, allow_blank=True)

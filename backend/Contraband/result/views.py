@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import asyncio
-from json import loads
+from json import loads, JSONDecodeError
 from aiohttp import ClientSession
 import time
 from query.models import Query
@@ -53,7 +53,10 @@ async def get_task_assigner(url, request_data, session, resp):
 async def get_gerrit_data(url, session, gerrit_resp):
     async with session.get(url) as response:
         data = await response.read()
-        data = loads(data[4:].decode("utf-8"))
+        try:
+            data = loads(data[4:].decode("utf-8"))
+        except JSONDecodeError:
+            data = []
         gerrit_resp.extend(data)
 
 
@@ -66,16 +69,23 @@ def format_data(pd, gd, query, phid):
     else:
         leng = len_gd
     temp = []
-    status_name = query.queryfilter.status.split(",")
+    print(query.queryfilter.status)
+    if query.queryfilter.status is not None or query.queryfilter.status != "":
+        status_name = query.queryfilter.status.split(",")
+    else:
+        status_name = True
     with transaction.atomic():
         ListCommit.objects.filter(query=query).delete()
         for i in range(0, leng):
             if i < len_pd:
+                print("came here")
                 if pd[i]['phid'] not in temp:
+                    print("came also here")
                     temp.append(pd[i]['phid'])
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
                     date_time = date_time.replace(hour=0, minute=0, second=0).strftime("%s")
-                    if pd[i]['fields']['status']['name'] in status_name:
+                    print(status_name)
+                    if status_name is True or pd[i]['fields']['status']['name'].lower() in status_name:
                         rv = {
                             "time": date_time,
                             "phabricator": True,
@@ -95,7 +105,7 @@ def format_data(pd, gd, query, phid):
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0], "%Y-%m-%d %H:%M:%S"))
                 if date_time < query.queryfilter.end_time and date_time > query.queryfilter.start_time:
                     epouch = int(date_time.replace(hour=0, minute=0, second=0).strftime("%s"))
-                    if gd[i]['status'] in status_name:
+                    if status_name is True or gd[i]['status'] in status_name:
                         rv = {
                            "time": epouch,
                            "gerrit": True,
@@ -107,9 +117,9 @@ def format_data(pd, gd, query, phid):
                         query=query, heading=gd[i]['subject'],
                         platform="gr", created_on=epouch,
                         redirect=gd[i]['change_id'], status=gd[i]['status'],
-                        owned=pd[i]['fields']['authorPHID'] == phid,
-                        assigned=pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
+                        owned=True, assigned=True
                     )
+    print(resp)
     return resp
 
 
@@ -122,7 +132,7 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
         await asyncio.gather(*tasks)
 
 
-def getDetails(username, gerrit_username, createdStart, createdEnd, phid, users):
+def getDetails(username, gerrit_username, createdStart, createdEnd, phid, users, query):
     loop = asyncio.new_event_loop()
     phab_response, gerrit_response = [], []
     asyncio.set_event_loop(loop)
@@ -149,8 +159,11 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, users)
                                      gerrit_response=gerrit_response, phab_response=phab_response,
                                      phid=phid))
     print(time.time() - start_time)
+    print(phab_response)
+    print(gerrit_response)
     formatted = format_data(phab_response, gerrit_response, query, phid[0])
     return Response({
+        'query': query.hash_code,
         "users": users,
         "result": formatted
     })
@@ -167,18 +180,18 @@ class DisplayResult(APIView):
             # get the data from CSV file
             try:
                 file = read_csv(query.csv_file)
-                j = 1
                 try:
                     users = file.iloc[:, 0].values.tolist()
                     if 'user' in request.GET:
-                            user = file[file['fullname'] == request.GET['user']]
+                        user = file[file['fullname'] == request.GET['user']]
+                        if user.empty:
+                            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+                        else:
+                            username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
                     else:
                         user = file.head(1)
-                        j = 0
-                    if not user.empty:
-                        username, gerrit_username = user['Phabricator'][j], user['Gerrit'][j]
-                    else:
-                        return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+                        username, gerrit_username = user['Phabricator'][0], user['Gerrit'][0]
+
                 except KeyError:
                     return Response({'message': 'CSV file is not in specified format!!', 'error': 1},
                                     status=status.HTTP_400_BAD_REQUEST)
@@ -189,50 +202,51 @@ class DisplayResult(APIView):
             if 'user' in request.GET:
                 user = query.queryuser_set.filter(fullname=request.GET['user'])
             else:
-                user = query.queryuser_set.all()[0]
-            users.extend(query.queryuser_set.all().values('fullname'))
-            if user is None:
-                return Response({"message": "Not Found", "error": 1}, status=status.HTTP_404_NOT_FOUND)
+                user = query.queryuser_set.all()
 
+            if not user.exists():
+                return Response({"message": "Not Found", "error": 1}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                user = user[0]
+
+            users.extend(query.queryuser_set.all().values_list('fullname', flat=True))
             username, gerrit_username = user.phabricator_username, user.gerrit_username
 
         createdStart = query.queryfilter.start_time.strftime('%s')
         createdEnd = query.queryfilter.end_time.strftime('%s')
 
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
-                          createdEnd=createdEnd, phid=phid, users=users)
+                          createdEnd=createdEnd, phid=phid, users=users, query=query)
 
 
 class UserUpdateTimeStamp(APIView):
-    http_method_names = ['post']
+    http_method_names = ['get']
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         data = request.session['data'].copy()
         del request.session['data']
+        print(data)
+        data['query'] = get_object_or_404(Query, hash_code=data['query'])
         if data['query'].file:
             try:
                 file = read_csv(data['query'].csv_file)
-                try:
-                    user = file[file['fullname'] == request.GET['user']]
-                    username, gerrit_username = user['Phabricator'][1], user['Gerrit'][1]
-                except KeyError:
-                    return Response({'message': 'CSV file is not in specified format!!', 'error': 1},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                user = file[file['fullname'] == data['username']]
+                if user.empty:
+                    return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+                else:
+                    username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
+
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
-
         else:
-            if 'user' in request.GET:
-                user = data['query'].queryuser_set.filter(fullname=request.GET['user'])
-            else:
-                user = data['query'].queryuser_set.all()[0]
+            user = data['query'].queryuser_set.filter(fullname=data['username'])
             username, gerrit_username = user.phabricator_username, user.gerrit_username
 
         createdStart = data['query'].queryfilter.start_time.strftime('%s')
         createdEnd = data['query'].queryfilter.end_time.strftime('%s')
         phid = [False]
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
-                          createdEnd=createdEnd, phid=phid, users=[])
+                          createdEnd=createdEnd, phid=phid, users=[], query=data['query'])
 
 
 class UserUpdateStatus(APIView):
@@ -242,6 +256,7 @@ class UserUpdateStatus(APIView):
         data = request.session['data'].copy()
         del request.session['data']
         result = []
+        data['query'] = get_object_or_404(Query, hash_code=data['query'])
         status = data['query'].queryfilter.status.split(",")
         commits = ListCommit.objects.filter(Q(query=data['query']), Q(status__in=status))
         for i in commits:
