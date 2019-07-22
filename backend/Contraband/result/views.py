@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import asyncio
@@ -12,9 +13,9 @@ from django.shortcuts import get_object_or_404
 from pandas import read_csv
 from datetime import datetime
 from .models import ListCommit
+from .serializers import UserCommitSerializer
 from pytz import utc
 from contraband.settings import API_TOKEN
-from django.core.serializers import serialize
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
@@ -69,8 +70,7 @@ def format_data(pd, gd, query, phid):
     else:
         leng = len_gd
     temp = []
-    print(query.queryfilter.status)
-    if query.queryfilter.status is not None or query.queryfilter.status != "":
+    if query.queryfilter.status is not None and query.queryfilter.status != "":
         status_name = query.queryfilter.status.split(",")
     else:
         status_name = True
@@ -78,13 +78,10 @@ def format_data(pd, gd, query, phid):
         ListCommit.objects.filter(query=query).delete()
         for i in range(0, leng):
             if i < len_pd:
-                print("came here")
                 if pd[i]['phid'] not in temp:
-                    print("came also here")
                     temp.append(pd[i]['phid'])
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
                     date_time = date_time.replace(hour=0, minute=0, second=0).strftime("%s")
-                    print(status_name)
                     if status_name is True or pd[i]['fields']['status']['name'].lower() in status_name:
                         rv = {
                             "time": date_time,
@@ -102,10 +99,11 @@ def format_data(pd, gd, query, phid):
                         assigned= pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
                     )
             if i < len_gd:
-                date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0], "%Y-%m-%d %H:%M:%S"))
-                if date_time < query.queryfilter.end_time and date_time > query.queryfilter.start_time:
+                date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
+                                                           "%Y-%m-%d"))
+                if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
                     epouch = int(date_time.replace(hour=0, minute=0, second=0).strftime("%s"))
-                    if status_name is True or gd[i]['status'] in status_name:
+                    if status_name is True or gd[i]['status'].lower() in status_name:
                         rv = {
                            "time": epouch,
                            "gerrit": True,
@@ -119,7 +117,6 @@ def format_data(pd, gd, query, phid):
                         redirect=gd[i]['change_id'], status=gd[i]['status'],
                         owned=True, assigned=True
                     )
-    print(resp)
     return resp
 
 
@@ -159,8 +156,6 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, users,
                                      gerrit_response=gerrit_response, phab_response=phab_response,
                                      phid=phid))
     print(time.time() - start_time)
-    print(phab_response)
-    print(gerrit_response)
     formatted = format_data(phab_response, gerrit_response, query, phid[0])
     return Response({
         'query': query.hash_code,
@@ -225,7 +220,6 @@ class UserUpdateTimeStamp(APIView):
     def get(self, request, *args, **kwargs):
         data = request.session['data'].copy()
         del request.session['data']
-        print(data)
         data['query'] = get_object_or_404(Query, hash_code=data['query'])
         if data['query'].file:
             try:
@@ -240,7 +234,9 @@ class UserUpdateTimeStamp(APIView):
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         else:
             user = data['query'].queryuser_set.filter(fullname=data['username'])
-            username, gerrit_username = user.phabricator_username, user.gerrit_username
+            if not user.exists():
+                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_400_BAD_REQUEST)
+            username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
 
         createdStart = data['query'].queryfilter.start_time.strftime('%s')
         createdEnd = data['query'].queryfilter.end_time.strftime('%s')
@@ -257,8 +253,12 @@ class UserUpdateStatus(APIView):
         del request.session['data']
         result = []
         data['query'] = get_object_or_404(Query, hash_code=data['query'])
-        status = data['query'].queryfilter.status.split(",")
-        commits = ListCommit.objects.filter(Q(query=data['query']), Q(status__in=status))
+        status = data['query'].queryfilter.status
+        if status is not None and status != "":
+            status = status.replace(",", "|")
+            commits = ListCommit.objects.filter(Q(query=data['query']), Q(status__iregex="(" + status + ")"))
+        else:
+            commits = ListCommit.objects.all()
         for i in commits:
             obj = {
                 "time": i.created_on,
@@ -272,14 +272,25 @@ class UserUpdateStatus(APIView):
                 obj['gerrit'] = True
             result.append(obj)
 
-        return result
+        return Response({"result": result})
 
 
-class GetUserCommits(APIView):
+class GetUserCommits(ListAPIView):
     http_method_names = ['get']
+    serializer_class = UserCommitSerializer
 
     def get(self, request, *args, **kwargs):
-        query = get_object_or_404(Query, hash_code=self.kwargs['query'])
-        contribs = ListCommit.objects.filter(Q(query=query), Q(created_on=self.kwargs['created']))
-        return Response(serialize("json", contribs))
+        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        try:
+            date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
+            date = int((date - datetime(1970, 1, 1)).total_seconds())
+        except KeyError:
+            date = datetime.now().date().strftime("%s")
+        status = query.queryfilter.status
+        if status is not None and status != "":
+            self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date),
+                                                  Q(status__iregex="(" + status.replace(",", "|") + ")"))
+        else:
+            self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
+        return super(GetUserCommits, self).get(request, *args, **kwargs)
 

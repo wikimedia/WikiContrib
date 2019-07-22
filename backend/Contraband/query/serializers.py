@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.serializers import ModelSerializer, CharField, DateTimeField
+from rest_framework.serializers import ModelSerializer, CharField, DateField
 from .models import Query, QueryUser, QueryFilter
 
 
@@ -23,8 +23,8 @@ class QueryUserSerializer(ModelSerializer):
 
 
 class QueryFilterSerializer(ModelSerializer):
-    start_time = DateTimeField(required=False, allow_null=True)
-    end_time = DateTimeField(required=False, allow_null=True)
+    start_time = DateField(required=False, allow_null=True)
+    end_time = DateField(required=False, allow_null=True)
     status = CharField(required=False, allow_blank=True)
     project = CharField(required=False, allow_blank=True)
 

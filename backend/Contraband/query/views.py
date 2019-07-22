@@ -1,8 +1,9 @@
-from django.db import transaction
+from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
-from .models import Query, QueryFilter
-from datetime import timedelta
+from .models import Query, QueryFilter, QueryUser
+from datetime import timedelta, datetime
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
@@ -70,8 +71,8 @@ class AddQueryUser(CreateAPIView):
                         query_obj.save()
                         QueryFilter.objects.create(
                             query=query_obj,
-                            start_time=timezone.now() - timedelta(days=365),
-                            end_time=timezone.now()
+                            start_time=timezone.now().date() - timedelta(days=365),
+                            end_time=timezone.now().date()
                         )
                 else:
                     # Append the file to the already created CSV file
@@ -98,36 +99,47 @@ class AddQueryUser(CreateAPIView):
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
                 request.data['hash_code'] = create_hash()
-                with transaction.atomic():
-                    # Add the Query
-                    query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                    QueryFilter.objects.create(
-                        query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                        start_time=timezone.now() - timedelta(days=365),
-                        end_time=timezone.now()
-                    )
+                try:
+                    with transaction.atomic():
+                        # Add the Query
+                        query = super(AddQueryUser, self).post(request, *args, **kwargs)
+                        QueryFilter.objects.create(
+                            query=get_object_or_404(Query, hash_code=query.data['hash_code']),
+                            start_time=timezone.now().date() - timedelta(days=365),
+                            end_time=timezone.now().date()
+                        )
 
-                    # Add the usernames & platforms to the query
-                    temp = 1
-                    for i in request.data['users']:
-                        data = i.copy()
+                        # Add the usernames & platforms to the query
+                        temp = 1
+                        for i in request.data['users']:
+                            data = i.copy()
+                            if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
+                                raise IntegrityError
+                            # Ignore if all the fields are empty
+                            if not (data['fullname'] == "" and data['gerrit_username'] == ""
+                                    and data['github_username'] == "" and data['phabricator_username'] == ""):
+                                data['query'] = query.data['pk']
+                                s = QueryUserSerializer(data=data)
+                                s.is_valid(raise_exception=True)
+                                s.save()
+                                temp = 0
 
-                        # Ignore if all the fields are empty
-                        if not (data['fullname'] == "" and data['gerrit_username'] == ""
-                            and data['github_username'] == "" and data['phabricator_username'] == ""):
-                            data['query'] = query.data['pk']
-                            s = QueryUserSerializer(data=data)
-                            s.is_valid(raise_exception=True)
-                            s.save()
-                            temp = 0
+                        # If all the fields are empty all the times, delete the query
+                        if temp == 1:
+                            raise KeyError
+                except KeyError:
+                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                    return Response({
+                        'message': 'Please provide users data',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
-                    # If all the fields are empty all the times, delete the query
-                    if temp == 1:
-                        Query.objects.filter(hash_code=query.data['hash_code']).delete()
-                        return Response({
-                            'message': 'Please provide users data',
-                            'error': 1
-                        }, status=status.HTTP_400_BAD_REQUEST)
+                except IntegrityError:
+                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                    return Response({
+                        'message': 'Fullname\'s has to be unique!!',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
                 return redirect('result', hash=query.data['hash_code'])
         except KeyError:
@@ -255,7 +267,8 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
                 "query": self.get_object().query.hash_code
             }
             if data['status'] != commit_status:
-                if commit_start != data['start_time'] or commit_end != data['end_time']:
+                if commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()\
+                        or commit_end != datetime.strptime(data['end_time'], "%Y-%m-%d").date():
                     return redirect('result-update')
                 else:
                     return redirect('result-status-update')

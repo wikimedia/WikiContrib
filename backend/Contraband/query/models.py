@@ -33,8 +33,8 @@ class QueryUser(models.Model):
 
 class QueryFilter(models.Model):
     query = models.OneToOneField(Query, on_delete=models.CASCADE)
-    start_time = models.DateTimeField(null=True, blank=True)
-    end_time = models.DateTimeField(null=True, blank=True)
+    start_time = models.DateField(null=True, blank=True)
+    end_time = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=40, null=True, blank=True)
 
     def __str__(self):
