@@ -1,5 +1,6 @@
 from django.db import transaction, IntegrityError
 from django.db.models import Q
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status
 from .models import Query, QueryFilter, QueryUser
@@ -10,7 +11,7 @@ from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
-from contraband.settings import BASE_DIR
+from contraband.settings import BASE_DIR, DEBUG
 from os import rename, remove
 
 
@@ -93,7 +94,6 @@ class AddQueryUser(CreateAPIView):
                         )
 
                 if int(request.data['complete']) is 0:
-                    print("came here: " + str(request.data['chunk']))
                     return redirect('result', hash=query_obj.hash_code)
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
@@ -194,7 +194,12 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     query.save()
                     rename(file_path + ".part", file_path)
 
-                    return redirect('result', hash=self.get_object().hash_code)
+                    response = HttpResponse(content="", status=303)
+                    if DEBUG:
+                        response['location'] = '/result/' + self.get_object().hash_code + '/'
+                    else:
+                        response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
+                    return response
                 else:
                     return Response({
                         "message": "Successfully updated.",
@@ -203,22 +208,37 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     })
             else:
                 # Update the users
-                with transaction.atomic():
-                    query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
-                    query.file = False
-                    query.csv_file = ""
-                    query.save()
-
-                    query.queryuser_set.all().delete()
-
-                    if "users" in request.data:
-                        for i in request.data['users']:
-                            data = i.copy()
-                            data['query'] = self.get_object().pk
-                            s = QueryUserSerializer(data=data)
-                            s.is_valid(raise_exception=True)
-                            s.save()
-                return redirect('result', hash=self.get_object().hash_code)
+                try:
+                    with transaction.atomic():
+                        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+                        query.file = False
+                        query.csv_file = ""
+                        query.save()
+                        query.queryuser_set.all().delete()
+                        temp = 0
+                        if "users" in request.data:
+                            for i in request.data['users']:
+                                data = i.copy()
+                                if not (data['fullname'] == "" and data['gerrit_username'] == ""
+                                        and data['github_username'] == "" and data['phabricator_username'] == ""):
+                                    data['query'] = self.get_object().pk
+                                    s = QueryUserSerializer(data=data)
+                                    s.is_valid(raise_exception=True)
+                                    s.save()
+                                    temp = 1
+                            if temp == 0:
+                                raise IntegrityError
+                except IntegrityError:
+                    return Response({
+                        'message': 'Can not update with the empty fields',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                response = HttpResponse(content="", status=303)
+                if DEBUG:
+                    response['location'] = '/result/' + self.get_object().hash_code + '/'
+                else:
+                    response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
+                return response
 
         except KeyError:
             return Response({

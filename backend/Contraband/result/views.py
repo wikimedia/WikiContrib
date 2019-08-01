@@ -129,7 +129,7 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
         await asyncio.gather(*tasks)
 
 
-def getDetails(username, gerrit_username, createdStart, createdEnd, phid, users, query):
+def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query, users):
     loop = asyncio.new_event_loop()
     phab_response, gerrit_response = [], []
     asyncio.set_event_loop(loop)
@@ -159,8 +159,10 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, users,
     formatted = format_data(phab_response, gerrit_response, query, phid[0])
     return Response({
         'query': query.hash_code,
-        "users": users,
-        "result": formatted
+        "result": formatted,
+        'previous': users[0],
+        'current': users[1],
+        'next': users[2]
     })
 
 
@@ -169,23 +171,32 @@ class DisplayResult(APIView):
 
     def get(self, request, *args, **kwargs):
         phid = [False]
-        users = []
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if query.file:
             # get the data from CSV file
             try:
                 file = read_csv(query.csv_file)
                 try:
-                    users = file.iloc[:, 0].values.tolist()
                     if 'user' in request.GET:
                         user = file[file['fullname'] == request.GET['user']]
                         if user.empty:
                             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
                         else:
-                            username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
+                            username, gerrit_username = user.iloc[0, :]['Phabricator'], user.iloc[0, :]['Gerrit']
+                            if user.index[0] != 0:
+                                prev_user = file.iloc[user.index[0]-1, :]['fullname']
+                            else:
+                                prev_user = None
+
+                            if user.index[0] != len(file) - 1:
+                                next_user = file.iloc[user.index[0]+1, :]['fullname']
+                            else:
+                                next_user = None
                     else:
                         user = file.head(1)
                         username, gerrit_username = user['Phabricator'][0], user['Gerrit'][0]
+                        prev_user = None
+                        next_user = file.iloc[1, :]['fullname']
 
                 except KeyError:
                     return Response({'message': 'CSV file is not in specified format!!', 'error': 1},
@@ -193,25 +204,50 @@ class DisplayResult(APIView):
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
 
+            paginate = [prev_user, user.iloc[0, :]['fullname'], next_user]
         else:
+            users = list(query.queryuser_set.all())
             if 'user' in request.GET:
                 user = query.queryuser_set.filter(fullname=request.GET['user'])
+                if not user.exists():
+                    return Response({
+                        'message': 'Not Found',
+                        'error': 1
+                    }, status=status.HTTP_404_NOT_FOUND)
             else:
-                user = query.queryuser_set.all()
+                user = users
+                if len(user) == 0:
+                    return Response({
+                        'message': 'Not Found',
+                        'error': 1
+                    }, status=status.HTTP_404_NOT_FOUND)
 
-            if not user.exists():
-                return Response({"message": "Not Found", "error": 1}, status=status.HTTP_404_NOT_FOUND)
+            user = user[0]
+            if len(users) != 1:
+                prev_user = users.index(user) - 1
+                next_user = users.index(user) + 1
+
+                if len(users) > next_user:
+                    next_user = users[next_user].fullname
+                else:
+                    next_user = None
+
+                if prev_user >= 0:
+                    prev_user = users[prev_user].fullname
+                else:
+                    prev_user = None
             else:
-                user = user[0]
+                prev_user = None
+                next_user = None
 
-            users.extend(query.queryuser_set.all().values_list('fullname', flat=True))
             username, gerrit_username = user.phabricator_username, user.gerrit_username
+            paginate = [prev_user, user.fullname, next_user]
 
         createdStart = query.queryfilter.start_time.strftime('%s')
         createdEnd = query.queryfilter.end_time.strftime('%s')
 
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
-                          createdEnd=createdEnd, phid=phid, users=users, query=query)
+                          createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
 
 class UserUpdateTimeStamp(APIView):
@@ -242,7 +278,7 @@ class UserUpdateTimeStamp(APIView):
         createdEnd = data['query'].queryfilter.end_time.strftime('%s')
         phid = [False]
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
-                          createdEnd=createdEnd, phid=phid, users=[], query=data['query'])
+                          createdEnd=createdEnd, phid=phid, query=data['query'], users=[])
 
 
 class UserUpdateStatus(APIView):
@@ -294,3 +330,32 @@ class GetUserCommits(ListAPIView):
             self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         return super(GetUserCommits, self).get(request, *args, **kwargs)
 
+
+class GetUsers(APIView):
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        if "username" not in request.GET or len(request.GET['username']) == 0:
+            return Response({
+                'message': 'Provide the username',
+                'error': 1
+            }, status=status.HTTP_400_BAD_REQUEST)
+        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        if not query.file:
+            users = query.queryuser_set.filter(fullname__icontains=
+                                request.GET['username']).values_list('fullname', flat=True)
+        else:
+            try:
+                try:
+                    file = read_csv(query.csv_file)
+                    users = file[file['fullname'].str.contains(request.GET['username'],
+                                        case=False)].iloc[:, 0].values.tolist()[:100]
+                except KeyError:
+                    return Response({
+                        'message': 'CSV file is not is specified format!',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            except FileNotFoundError:
+                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'users': users})

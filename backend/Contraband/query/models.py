@@ -2,6 +2,7 @@ from django.db import models
 from contraband.settings import BASE_URL
 from django.utils.crypto import get_random_string
 from django.utils import timezone
+from contraband.settings import DEBUG
 
 
 class Query(models.Model):
@@ -12,8 +13,11 @@ class Query(models.Model):
 
     @property
     def csv_file_uri(self):
+        base_url = BASE_URL[:-1]
+        if DEBUG:
+            base_url += "/src"
         if self.file is not False and self.csv_file != "":
-            return BASE_URL[:-1] + self.csv_file.url
+            return base_url + self.csv_file.url
         return ""
 
     def __str__(self):
