@@ -10,7 +10,7 @@ class ListCommit(models.Model):
     )
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     heading = models.CharField(max_length=200)
-    platform = models.CharField(max_length=2, choices=PLATFORMS)
+    platform = models.CharField(max_length=2)
     created_on = models.CharField(max_length=50)
     redirect = models.CharField(max_length=200)
     status = models.CharField(max_length=20)

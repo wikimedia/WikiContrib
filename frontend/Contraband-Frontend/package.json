@@ -5,18 +5,17 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-favicon": "^2.0.1",
-    "moment": "^2.24.0",
     "path": "^0.12.7",
     "react": "^16.8.6",
+    "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
-    "semantic-ui-calendar-react": "^0.15.0",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.87.2"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

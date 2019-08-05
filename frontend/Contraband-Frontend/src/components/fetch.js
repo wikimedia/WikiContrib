@@ -7,8 +7,5 @@ export const fetchAsynchronous = (uri, method, data, headers, callback) => {
     .then(response => response.json())
     .then(object => {
       callback(object);
-    })
-    .catch(error => {
-      console.log(error);
     });
 };

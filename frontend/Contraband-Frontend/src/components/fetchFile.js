@@ -1,4 +1,4 @@
-var chunk, chunks, file, uri, method, callback, percent, error;
+var chunk, chunks, file, uri, method, callback, percent, error, _set;
 
 const fetchFileAsynchronous = (
   csv_file,
@@ -6,7 +6,8 @@ const fetchFileAsynchronous = (
   request_url,
   callback_func,
   upload_percent,
-  error_callback
+  error_callback,
+  set
 ) => {
   chunk = 0;
   chunks = 0;
@@ -16,7 +17,7 @@ const fetchFileAsynchronous = (
   callback = callback_func;
   percent = upload_percent;
   error = error_callback;
-
+  _set = set;
   extractChunk("");
 };
 
@@ -41,6 +42,7 @@ const uploadChunk = hash => {
   let data = new FormData();
   if (chunk === chunks) {
     data.append("complete", 0);
+    _set({ loadData: true });
   } else {
     data.append("complete", -1);
   }

@@ -70,10 +70,12 @@ class AddQueryUser(CreateAPIView):
                     if int(request.data['complete']) == 0:
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
+                        filter_time = timezone.now().date()
+                        filter_time = filter_time.replace(day=1)
                         QueryFilter.objects.create(
                             query=query_obj,
-                            start_time=timezone.now().date() - timedelta(days=365),
-                            end_time=timezone.now().date()
+                            start_time=filter_time - timedelta(days=365),
+                            end_time=filter_time
                         )
                 else:
                     # Append the file to the already created CSV file
@@ -86,11 +88,13 @@ class AddQueryUser(CreateAPIView):
                         rename(BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part",
                                BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv")
                         query_obj.csv_file = query_obj.hash_code + ".csv"
+                        filter_time = timezone.now().date()
+                        filter_time = filter_time.replace(day=1)
                         query_obj.save()
                         QueryFilter.objects.create(
                             query=query_obj,
-                            start_time=timezone.now() - timedelta(days=365),
-                            end_time=timezone.now()
+                            start_time=filter_time - timedelta(days=365),
+                            end_time=filter_time
                         )
 
                 if int(request.data['complete']) is 0:
@@ -103,10 +107,12 @@ class AddQueryUser(CreateAPIView):
                     with transaction.atomic():
                         # Add the Query
                         query = super(AddQueryUser, self).post(request, *args, **kwargs)
+                        filter_time = timezone.now().date()
+                        filter_time = filter_time.replace(day=1)
                         QueryFilter.objects.create(
                             query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                            start_time=timezone.now().date() - timedelta(days=365),
-                            end_time=timezone.now().date()
+                            start_time=filter_time - timedelta(days=365),
+                            end_time=filter_time
                         )
 
                         # Add the usernames & platforms to the query

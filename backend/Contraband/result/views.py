@@ -93,7 +93,7 @@ def format_data(pd, gd, query, phid):
                         resp.append(rv)
                     ListCommit.objects.create(
                         query=query, heading=pd[i]['fields']['name'],
-                        platform="phabricator", created_on=date_time,
+                        platform="Phabricator", created_on=date_time,
                         redirect="T" + str(pd[i]['id']), status=pd[i]['fields']['status']['name'],
                         owned=pd[i]['fields']['authorPHID'] == phid,
                         assigned= pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
@@ -113,7 +113,7 @@ def format_data(pd, gd, query, phid):
                         resp.append(rv)
                     ListCommit.objects.create(
                         query=query, heading=gd[i]['subject'],
-                        platform="gr", created_on=epouch,
+                        platform="Gerrit", created_on=epouch,
                         redirect=gd[i]['change_id'], status=gd[i]['status'],
                         owned=True, assigned=True
                     )
@@ -162,7 +162,12 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
         "result": formatted,
         'previous': users[0],
         'current': users[1],
-        'next': users[2]
+        'next': users[2],
+        'filters': {
+            'start_time': query.queryfilter.start_time,
+            'end_time': query.queryfilter.end_time,
+            'status': query.queryfilter.status
+        }
     })
 
 
@@ -358,4 +363,4 @@ class GetUsers(APIView):
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({'users': users})
+        return Response({'users': users, 'search': request.GET['username']})
