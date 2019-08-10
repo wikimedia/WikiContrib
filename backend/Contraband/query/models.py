@@ -14,7 +14,7 @@ class Query(models.Model):
     @property
     def csv_file_uri(self):
         base_url = BASE_URL[:-1]
-        if DEBUG:
+        if not DEBUG:
             base_url += "/src"
         if self.file is not False and self.csv_file != "":
             return base_url + self.csv_file.url
@@ -39,7 +39,7 @@ class QueryFilter(models.Model):
     query = models.OneToOneField(Query, on_delete=models.CASCADE)
     start_time = models.DateField(null=True, blank=True)
     end_time = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=40, null=True, blank=True)
+    status = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.query.__str__()

@@ -15,15 +15,14 @@ export const filterCreateApi = BASE_API_URI + "query/<hash>/add/filter/";
 export const filterDetailApi = BASE_API_URI + "query/<hash>/update/filter/";
 // method: POST
 export const queryExist = BASE_API_URI + "query/<hash>/check/";
-
 // method: GET
 export const fetchDetails = BASE_API_URI + "result/<hash>/";
 
-export const searchUsers = BASE_API_URI + "result/<hash>/users/";
+export const getUsers = BASE_API_URI + "result/<hash>/users/";
 
 export const commits_by_date = BASE_API_URI + "result/<hash>/commits/";
 
-export const BASE_YEAR = "2010";
+export const BASE_YEAR = 2013;
 export const months = [
   "Jan",
   "Feb",
@@ -37,6 +36,20 @@ export const months = [
   "Oct",
   "nov",
   "Dec"
+];
+export const full_months = [
+  "January",
+  "Feberuary",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
 ];
 
 export const contribution_color = contr => {
@@ -57,45 +70,74 @@ export const filter_2 = [
   { key: 30, value: 30, text: "Last 30 days" },
   { key: 60, value: 60, text: "Last 60 days" },
   { key: 90, value: 90, text: "Last 90 days" },
-  { key: 183, value: 183, text: "Last 6 months" },
+  { key: 180, value: 180, text: "Last 6 months" },
   { key: 365, value: 365, text: "Last 1 year" }
 ];
 
-export const filter_3 = [
-  { key: "merged", value: "merged", text: "Gerrit, Merged" },
-  { key: "abandoned", value: "abandoned", text: "Phabricator, Abandoned" },
-  { key: "resolved", value: "resolved", text: "Phabricator, Resolved" }
-];
+export const get_dates = () => {
+  let current_year = new Date().getFullYear();
+  let current_month = new Date().getMonth();
+  let rv = [];
 
-export const filter_1 = [
-  { key: "merged", value: "merged", text: "June, 2019" },
-  { key: "abandoned", value: "abandoned", text: "May, 2019" },
-  { key: "resolved", value: "resolveasd", text: "April, 2019" },
-  { key: "resolve", value: "resolveasdd", text: "March, 2019" },
-  { key: "resolvd", value: "resolveasdd", text: "Feberuary, 2019" },
-  { key: "resoed", value: "resolvasded", text: "January, 2019" },
-  { key: "rlved", value: "resolvqweed", text: "December, 2018" },
-  { key: "rsolved", value: "resolvssed", text: "November, 2018" },
-  { key: "res", value: "resolveqwed", text: "October, 2018" },
-  { key: "resqolved", value: "resolweved", text: "September, 2018" },
-  { key: "resoadlved", value: "resowlved", text: "August, 2018" },
-  { key: "resolvasded", value: "rqwesolved", text: "July, 2018" },
-  { key: "resolvasdesd", value: "rqwesolved", text: "June, 2018" },
-  { key: "resolvasdsed", value: "rsqwesolved", text: "May, 2018" }
-];
-
-export const data = {
-  labels: ["a", "b", "c", "d", "e"],
-  datasets: [
-    {
-      stack: "stack1",
-      label: "data1",
-      data: [1, 2, 3, 4, 5]
-    },
-    {
-      stack: "stack1",
-      label: "data2",
-      data: [5, 4, 3, 2, 1]
+  for (let i = current_year; i >= BASE_YEAR; i--) {
+    for (let j = 11; j >= 0; j--) {
+      if (i == current_year && j > current_month) {
+        continue;
+      }
+      rv.push({
+        key: full_months[j] + ", " + i,
+        value: full_months[j] + ", " + i,
+        text: full_months[j] + ", " + i
+      });
     }
-  ]
+  }
+  return rv;
+};
+
+export const phab_status = ["declined", "resolved", "stalled", "invalid"];
+
+export const gerrit_status = [
+  "merged",
+  "abandoned",
+  "closed",
+  "pending",
+  "reviewed"
+];
+
+export const format_status = arr => {
+  let rv = [];
+  for (let i of arr) {
+    if (gerrit_status.includes(i)) {
+      rv.push({
+        key: i,
+        value: i,
+        text: "Gerrit: " + i
+      });
+    }
+
+    if (phab_status.includes(i)) {
+      rv.push({ key: i, value: i, text: "Phab: " + i });
+    }
+
+    if (i == "open") {
+      rv.push({ key: "g-open", value: "g-open", text: "Gerrit: " + i });
+      rv.push({ key: "p-open", value: "p-open", text: "Phab: " + i });
+    }
+  }
+  return rv;
+};
+
+export const get_timestamp = (date1, date2) => {
+  let days = Math.abs((date2 - date1) / 86400000);
+  let day = 30;
+  if (days >= 365) {
+    day = 365;
+  } else if (days >= 180 && days <= 365) {
+    day = 180;
+  } else if (days >= 90 && days <= 180) {
+    day = 90;
+  } else if (days >= 60 && days <= 90) {
+    day = 60;
+  }
+  return day;
 };

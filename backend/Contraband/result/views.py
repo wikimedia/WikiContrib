@@ -82,7 +82,8 @@ def format_data(pd, gd, query, phid):
                     temp.append(pd[i]['phid'])
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
                     date_time = date_time.replace(hour=0, minute=0, second=0).strftime("%s")
-                    if status_name is True or pd[i]['fields']['status']['name'].lower() in status_name:
+                    status = pd[i]['fields']['status']['name'].lower()
+                    if status_name is True or status in status_name or (status == "open" and "p-open" in status_name):
                         rv = {
                             "time": date_time,
                             "phabricator": True,
@@ -103,7 +104,8 @@ def format_data(pd, gd, query, phid):
                                                            "%Y-%m-%d"))
                 if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
                     epouch = int(date_time.replace(hour=0, minute=0, second=0).strftime("%s"))
-                    if status_name is True or gd[i]['status'].lower() in status_name:
+                    status = gd[i]['status'].lower()
+                    if status_name is True or status in status_name or (status == "open" and "g-open" in status_name):
                         rv = {
                            "time": epouch,
                            "gerrit": True,
@@ -255,67 +257,6 @@ class DisplayResult(APIView):
                           createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
 
-class UserUpdateTimeStamp(APIView):
-    http_method_names = ['get']
-
-    def get(self, request, *args, **kwargs):
-        data = request.session['data'].copy()
-        del request.session['data']
-        data['query'] = get_object_or_404(Query, hash_code=data['query'])
-        if data['query'].file:
-            try:
-                file = read_csv(data['query'].csv_file)
-                user = file[file['fullname'] == data['username']]
-                if user.empty:
-                    return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
-                else:
-                    username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
-
-            except FileNotFoundError:
-                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            user = data['query'].queryuser_set.filter(fullname=data['username'])
-            if not user.exists():
-                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_400_BAD_REQUEST)
-            username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
-
-        createdStart = data['query'].queryfilter.start_time.strftime('%s')
-        createdEnd = data['query'].queryfilter.end_time.strftime('%s')
-        phid = [False]
-        return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
-                          createdEnd=createdEnd, phid=phid, query=data['query'], users=[])
-
-
-class UserUpdateStatus(APIView):
-    http_method_names = ['get']
-
-    def get(self, request, *args, **kwargs):
-        data = request.session['data'].copy()
-        del request.session['data']
-        result = []
-        data['query'] = get_object_or_404(Query, hash_code=data['query'])
-        status = data['query'].queryfilter.status
-        if status is not None and status != "":
-            status = status.replace(",", "|")
-            commits = ListCommit.objects.filter(Q(query=data['query']), Q(status__iregex="(" + status + ")"))
-        else:
-            commits = ListCommit.objects.all()
-        for i in commits:
-            obj = {
-                "time": i.created_on,
-                "status": i.status,
-                "owned": i.owned,
-                "assigned": i.assigned
-            }
-            if i.platform == 'phabricator':
-                obj['phabricator'] = True
-            else:
-                obj['gerrit'] = True
-            result.append(obj)
-
-        return Response({"result": result})
-
-
 class GetUserCommits(ListAPIView):
     http_method_names = ['get']
     serializer_class = UserCommitSerializer
@@ -340,21 +281,14 @@ class GetUsers(APIView):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        if "username" not in request.GET or len(request.GET['username']) == 0:
-            return Response({
-                'message': 'Provide the username',
-                'error': 1
-            }, status=status.HTTP_400_BAD_REQUEST)
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if not query.file:
-            users = query.queryuser_set.filter(fullname__icontains=
-                                request.GET['username']).values_list('fullname', flat=True)
+            users = query.queryuser_set.all().values_list('fullname', flat=True)
         else:
             try:
                 try:
                     file = read_csv(query.csv_file)
-                    users = file[file['fullname'].str.contains(request.GET['username'],
-                                        case=False)].iloc[:, 0].values.tolist()[:100]
+                    users = file.iloc[:, 0].values.tolist()
                 except KeyError:
                     return Response({
                         'message': 'CSV file is not is specified format!',
@@ -362,5 +296,77 @@ class GetUsers(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'users': users})
 
-        return Response({'users': users, 'search': request.GET['username']})
+
+def UserUpdateTimeStamp(data):
+    data['query'] = get_object_or_404(Query, hash_code=data['query'])
+    if data['query'].file:
+        try:
+            file = read_csv(data['query'].csv_file)
+            user = file[file['fullname'] == data['username']]
+            if user.empty:
+                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
+
+        except FileNotFoundError:
+            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        user = data['query'].queryuser_set.filter(fullname=data['username'])
+        if not user.exists():
+            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_400_BAD_REQUEST)
+        username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
+
+    createdStart = data['query'].queryfilter.start_time.strftime('%s')
+    createdEnd = data['query'].queryfilter.end_time.strftime('%s')
+    phid = [False]
+    return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
+                      createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
+
+
+def UserUpdateStatus(data):
+    result = []
+    data['query'] = get_object_or_404(Query, hash_code=data['query'])
+    status = data['query'].queryfilter.status
+    p_open, g_open = -1, -1
+    if status is not None and status != "":
+        status = status.split(",")
+        if "p-open" in status or "g-open" in status:
+            try:
+                status.remove("p-open")
+                p_open = 0
+            except ValueError:
+                pass
+            try:
+                status.remove("g-open")
+                g_open = 0
+            except ValueError:
+                pass
+
+            status.append("open")
+        status = '|'.join(status)
+        commits = ListCommit.objects.filter(Q(query=data['query']), Q(status__iregex="(" + status + ")"))
+    else:
+        commits = ListCommit.objects.all()
+    for i in commits:
+        if i.status.lower() == "open" and i.platform == "Phabricator" and p_open == -1:
+            continue
+
+        if i.status.lower() == "open" and i.platform == "Gerrit" and g_open == -1:
+            continue
+
+        obj = {
+            "time": i.created_on,
+            "status": i.status,
+            "owned": i.owned,
+            "assigned": i.assigned
+        }
+
+        if i.platform == 'Phabricator':
+            obj['phabricator'] = True
+        else:
+            obj['gerrit'] = True
+        result.append(obj)
+
+    return Response({"result": result})

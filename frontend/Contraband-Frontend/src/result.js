@@ -7,17 +7,22 @@ import {
   Card,
   Popup,
   Dropdown,
-  Placeholder
+  Placeholder,
+  Progress
 } from "semantic-ui-react";
 import { fetchAsynchronous } from "./components/fetch";
 import { Link } from "react-router-dom";
 import {
   filter_2,
-  filter_3,
-  data,
-  filter_1,
+  get_dates,
   months,
-  fetchDetails
+  fetchDetails,
+  phab_status,
+  gerrit_status,
+  format_status,
+  full_months,
+  get_timestamp,
+  filterDetailApi
 } from "./api";
 import UserSearch from "./components/dropdown";
 import { Line } from "react-chartjs-2";
@@ -28,24 +33,38 @@ class QueryResult extends React.Component {
   constructor(props) {
     super(props);
     let data = false;
+    let filters = {
+      status: [],
+      start_time: "",
+      end_time: ""
+    };
+
     if ("data" in this.props.location) {
       data = this.props.location.data;
+      filters = data.filters;
+      filters.status = data.filters.status.split(",");
     }
+
+    console.log(data);
 
     this.state = {
       query: this.props.match.params.hash,
-      loading: data !== false,
+      loading: data === false,
       data: data !== false ? data.result : [],
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
       notFound: false,
-      search: "",
-      activity: undefined
+      value: "",
+      activity: undefined,
+      current_filters: Object.assign({}, filters),
+      update_filters: Object.assign({}, filters),
+      page_load: data === false
     };
   }
 
   set = obj => {
+    console.log(obj);
     this.setState(obj);
   };
 
@@ -116,23 +135,42 @@ class QueryResult extends React.Component {
 
   callback = response => {
     if (response.error !== 1) {
+      let filters = response.filters;
+      filters.status = filters.status.split(",");
       this.setState({
         data: response.result,
         current: response.current,
         prev: response.previous,
         next: response.next,
-        loading: false
+        loading: false,
+        current_filters: filters,
+        page_load: false,
+        update_filters: filters
       });
     } else {
       this.setState({
         loading: false,
+        page_load: false,
         notFound: true
       });
     }
   };
 
   componentDidMount = () => {
-    if (this.state.data === undefined || this.state.data.length === 0) {
+    if (
+      this.state.data.length === 0 &&
+      localStorage.getItem("users") != null &&
+      localStorage.getItem("query") == this.state.query
+    ) {
+      this.setState({ loading: true });
+      let uri = fetchDetails.replace("<hash>", this.state.query);
+      fetchAsynchronous(uri, "GET", {}, {}, this.callback);
+    }
+
+    if (
+      this.state.data.length === 0 &&
+      localStorage.getItem("users") === null
+    ) {
       this.setState({ loading: true });
       let uri = fetchDetails.replace("<hash>", this.state.query);
       fetchAsynchronous(uri, "GET", {}, {}, this.callback);
@@ -143,11 +181,63 @@ class QueryResult extends React.Component {
     let uri =
       fetchDetails.replace("<hash>", this.state.query) + "?user=" + username;
     fetchAsynchronous(uri, "GET", {}, {}, this.callback);
-    this.setState({ loading: true, activity: undefined });
+    this.setState({ loading: true, activity: undefined, value: "" });
+  };
+
+  check_filters = () => {
+    let { update_filters: uf, current_filters: cf } = this.state;
+    if (JSON.stringify(uf) !== JSON.stringify(cf)) {
+      let out = {};
+      if (uf.status.join(",") !== cf.status.join(",")) {
+        out["status"] = uf.status.join(",");
+      }
+      if (uf.start_time !== cf.start_time) {
+        out["start_time"] = uf.start_time;
+      }
+      if (uf.end_time !== cf.end_time) {
+        out["end_time"] = uf.end_time;
+      }
+
+      return out;
+    }
+    return false;
+  };
+
+  updatecallback = response => {
+    if (response.error != 1) {
+      this.setState({
+        data: response.result,
+        current_filters: this.state.update_filters,
+        loading: false
+      });
+    }
+  };
+
+  handleSearchClick = () => {
+    let data = this.check_filters();
+    if (data !== false) {
+      data["username"] = this.state.current;
+      this.setState({ loading: true, activity: undefined });
+      fetchAsynchronous(
+        filterDetailApi.replace("<hash>", this.state.query),
+        "PATCH",
+        data,
+        { "Content-Type": "application/json" },
+        this.updatecallback
+      );
+    }
+  };
+
+  onUserSearch = obj => {
+    this.setState({ value: obj.value, loading: true });
+    let uri =
+      fetchDetails.replace("<hash>", this.state.query) + "?user=" + obj.value;
+    fetchAsynchronous(uri, "GET", {}, {}, this.callback);
   };
 
   render = () => {
     document.body.style.backgroundColor = "#ffffff";
+    let { update_filters: uf, current_filters: cf } = this.state;
     return (
       <React.Fragment>
         <NavBar />
@@ -224,26 +314,97 @@ class QueryResult extends React.Component {
             <Grid.Column width={4} />
             <Grid.Column width={8}>
               <div className="result">
-                <div className="search">
-                  <UserSearch set={this.set} hash={this.state.query} />
-                  <Button icon="search" primary />
-                </div>
+                {this.state.page_load ? (
+                  <Placeholder fluid style={{ height: 30, margin: 5 }}>
+                    <Placeholder.Line />
+                  </Placeholder>
+                ) : (
+                  <UserSearch
+                    set={this.onUserSearch}
+                    hash={this.state.query}
+                    value={this.state.value}
+                  />
+                )}
                 <br />
                 <Grid>
                   <Grid.Row>
-                    <Grid.Column computer={5} tablet={16} mobile={16}>
+                    <Grid.Column computer={16} tablet={16} mobile={16}>
+                      <Dropdown
+                        style={{ marginTop: 10 }}
+                        fluid
+                        search
+                        multiple
+                        selection
+                        options={format_status(
+                          gerrit_status.concat(phab_status, "open")
+                        )}
+                        value={uf.status}
+                        onChange={(e, obj) => {
+                          let value = obj.value;
+                          let filters = Object.assign({}, uf);
+                          filters.status = value;
+                          this.setState({
+                            update_filters: filters
+                          });
+                        }}
+                        placeholder="Status of Commit"
+                        closeOnChange={true}
+                      />
+                    </Grid.Column>
+                  </Grid.Row>
+                  <Grid.Row>
+                    <Grid.Column computer={8} tablet={16} mobile={16}>
                       <Dropdown
                         style={{ marginTop: 10 }}
                         fluid
                         search
                         selection
                         icon={false}
-                        options={filter_1}
+                        value={
+                          full_months[new Date(uf.end_time).getMonth()] +
+                          ", " +
+                          new Date(uf.end_time).getFullYear()
+                        }
+                        options={get_dates()}
+                        onChange={(e, obj) => {
+                          let date = obj.value.split(",");
+                          date[1] = date[1].substr(1);
+                          date[0] = full_months.indexOf(date[0]) + 1;
+                          let filters = Object.assign({}, uf);
+                          filters.end_time = date[1] + "-" + date[0] + "-01";
+                          let days = get_timestamp(
+                            new Date(uf.end_time),
+                            new Date(uf.start_time)
+                          );
+                          let incr =
+                            days == 30
+                              ? 1
+                              : days == 60
+                              ? 2
+                              : days == 90
+                              ? 3
+                              : days == 180
+                              ? 6
+                              : 12;
+
+                          let updated_val = new Date(filters.end_time);
+                          let start_time = new Date(
+                            updated_val.getFullYear(),
+                            updated_val.getMonth() - incr,
+                            1
+                          );
+                          let month = start_time.getMonth() + 1;
+                          filters.start_time =
+                            start_time.getFullYear() + "-" + month + "-01";
+                          this.setState({
+                            update_filters: filters
+                          });
+                        }}
                         placeholder="Select Date"
                         closeOnChange={true}
                       />
                     </Grid.Column>
-                    <Grid.Column computer={5} tablet={16} mobile={16}>
+                    <Grid.Column computer={8} tablet={16} mobile={16}>
                       <Dropdown
                         style={{ marginTop: 10 }}
                         fluid
@@ -251,19 +412,37 @@ class QueryResult extends React.Component {
                         selection
                         icon={false}
                         options={filter_2}
+                        value={get_timestamp(
+                          new Date(uf.start_time),
+                          new Date(uf.end_time)
+                        )}
+                        onChange={(e, obj) => {
+                          let date = new Date(
+                            this.state.update_filters.end_time
+                          );
+                          let value = obj.value;
+                          let incr =
+                            value <= 31
+                              ? 1
+                              : value <= 61
+                              ? 2
+                              : value <= 92
+                              ? 3
+                              : value <= 183
+                              ? 6
+                              : 12;
+                          date = new Date(
+                            date.getFullYear(),
+                            date.getMonth() - incr,
+                            1
+                          );
+                          let month = date.getMonth() + 1;
+                          let filters = Object.assign({}, uf);
+                          filters.start_time =
+                            date.getFullYear() + "-" + month + "-" + 1;
+                          this.setState({ update_filters: filters });
+                        }}
                         placeholder="Get by date"
-                        closeOnChange={true}
-                      />
-                    </Grid.Column>
-                    <Grid.Column computer={6} tablet={16} mobile={16}>
-                      <Dropdown
-                        style={{ marginTop: 10 }}
-                        fluid
-                        search
-                        multiple
-                        selection
-                        options={filter_3}
-                        placeholder="Status of commit"
                         closeOnChange={true}
                       />
                     </Grid.Column>
@@ -319,10 +498,8 @@ class QueryResult extends React.Component {
             <Grid.Column width={2} />
             <Grid.Column width={12}>
               <UserContribution
-                start_year={2018}
-                start_month={7}
-                end_year={2019}
-                end_month={6}
+                start_time={cf.start_time}
+                end_time={cf.end_time}
                 user={this.state.current}
                 data={this.state.data}
                 set={this.set}

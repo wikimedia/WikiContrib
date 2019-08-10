@@ -1,3 +1,5 @@
+import json
+
 from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse
@@ -13,7 +15,8 @@ from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
 from contraband.settings import BASE_DIR, DEBUG
 from os import rename, remove
-
+from contraband.settings import COMMIT_STATUS
+from result.views import UserUpdateStatus, UserUpdateTimeStamp
 
 def create_hash():
     hash_code = get_random_string(64)
@@ -75,7 +78,8 @@ class AddQueryUser(CreateAPIView):
                         QueryFilter.objects.create(
                             query=query_obj,
                             start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time
+                            end_time=filter_time,
+                            status=','.join(COMMIT_STATUS)
                         )
                 else:
                     # Append the file to the already created CSV file
@@ -94,7 +98,8 @@ class AddQueryUser(CreateAPIView):
                         QueryFilter.objects.create(
                             query=query_obj,
                             start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time
+                            end_time=filter_time,
+                            status=','.join(COMMIT_STATUS)
                         )
 
                 if int(request.data['complete']) is 0:
@@ -112,7 +117,8 @@ class AddQueryUser(CreateAPIView):
                         QueryFilter.objects.create(
                             query=get_object_or_404(Query, hash_code=query.data['hash_code']),
                             start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time
+                            end_time=filter_time,
+                            status=','.join(COMMIT_STATUS)
                         )
 
                         # Add the usernames & platforms to the query
@@ -280,6 +286,10 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             })
 
     def patch(self, request, *args, **kwargs):
+        rv = {
+            "username": request.data['username'],
+            "query": self.get_object().query.hash_code
+        }
         if QueryFilter.objects.filter(query__hash_code=self.kwargs['hash']).exists():
             commit_status = self.get_object().status
             commit_start = self.get_object().start_time
@@ -288,25 +298,19 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
                 return Response({'message': 'Fill the form completely', 'error': 1},
                                 status=status.HTTP_400_BAD_REQUEST)
             data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
-            request.session['data'] = {
-                "username": request.data['username'],
-                "query": self.get_object().query.hash_code
-            }
+
             if data['status'] != commit_status:
                 if commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()\
                         or commit_end != datetime.strptime(data['end_time'], "%Y-%m-%d").date():
-                    return redirect('result-update')
+                    return UserUpdateTimeStamp(rv)
                 else:
-                    return redirect('result-status-update')
+                    return UserUpdateStatus(rv)
             else:
                 # User has changed the timestamp, perform the request again.
-                return redirect('result-update')
+                return UserUpdateTimeStamp(rv)
         else:
             kwargs = request.data.copy()
             kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
             QueryFilter.objects.create(**kwargs)
-            request.session['data'] = {
-                "username": request.data['username'],
-                "query": kwargs['query'].hash_code
-            }
-            return redirect('result-update')
+            return UserUpdateTimeStamp(rv)
+

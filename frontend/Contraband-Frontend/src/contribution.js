@@ -1,6 +1,6 @@
 import React from "react";
 import { Popup, Placeholder } from "semantic-ui-react";
-import { months, contribution_color } from "./api";
+import { months, contribution_color, get_timestamp } from "./api";
 
 const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -142,7 +142,46 @@ class UserContribution extends React.Component {
   };
 
   render = () => {
-    let data = this.format();
+    var render_months = [];
+    if (!this.props.loading) {
+      let data = this.format();
+      let approx_days = get_timestamp(
+        new Date(this.props.start_time),
+        new Date(this.props.end_time)
+      );
+      let numb_months =
+        approx_days == 30
+          ? 1
+          : approx_days == 60
+          ? 2
+          : approx_days == 90
+          ? 3
+          : approx_days == 180
+          ? 6
+          : 12;
+      let start_month = new Date(this.props.start_time).getMonth();
+      let year = new Date(this.props.start_time).getFullYear();
+      while (numb_months != 0) {
+        render_months.push(
+          <GenerateMonth
+            month={months[start_month]}
+            key={numb_months}
+            year={year}
+            data={data}
+            style={{ display: "inline" }}
+            set={this.props.set}
+          />
+        );
+
+        numb_months -= 1;
+        start_month += 1;
+        if (start_month % 12 === 0) {
+          start_month = 0;
+          year = new Date(this.props.end_time).getFullYear();
+        }
+      }
+    }
+
     return (
       <React.Fragment>
         {!this.props.loading ? (
@@ -170,37 +209,8 @@ class UserContribution extends React.Component {
             </div>
           ) : (
             <React.Fragment>
-              {months.map((obj, index) => (
-                <React.Fragment key={index}>
-                  {this.props.start_month <= index ? (
-                    <div className="activity">
-                      <GenerateMonth
-                        month={obj}
-                        year={this.props.start_year}
-                        data={data}
-                        set={this.props.set}
-                      />
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </React.Fragment>
-              ))}
-              {months.map((obj, index) => (
-                <React.Fragment key={index}>
-                  {this.props.end_month >= index ? (
-                    <div className="activity">
-                      <GenerateMonth
-                        month={obj}
-                        year={this.props.end_year}
-                        data={data}
-                        set={this.props.set}
-                      />
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </React.Fragment>
+              {render_months.map((obj, ind) => (
+                <div className="activity">{obj}</div>
               ))}
 
               <div

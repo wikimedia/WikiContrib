@@ -59,10 +59,7 @@ export class Query extends Component {
       operation: type,
       progress: !type,
       original_users: [],
-      bulk:
-        localStorage.getItem("bulk") === null
-          ? false
-          : localStorage.getItem("bulk") === "true",
+      bulk: false,
       visible: false,
       loadData: false
     };
@@ -102,6 +99,7 @@ export class Query extends Component {
       } else {
         this.setState({
           rows: response.users,
+          bulk: false,
           progress: false,
           original_users: response.users
         });
@@ -708,25 +706,26 @@ export class Query extends Component {
                                     trigger: true,
                                     type: 0,
                                     update: !this.state.message.update
-                                  }
+                                  },
+                                  rows: [Object.assign({}, emptyObj)]
                                 });
-                                if (!this.state.operation) {
-                                  this.setState({ progress: true });
-                                  fetchAsynchronous(
-                                    QueryDetailApi.replace(
-                                      "<hash>",
-                                      this.props.match.params.hash
-                                    ),
-                                    "GET",
-                                    undefined,
-                                    {},
-                                    this.displayData
-                                  );
-                                } else {
-                                  this.setState({
-                                    rows: [Object.assign({}, emptyObj)]
-                                  });
-                                }
+                                // if (!this.state.operation) {
+                                //   this.setState({ progress: true });
+                                //   fetchAsynchronous(
+                                //     QueryDetailApi.replace(
+                                //       "<hash>",
+                                //       this.props.match.params.hash
+                                //     ),
+                                //     "GET",
+                                //     undefined,
+                                //     {},
+                                //     this.displayData
+                                //   );
+                                // } else {
+                                //   this.setState({
+                                //     rows: [Object.assign({}, emptyObj)]
+                                //   });
+                                // }
                               }}
                             >
                               <Icon
@@ -752,16 +751,7 @@ export class Query extends Component {
                               toggle
                               label="Bulk Add"
                               onClick={() =>
-                                this.setState(
-                                  { bulk: !this.state.bulk },
-                                  () => {
-                                    localStorage.removeItem("bulk");
-                                    localStorage.setItem(
-                                      "bulk",
-                                      this.state.bulk
-                                    );
-                                  }
-                                )
+                                this.setState({ bulk: !this.state.bulk })
                               }
                               checked={this.state.bulk}
                             />

@@ -62,11 +62,11 @@ class Activity extends React.Component {
           <React.Fragment>
             {this.state.data.length !== 0 ? (
               <React.Fragment>
-                <h4>User Activity</h4>
+                <h4>User Activity on {this.props.date}</h4>
                 {this.state.data.map((obj, index) => (
                   <Card style={{ width: "100%" }} key={index}>
                     <Card.Content>
-                      {obj.platform === "phabricator" ? (
+                      {obj.platform === "Phabricator" ? (
                         <a
                           href={
                             "https://phabricator.wikimedia.org/" + obj.redirect
@@ -78,9 +78,7 @@ class Activity extends React.Component {
                       ) : (
                         <a
                           href={
-                            "https://gerrit.wikimedia.org/r/#/q/" +
-                            obj.redirect +
-                            "/"
+                            "https://gerrit.wikimedia.org/r/#/q/" + obj.redirect
                           }
                           target="_blank"
                         >

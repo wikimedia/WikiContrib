@@ -148,3 +148,7 @@ try:
     from .local_settings_sample import *
 except ImportError:
     pass
+
+
+COMMIT_STATUS = ['merged', 'open', 'abandoned', 'declined', 'resolved', 'stalled', 'invalid',
+                 'closed', 'pending', 'reviewed', 'p-open', 'g-open']
