@@ -19,6 +19,8 @@ from contraband.settings import API_TOKEN
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
+    if request_data['constraints[authorPHIDs][0]'] == '':
+        return
     page, after = True, False
     while page or after is not False:
         page = False
@@ -38,6 +40,8 @@ async def get_task_authors(url, request_data, session, resp, phid):
 
 
 async def get_task_assigner(url, request_data, session, resp):
+    if request_data['constraints[assigned][0]'] == '':
+        return
     page, after = True, False
     while page or after is not False:
         page = False
@@ -52,12 +56,15 @@ async def get_task_assigner(url, request_data, session, resp):
 
 
 async def get_gerrit_data(url, session, gerrit_resp):
+    if url.split("?")[1].split("&")[0].split(":")[1] == "":
+        return
     async with session.get(url) as response:
         data = await response.read()
         try:
             data = loads(data[4:].decode("utf-8"))
         except JSONDecodeError:
             data = []
+
         gerrit_resp.extend(data)
 
 

@@ -8,7 +8,7 @@ import {
   Popup,
   Dropdown,
   Placeholder,
-  Progress
+  Transition
 } from "semantic-ui-react";
 import { fetchAsynchronous } from "./components/fetch";
 import { Link } from "react-router-dom";
@@ -39,13 +39,11 @@ class QueryResult extends React.Component {
       end_time: ""
     };
 
-    if ("data" in this.props.location) {
+    if ("data" in this.props.location && this.props.location.data !== "") {
       data = this.props.location.data;
       filters = data.filters;
       filters.status = data.filters.status.split(",");
     }
-
-    console.log(data);
 
     this.state = {
       query: this.props.match.params.hash,
@@ -59,12 +57,12 @@ class QueryResult extends React.Component {
       activity: undefined,
       current_filters: Object.assign({}, filters),
       update_filters: Object.assign({}, filters),
-      page_load: data === false
+      page_load: data === false,
+      view_filters: false
     };
   }
 
   set = obj => {
-    console.log(obj);
     this.setState(obj);
   };
 
@@ -235,81 +233,78 @@ class QueryResult extends React.Component {
     fetchAsynchronous(uri, "GET", {}, {}, this.callback);
   };
 
+  handleReset = () => {
+    let time = new Date();
+    let month = time.getMonth() + 1;
+    let filters = {
+      end_time: time.getFullYear() + "-" + month + "-01",
+      start_time: time.getFullYear() - 1 + "-" + month + "-01",
+      status: phab_status.concat(gerrit_status).concat(["p-open", "g-open"]),
+      username: this.state.current
+    };
+    this.setState({
+      loading: true,
+      activity: undefined,
+      update_filters: Object.assign(filters)
+    });
+    let data = Object.assign({}, filters);
+    data.status = filters.status.join(",");
+    fetchAsynchronous(
+      filterDetailApi.replace("<hash>", this.state.query),
+      "PATCH",
+      data,
+      { "Content-Type": "application/json" },
+      this.updatecallback
+    );
+  };
+
   render = () => {
     document.body.style.backgroundColor = "#ffffff";
     let { update_filters: uf, current_filters: cf } = this.state;
     return (
       <React.Fragment>
-        <NavBar />
+        <NavBar display={true} query={this.state.query} />
+        {this.state.prev !== null ? (
+          <Popup
+            content={"Fetch about " + this.state.prev}
+            position={"bottom left"}
+            trigger={
+              <div className="left_arrow">
+                <Button
+                  icon="arrow left"
+                  className="page_button"
+                  primary
+                  onClick={() => this.getDetails(this.state.prev)}
+                  disabled={this.state.loading}
+                />
+              </div>
+            }
+          />
+        ) : (
+          ""
+        )}
+
+        {this.state.next !== null ? (
+          <div className="right_arrow">
+            <Popup
+              content={"Fetch about " + this.state.next}
+              position={"bottom right"}
+              trigger={
+                <Button
+                  primary
+                  className="page_button"
+                  icon="arrow right"
+                  disabled={this.state.loading}
+                  onClick={() => this.getDetails(this.state.next)}
+                />
+              }
+            />
+          </div>
+        ) : (
+          ""
+        )}
+
         <Grid>
-          <Grid.Row style={{ textAlign: "center" }}>
-            <Grid.Column width={2}>
-              {this.state.prev !== null ? (
-                <Popup
-                  content={"Fetch about " + this.state.prev}
-                  position={"bottom left"}
-                  trigger={
-                    <Button
-                      icon="arrow left"
-                      primary
-                      onClick={() => this.getDetails(this.state.prev)}
-                      disabled={this.state.loading}
-                    />
-                  }
-                />
-              ) : (
-                ""
-              )}
-            </Grid.Column>
-            <Grid.Column width={12} />
-            <Grid.Column width={2}>
-              {this.state.next !== null ? (
-                <Popup
-                  content={"Fetch about " + this.state.next}
-                  position={"bottom right"}
-                  trigger={
-                    <Button
-                      primary
-                      icon="arrow right"
-                      disabled={this.state.loading}
-                      onClick={() => this.getDetails(this.state.next)}
-                    />
-                  }
-                />
-              ) : (
-                ""
-              )}
-            </Grid.Column>
-          </Grid.Row>
-          <Grid.Row>
-            <Grid.Column width={12} />
-            <Grid.Column width={4}>
-              <Popup
-                content={"Update the query"}
-                position={"bottom center"}
-                trigger={
-                  <Button
-                    primary
-                    as={Link}
-                    to={"/query/" + this.state.query + "/update/"}
-                  >
-                    <Icon name="redo" />
-                    Update
-                  </Button>
-                }
-              />
-              <Popup
-                content={"Create new query"}
-                position={"bottom center"}
-                trigger={
-                  <Button primary as={Link} to="/">
-                    <Icon name="plus circle" />
-                    New
-                  </Button>
-                }
-              />
-            </Grid.Column>
-          </Grid.Row>
           <Grid.Row>
             <Grid.Column width={4} />
             <Grid.Column width={8}>
@@ -319,135 +314,184 @@ class QueryResult extends React.Component {
                     <Placeholder.Line />
                   </Placeholder>
                 ) : (
-                  <UserSearch
-                    set={this.onUserSearch}
-                    hash={this.state.query}
-                    value={this.state.value}
-                  />
+                  <Grid>
+                    <Grid.Row>
+                      <Grid.Column computer={15} tablet={14} mobile={12}>
+                        <UserSearch
+                          set={this.onUserSearch}
+                          hash={this.state.query}
+                          value={this.state.value}
+                        />
+                      </Grid.Column>
+                      <Grid.Column computer={1} tablet={2} mobile={4}>
+                        <Popup
+                          content="View Filters"
+                          position="top center"
+                          trigger={
+                            <Button
+                              icon="options"
+                              className="filters"
+                              onClick={() =>
+                                this.setState({
+                                  view_filters: !this.state.view_filters
+                                })
+                              }
+                            />
+                          }
+                        />
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid>
                 )}
-                <br />
-                <Grid>
-                  <Grid.Row>
-                    <Grid.Column computer={16} tablet={16} mobile={16}>
-                      <Dropdown
-                        style={{ marginTop: 10 }}
-                        fluid
-                        search
-                        multiple
-                        selection
-                        options={format_status(
-                          gerrit_status.concat(phab_status, "open")
-                        )}
-                        value={uf.status}
-                        onChange={(e, obj) => {
-                          let value = obj.value;
-                          let filters = Object.assign({}, uf);
-                          filters.status = value;
-                          this.setState({
-                            update_filters: filters
-                          });
-                        }}
-                        placeholder="Status of Commit"
-                        closeOnChange={true}
-                      />
-                    </Grid.Column>
-                  </Grid.Row>
-                  <Grid.Row>
-                    <Grid.Column computer={8} tablet={16} mobile={16}>
-                      <Dropdown
-                        style={{ marginTop: 10 }}
-                        fluid
-                        search
-                        selection
-                        icon={false}
-                        value={
-                          full_months[new Date(uf.end_time).getMonth()] +
-                          ", " +
-                          new Date(uf.end_time).getFullYear()
-                        }
-                        options={get_dates()}
-                        onChange={(e, obj) => {
-                          let date = obj.value.split(",");
-                          date[1] = date[1].substr(1);
-                          date[0] = full_months.indexOf(date[0]) + 1;
-                          let filters = Object.assign({}, uf);
-                          filters.end_time = date[1] + "-" + date[0] + "-01";
-                          let days = get_timestamp(
-                            new Date(uf.end_time),
-                            new Date(uf.start_time)
-                          );
-                          let incr =
-                            days == 30
-                              ? 1
-                              : days == 60
-                              ? 2
-                              : days == 90
-                              ? 3
-                              : days == 180
-                              ? 6
-                              : 12;
+                <Transition
+                  animation="fade down"
+                  duration={300}
+                  visible={this.state.view_filters}
+                >
+                  <div className="filter_view">
+                    <h4 style={{ textAlign: "center" }}>Query Filters</h4>
+                    <Grid>
+                      <Grid.Row>
+                        <Grid.Column computer={16} tablet={16} mobile={16}>
+                          <h5>Status of the commit: </h5>
+                          <Dropdown
+                            style={{ marginTop: 10 }}
+                            fluid
+                            search
+                            multiple
+                            selection
+                            options={format_status(
+                              gerrit_status.concat(phab_status, "open")
+                            )}
+                            value={uf.status}
+                            onChange={(e, obj) => {
+                              let value = obj.value;
+                              let filters = Object.assign({}, uf);
+                              filters.status = value;
+                              this.setState({
+                                update_filters: filters
+                              });
+                            }}
+                            placeholder="Status of Commit"
+                            closeOnChange={true}
+                          />
+                        </Grid.Column>
+                      </Grid.Row>
+                      <Grid.Row>
+                        <Grid.Column computer={8} tablet={16} mobile={16}>
+                          <h5>From:</h5>
+                          <Dropdown
+                            style={{ marginTop: 10 }}
+                            fluid
+                            search
+                            selection
+                            icon={false}
+                            value={
+                              full_months[new Date(uf.end_time).getMonth()] +
+                              ", " +
+                              new Date(uf.end_time).getFullYear()
+                            }
+                            options={get_dates()}
+                            onChange={(e, obj) => {
+                              let date = obj.value.split(",");
+                              date[1] = date[1].substr(1);
+                              date[0] = full_months.indexOf(date[0]) + 1;
+                              let filters = Object.assign({}, uf);
+                              filters.end_time =
+                                date[1] + "-" + date[0] + "-01";
+                              let days = get_timestamp(
+                                new Date(uf.end_time),
+                                new Date(uf.start_time)
+                              );
+                              let incr =
+                                days == 30
+                                  ? 1
+                                  : days == 60
+                                  ? 2
+                                  : days == 90
+                                  ? 3
+                                  : days == 180
+                                  ? 6
+                                  : 12;
 
-                          let updated_val = new Date(filters.end_time);
-                          let start_time = new Date(
-                            updated_val.getFullYear(),
-                            updated_val.getMonth() - incr,
-                            1
-                          );
-                          let month = start_time.getMonth() + 1;
-                          filters.start_time =
-                            start_time.getFullYear() + "-" + month + "-01";
-                          this.setState({
-                            update_filters: filters
-                          });
-                        }}
-                        placeholder="Select Date"
-                        closeOnChange={true}
-                      />
-                    </Grid.Column>
-                    <Grid.Column computer={8} tablet={16} mobile={16}>
-                      <Dropdown
-                        style={{ marginTop: 10 }}
-                        fluid
-                        search
-                        selection
-                        icon={false}
-                        options={filter_2}
-                        value={get_timestamp(
-                          new Date(uf.start_time),
-                          new Date(uf.end_time)
-                        )}
-                        onChange={(e, obj) => {
-                          let date = new Date(
-                            this.state.update_filters.end_time
-                          );
-                          let value = obj.value;
-                          let incr =
-                            value <= 31
-                              ? 1
-                              : value <= 61
-                              ? 2
-                              : value <= 92
-                              ? 3
-                              : value <= 183
-                              ? 6
-                              : 12;
-                          date = new Date(
-                            date.getFullYear(),
-                            date.getMonth() - incr,
-                            1
-                          );
-                          let month = date.getMonth() + 1;
-                          let filters = Object.assign({}, uf);
-                          filters.start_time =
-                            date.getFullYear() + "-" + month + "-" + 1;
-                          this.setState({ update_filters: filters });
-                        }}
-                        placeholder="Get by date"
-                        closeOnChange={true}
-                      />
-                    </Grid.Column>
-                  </Grid.Row>
-                </Grid>
+                              let updated_val = new Date(filters.end_time);
+                              let start_time = new Date(
+                                updated_val.getFullYear(),
+                                updated_val.getMonth() - incr,
+                                1
+                              );
+                              let month = start_time.getMonth() + 1;
+                              filters.start_time =
+                                start_time.getFullYear() + "-" + month + "-01";
+                              this.setState({
+                                update_filters: filters
+                              });
+                            }}
+                            placeholder="Select Date"
+                            closeOnChange={true}
+                          />
+                        </Grid.Column>
+                        <Grid.Column computer={8} tablet={16} mobile={16}>
+                          <h5>Time range:</h5>
+                          <Dropdown
+                            style={{ marginTop: 10 }}
+                            fluid
+                            search
+                            selection
+                            icon={false}
+                            options={filter_2}
+                            value={get_timestamp(
+                              new Date(uf.start_time),
+                              new Date(uf.end_time)
+                            )}
+                            onChange={(e, obj) => {
+                              let date = new Date(
+                                this.state.update_filters.end_time
+                              );
+                              let value = obj.value;
+                              let incr =
+                                value <= 31
+                                  ? 1
+                                  : value <= 61
+                                  ? 2
+                                  : value <= 92
+                                  ? 3
+                                  : value <= 183
+                                  ? 6
+                                  : 12;
+                              date = new Date(
+                                date.getFullYear(),
+                                date.getMonth() - incr,
+                                1
+                              );
+                              let month = date.getMonth() + 1;
+                              let filters = Object.assign({}, uf);
+                              filters.start_time =
+                                date.getFullYear() + "-" + month + "-" + 1;
+                              this.setState({ update_filters: filters });
+                            }}
+                            placeholder="Get by date"
+                            closeOnChange={true}
+                          />
+                        </Grid.Column>
+                      </Grid.Row>
+                    </Grid>
+                    <div style={{ width: "100%" }}>
+                      <Button
+                        className="reset_filters"
+                        onClick={() => this.handleReset()}
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        className="apply_filters"
+                        onClick={() => this.handleSearchClick()}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                </Transition>
               </div>
             </Grid.Column>
             <Grid.Column width={4} />
@@ -472,8 +516,6 @@ class QueryResult extends React.Component {
                 </Card>
               )}
             </Grid.Column>
-            <Grid.Column computer={1} mobile={1} tablet={1} />
-
             <Grid.Column computer={6} mobile={14} tablet={6}>
               {this.state.loading ? (
                 <Card style={{ marginTop: 10, width: "80%" }}>
@@ -492,7 +534,7 @@ class QueryResult extends React.Component {
                 </Card>
               )}
             </Grid.Column>
-            <Grid.Column computer={1} mobile={1} tablet={1} />
+            <Grid.Column computer={2} mobile={1} tablet={1} />
           </Grid.Row>
           <Grid.Row>
             <Grid.Column width={2} />

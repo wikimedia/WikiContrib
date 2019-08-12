@@ -11,6 +11,11 @@
   font-size: 20px !important;
 }
 
+.ui.button.navbar_buttons {
+  background: #351e29 !important;
+  color: white !important;
+}
+
 /* End of NavBar Styles */
 
 /* About tool text */
@@ -243,6 +248,7 @@
   padding-bottom: 20px;
   border-radius: 5px;
   text-align: center;
+  margin-left: 0px;
 }
 
 .day {
@@ -319,6 +325,7 @@
   padding: 8px;
   z-index: 1;
   background: white;
+  /* display: flex; */
 }
 
 #dropdown:hover {
@@ -353,4 +360,56 @@
   margin-left: 2%;
   font-weight: bold;
   font-size: 15px;
+}
+
+.ui.icon.button.filters {
+  left: 0px !important;
+  margin-top: 1em;
+  background: white;
+  margin-left: -3em;
+}
+
+.filter_view {
+  width: 95%;
+  background: #f1f1f1;
+  border: none;
+  margin-top: 2em;
+  padding: 10px;
+}
+
+.ui.button.apply_filters {
+  margin: 10px;
+  right: 0px;
+  float: right !important;
+  color: white !important;
+  background: #03b6fc !important;
+}
+
+.ui.button.reset_filters {
+  margin: 10px;
+  background: #fa5050 !important;
+  color: white !important;
+}
+
+.left_arrow {
+  position: fixed;
+  left: 0;
+  margin: 2em;
+  top: 25em;
+  z-index: 2;
+}
+
+.right_arrow {
+  position: fixed;
+  right: 0;
+  z-index: 2;
+  margin: 2em;
+  top: 25em;
+}
+
+.ui.button.page_button {
+  background: #03b6fc !important;
+  color: white !important;
+  padding-top: 2em !important;
+  padding-bottom: 2em !important;
 }

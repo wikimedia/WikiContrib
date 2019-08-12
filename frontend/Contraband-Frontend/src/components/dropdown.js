@@ -16,41 +16,48 @@ class Dropdown extends React.Component {
       <div className="drop">
         <div style={{ position: "relative", margin: 10 }}>
           <div id="dropdown">
-            <input
-              onKeyPress={e => {
-                if (e.which == 13) {
-                  this.props.onSearchChange();
-                }
-              }}
-              value={this.props.value}
-              onChange={e => {
-                this.props.set({
-                  message: "Press Enter to search",
-                  strng: e.target.value
-                });
-              }}
-              onFocus={() => {
-                this.setState({ open: true });
-                this.props.set({ message: "Press Enter to search" });
-                document.querySelectorAll("div#dropdown")[0].style.border =
-                  "1px solid lightblue";
-              }}
-              onBlur={e => {
-                setTimeout(() => {
-                  this.setState({ open: false });
-                  this.props.onClose();
-                }, 200);
-                document.querySelectorAll("div#dropdown")[0].style.border =
-                  "1px solid #ede2e1";
-              }}
-              placeholder={this.state.open ? "" : this.props.placeholder}
-              className="input_dropdown"
-            />
-            {this.props.loading ? (
-              <Loader inline={true} active size="mini" />
-            ) : (
-              <Icon name="search" />
-            )}
+            <div style={{ display: "flex" }}>
+              {this.props.loading ? (
+                <Loader
+                  inline={true}
+                  active
+                  size="mini"
+                  style={{ marginTop: 3 }}
+                />
+              ) : (
+                <Icon name="search" style={{ marginTop: 3 }} />
+              )}
+              <input
+                onKeyPress={e => {
+                  if (e.which == 13) {
+                    this.props.onSearchChange();
+                  }
+                }}
+                value={this.props.value}
+                onChange={e => {
+                  this.props.set({
+                    message: "Press Enter to search",
+                    strng: e.target.value
+                  });
+                }}
+                onFocus={() => {
+                  this.setState({ open: true });
+                  this.props.set({ message: "Press Enter to search" });
+                  document.querySelectorAll("div#dropdown")[0].style.border =
+                    "1px solid lightblue";
+                }}
+                onBlur={e => {
+                  setTimeout(() => {
+                    this.setState({ open: false });
+                    this.props.onClose();
+                  }, 200);
+                  document.querySelectorAll("div#dropdown")[0].style.border =
+                    "1px solid #ede2e1";
+                }}
+                placeholder={this.state.open ? "" : this.props.placeholder}
+                className="input_dropdown"
+              />
+            </div>
             {this.state.open ? (
               <div style={{ overflowY: "auto", maxHeight: "30vh" }}>
                 {this.state.loading ? (

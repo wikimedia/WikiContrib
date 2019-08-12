@@ -206,6 +206,8 @@ export class Query extends Component {
 
   createQuery = () => {
     localStorage.removeItem("users");
+    localStorage.removeItem("res_users");
+    localStorage.removeItem("res_query");
     let nonemptyRowExist = () => {
       let rv = false;
       for (let i in this.state.rows) {
@@ -250,8 +252,7 @@ export class Query extends Component {
           (chunk, chunks) => {
             this.setState({ chunk: chunk, chunks: chunks });
           },
-          this.errorCallback,
-          this.set
+          this.errorCallback
         );
       } else {
         if (

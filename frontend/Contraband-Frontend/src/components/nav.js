@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon, Menu, Popup } from "semantic-ui-react";
+import { Icon, Menu, Popup, Button } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 
 class NavBar extends React.Component {
@@ -10,6 +10,10 @@ class NavBar extends React.Component {
         Contraband tool provides user activity from two platforms(Phabricator,
         Gerrit) and display it. It simply tracks the developer activity. You can
         also view the user contributions in form of github profile.
+        <br />
+        <Button as={Link} to="/docs/">
+          Docs
+        </Button>
       </b>
     );
   }
@@ -17,15 +21,40 @@ class NavBar extends React.Component {
     <Menu secondary className="navbar">
       <Menu.Item name="Contraband" as={Link} to="/" className="navbar_header" />
       <Menu.Item position="right">
-        <Menu.Item
-          position="right"
-          as={Link}
-          to="/docs/"
-          style={{ color: "white" }}
-        >
-          <Icon name="book" />
-          Docs
-        </Menu.Item>
+        {"display" in this.props && this.props.display ? (
+          <React.Fragment>
+            <Menu.Item position="right" style={{ color: "white" }}>
+              <Popup
+                content={"Update the query"}
+                position={"bottom center"}
+                trigger={
+                  <Button
+                    as={Link}
+                    className="navbar_buttons"
+                    to={"/query/" + this.props.query + "/update/"}
+                  >
+                    <Icon name="redo" />
+                    Update
+                  </Button>
+                }
+              />
+            </Menu.Item>
+            <Menu.Item style={{ color: "white" }}>
+              <Popup
+                content={"Create new query"}
+                position={"bottom center"}
+                trigger={
+                  <Button as={Link} to="/" className="navbar_buttons">
+                    <Icon name="plus circle" />
+                    New
+                  </Button>
+                }
+              />
+            </Menu.Item>
+          </React.Fragment>
+        ) : (
+          ""
+        )}
         <Popup
           content={this.about_content}
           on="click"
