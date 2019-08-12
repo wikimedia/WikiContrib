@@ -172,6 +172,8 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
         'previous': users[0],
         'current': users[1],
         'next': users[2],
+        'current_gerrit': gerrit_username,
+        'current_phabricator': username,
         'filters': {
             'start_time': query.queryfilter.start_time,
             'end_time': query.queryfilter.end_time,

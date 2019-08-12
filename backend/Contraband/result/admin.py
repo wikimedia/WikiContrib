@@ -1,4 +1,4 @@
-from django.contrib import admin
+from contraband.admin import admin_site as admin
 from .models import ListCommit
 
-admin.site.register(ListCommit)
+admin.register(ListCommit)

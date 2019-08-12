@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os
+import os, environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'aquo6@!a_0&r1n$=%t2$299*k$q3-(por8kc$^egvf=awgu*nm'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -141,7 +144,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
-API_TOKEN = "api-hfubeyafa7gd7vwfi7jvz4nbskut"
+API_TOKEN = env('PHAB_KEY')
 CORS_ORIGIN_ALLOW_ALL = True
 
 try:

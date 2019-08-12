@@ -1,6 +1,6 @@
-from django.contrib import admin
+from contraband.admin import admin_site as admin
 from .models import Query, QueryFilter, QueryUser
 
-admin.site.register(Query)
-admin.site.register(QueryFilter)
-admin.site.register(QueryUser)
+admin.register(Query)
+admin.register(QueryFilter)
+admin.register(QueryUser)

@@ -29,6 +29,61 @@ import { Line } from "react-chartjs-2";
 import UserContribution from "./contribution";
 import Activity from "./components/activity";
 
+class DisplayUser extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render = () => (
+    <div>
+      {this.props.loading ? (
+        <React.Fragment>
+          <Placeholder>
+            <Placeholder.Line />
+            <Placeholder.Line />
+          </Placeholder>
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <h2>{this.props.username}'s Activity</h2>
+          <span>
+            Gerrit:{" "}
+            {this.props.gerrit_username !== "" ? (
+              <a
+                target="_blank"
+                href={
+                  "https://gerrit.wikimedia.org/r/#/q/" +
+                  this.props.gerrit_username
+                }
+              >
+                {this.props.gerrit_username}
+              </a>
+            ) : (
+              "None"
+            )}{" "}
+            | Phabricator:{" "}
+            {this.props.phabricator_username !== "" ? (
+              <a
+                target="_blank"
+                href={
+                  "https://phabricator.wikimedia.org/p/" +
+                  this.props.phabricator_username +
+                  "/"
+                }
+              >
+                {this.props.phabricator_username}
+              </a>
+            ) : (
+              "None"
+            )}
+          </span>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
 class QueryResult extends React.Component {
   constructor(props) {
     super(props);
@@ -58,7 +113,9 @@ class QueryResult extends React.Component {
       current_filters: Object.assign({}, filters),
       update_filters: Object.assign({}, filters),
       page_load: data === false,
-      view_filters: false
+      view_filters: false,
+      gerrit_username: data !== false ? data.current_gerrit : null,
+      phab_username: data !== false ? data.current_phabricator : null
     };
   }
 
@@ -139,6 +196,8 @@ class QueryResult extends React.Component {
         data: response.result,
         current: response.current,
         prev: response.previous,
+        gerrit_username: response.current_gerrit,
+        phab_username: response.current_phabricator,
         next: response.next,
         loading: false,
         current_filters: filters,
@@ -493,6 +552,18 @@ class QueryResult extends React.Component {
                   </div>
                 </Transition>
               </div>
+            </Grid.Column>
+            <Grid.Column width={4} />
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column width={4} />
+            <Grid.Column width={8}>
+              <DisplayUser
+                loading={this.state.loading}
+                username={this.state.current}
+                gerrit_username={this.state.gerrit_username}
+                phabricator_username={this.state.phab_username}
+              />
             </Grid.Column>
             <Grid.Column width={4} />
           </Grid.Row>
