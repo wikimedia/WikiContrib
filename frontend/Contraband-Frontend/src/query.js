@@ -21,6 +21,7 @@ import {
   Transition,
   Loader
 } from "semantic-ui-react";
+import NotFound from "./components/404";
 
 var emptyObj = {
   fullname: "",
@@ -61,7 +62,8 @@ export class Query extends Component {
       original_users: [],
       bulk: false,
       visible: false,
-      loadData: false
+      loadData: false,
+      notfound: false
     };
   }
 
@@ -76,7 +78,7 @@ export class Query extends Component {
       );
     }
 
-    this.setState({ visible: true });
+    this.setState({ visible: true, notfound: false });
   };
 
   set = obj => {
@@ -85,7 +87,7 @@ export class Query extends Component {
 
   displayData = response => {
     if (response.error === 1) {
-      this.setState({ redirect: "/404/" });
+      this.setState({ notfound: true });
     } else {
       if (response.file === 0) {
         this.setState({
@@ -239,7 +241,7 @@ export class Query extends Component {
         }
       });
     } else {
-      this.setState({ loading: true });
+      this.setState({ loading: true, notfound: false });
       let uri = this.state.operation
         ? QueryCreateApi
         : QueryDetailApi.replace("<hash>", this.props.match.params.hash);
@@ -263,7 +265,7 @@ export class Query extends Component {
         } else {
           let data = { file: -1 };
           data["users"] = this.getExactRows();
-          this.setState({ loadData: true });
+          this.setState({ loadData: true, notfound: false });
           fetchAsynchronous(
             uri,
             this.state.operation ? "POST" : "PATCH",
@@ -710,23 +712,6 @@ export class Query extends Component {
                                   },
                                   rows: [Object.assign({}, emptyObj)]
                                 });
-                                // if (!this.state.operation) {
-                                //   this.setState({ progress: true });
-                                //   fetchAsynchronous(
-                                //     QueryDetailApi.replace(
-                                //       "<hash>",
-                                //       this.props.match.params.hash
-                                //     ),
-                                //     "GET",
-                                //     undefined,
-                                //     {},
-                                //     this.displayData
-                                //   );
-                                // } else {
-                                //   this.setState({
-                                //     rows: [Object.assign({}, emptyObj)]
-                                //   });
-                                // }
                               }}
                             >
                               <Icon

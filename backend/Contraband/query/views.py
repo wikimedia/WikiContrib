@@ -18,6 +18,7 @@ from os import rename, remove
 from contraband.settings import COMMIT_STATUS
 from result.views import UserUpdateStatus, UserUpdateTimeStamp
 
+
 def create_hash():
     hash_code = get_random_string(64)
     while Query.objects.filter(hash_code=hash_code).exists():

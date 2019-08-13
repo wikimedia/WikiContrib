@@ -272,17 +272,14 @@ class GetUserCommits(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+
         try:
             date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
             date = int((date - datetime(1970, 1, 1)).total_seconds())
         except KeyError:
             date = datetime.now().date().strftime("%s")
-        status = query.queryfilter.status
-        if status is not None and status != "":
-            self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date),
-                                                  Q(status__iregex="(" + status.replace(",", "|") + ")"))
-        else:
-            self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
+
+        self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         return super(GetUserCommits, self).get(request, *args, **kwargs)
 
 
@@ -324,7 +321,7 @@ def UserUpdateTimeStamp(data):
     else:
         user = data['query'].queryuser_set.filter(fullname=data['username'])
         if not user.exists():
-            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
 
     createdStart = data['query'].queryfilter.start_time.strftime('%s')

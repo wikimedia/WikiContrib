@@ -28,6 +28,7 @@ import UserSearch from "./components/dropdown";
 import { Line } from "react-chartjs-2";
 import UserContribution from "./contribution";
 import Activity from "./components/activity";
+import NotFound from "./components/404";
 
 class DisplayUser extends React.Component {
   constructor(props) {
@@ -214,21 +215,8 @@ class QueryResult extends React.Component {
   };
 
   componentDidMount = () => {
-    if (
-      this.state.data.length === 0 &&
-      localStorage.getItem("users") != null &&
-      localStorage.getItem("query") == this.state.query
-    ) {
-      this.setState({ loading: true });
-      let uri = fetchDetails.replace("<hash>", this.state.query);
-      fetchAsynchronous(uri, "GET", {}, {}, this.callback);
-    }
-
-    if (
-      this.state.data.length === 0 &&
-      localStorage.getItem("users") === null
-    ) {
-      this.setState({ loading: true });
+    if (this.state.data.length === 0) {
+      this.setState({ loading: true, notFound: false });
       let uri = fetchDetails.replace("<hash>", this.state.query);
       fetchAsynchronous(uri, "GET", {}, {}, this.callback);
     }
@@ -238,7 +226,12 @@ class QueryResult extends React.Component {
     let uri =
       fetchDetails.replace("<hash>", this.state.query) + "?user=" + username;
     fetchAsynchronous(uri, "GET", {}, {}, this.callback);
-    this.setState({ loading: true, activity: undefined, value: "" });
+    this.setState({
+      loading: true,
+      activity: undefined,
+      value: "",
+      notFound: false
+    });
   };
 
   check_filters = () => {
@@ -267,6 +260,11 @@ class QueryResult extends React.Component {
         current_filters: this.state.update_filters,
         loading: false
       });
+    } else {
+      this.setState({
+        loading: false,
+        notFound: true
+      });
     }
   };
 
@@ -274,7 +272,7 @@ class QueryResult extends React.Component {
     let data = this.check_filters();
     if (data !== false) {
       data["username"] = this.state.current;
-      this.setState({ loading: true, activity: undefined });
+      this.setState({ loading: true, activity: undefined, notFound: false });
       fetchAsynchronous(
         filterDetailApi.replace("<hash>", this.state.query),
         "PATCH",
@@ -286,7 +284,7 @@ class QueryResult extends React.Component {
   };
 
   onUserSearch = obj => {
-    this.setState({ value: obj.value, loading: true });
+    this.setState({ value: obj.value, loading: true, notFound: false });
     let uri =
       fetchDetails.replace("<hash>", this.state.query) + "?user=" + obj.value;
     fetchAsynchronous(uri, "GET", {}, {}, this.callback);
@@ -304,7 +302,8 @@ class QueryResult extends React.Component {
     this.setState({
       loading: true,
       activity: undefined,
-      update_filters: Object.assign(filters)
+      update_filters: Object.assign(filters),
+      notFound: false
     });
     let data = Object.assign({}, filters);
     data.status = filters.status.join(",");
@@ -555,86 +554,95 @@ class QueryResult extends React.Component {
             </Grid.Column>
             <Grid.Column width={4} />
           </Grid.Row>
-          <Grid.Row>
-            <Grid.Column width={4} />
-            <Grid.Column width={8}>
-              <DisplayUser
-                loading={this.state.loading}
-                username={this.state.current}
-                gerrit_username={this.state.gerrit_username}
-                phabricator_username={this.state.phab_username}
-              />
-            </Grid.Column>
-            <Grid.Column width={4} />
-          </Grid.Row>
-          <Grid.Row>
-            <Grid.Column computer={2} mobile={1} tablet={1} />
-            <Grid.Column computer={6} mobile={14} tablet={6}>
-              {this.state.loading ? (
-                <Card style={{ marginTop: 10, width: "80%" }}>
-                  <Card.Content>
-                    <Placeholder>
-                      <Placeholder.Image rectangular />
-                    </Placeholder>
-                  </Card.Content>
-                </Card>
-              ) : (
-                <Card style={{ width: "100%", marginTop: 10 }}>
-                  <span style={{ textAlign: "center" }}>
-                    <b>Phabricator </b>
-                    <Line ref="chart" data={this.getGraphData("phabricator")} />
-                  </span>
-                </Card>
-              )}
-            </Grid.Column>
-            <Grid.Column computer={6} mobile={14} tablet={6}>
-              {this.state.loading ? (
-                <Card style={{ marginTop: 10, width: "80%" }}>
-                  <Card.Content>
-                    <Placeholder>
-                      <Placeholder.Image rectangular />
-                    </Placeholder>
-                  </Card.Content>
-                </Card>
-              ) : (
-                <Card style={{ width: "100%", marginTop: 10 }}>
-                  <span style={{ textAlign: "center" }}>
-                    <b>Gerrit </b>
-                    <Line ref="chart" data={this.getGraphData("gerrit")} />
-                  </span>
-                </Card>
-              )}
-            </Grid.Column>
-            <Grid.Column computer={2} mobile={1} tablet={1} />
-          </Grid.Row>
-          <Grid.Row>
-            <Grid.Column width={2} />
-            <Grid.Column width={12}>
-              <UserContribution
-                start_time={cf.start_time}
-                end_time={cf.end_time}
-                user={this.state.current}
-                data={this.state.data}
-                set={this.set}
-                loading={this.state.loading}
-              />
-            </Grid.Column>
-            <Grid.Column width={2} />
-          </Grid.Row>
-          {this.state.activity !== undefined ? (
-            <Grid.Row>
-              <Grid.Column width={3} />
-              <Grid.Column width={9}>
-                <Activity
-                  date={this.state.activity}
-                  hash={this.state.query}
-                  username={this.state.current}
-                />
-              </Grid.Column>
-              <Grid.Column width={3} />
-            </Grid.Row>
+          {this.state.notFound ? (
+            <NotFound />
           ) : (
-            ""
+            <React.Fragment>
+              <Grid.Row>
+                <Grid.Column width={4} />
+                <Grid.Column width={8}>
+                  <DisplayUser
+                    loading={this.state.loading}
+                    username={this.state.current}
+                    gerrit_username={this.state.gerrit_username}
+                    phabricator_username={this.state.phab_username}
+                  />
+                </Grid.Column>
+                <Grid.Column width={4} />
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column computer={2} mobile={1} tablet={1} />
+                <Grid.Column computer={6} mobile={14} tablet={6}>
+                  {this.state.loading ? (
+                    <Card style={{ marginTop: 10, width: "80%" }}>
+                      <Card.Content>
+                        <Placeholder>
+                          <Placeholder.Image rectangular />
+                        </Placeholder>
+                      </Card.Content>
+                    </Card>
+                  ) : (
+                    <Card style={{ width: "100%", marginTop: 10 }}>
+                      <span style={{ textAlign: "center" }}>
+                        <b>Phabricator </b>
+                        <Line
+                          ref="chart"
+                          data={this.getGraphData("phabricator")}
+                        />
+                      </span>
+                    </Card>
+                  )}
+                </Grid.Column>
+                <Grid.Column computer={6} mobile={14} tablet={6}>
+                  {this.state.loading ? (
+                    <Card style={{ marginTop: 10, width: "80%" }}>
+                      <Card.Content>
+                        <Placeholder>
+                          <Placeholder.Image rectangular />
+                        </Placeholder>
+                      </Card.Content>
+                    </Card>
+                  ) : (
+                    <Card style={{ width: "100%", marginTop: 10 }}>
+                      <span style={{ textAlign: "center" }}>
+                        <b>Gerrit </b>
+                        <Line ref="chart" data={this.getGraphData("gerrit")} />
+                      </span>
+                    </Card>
+                  )}
+                </Grid.Column>
+                <Grid.Column computer={2} mobile={1} tablet={1} />
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={2} />
+                <Grid.Column width={12}>
+                  <UserContribution
+                    start_time={cf.start_time}
+                    end_time={cf.end_time}
+                    user={this.state.current}
+                    data={this.state.data}
+                    set={this.set}
+                    loading={this.state.loading}
+                  />
+                </Grid.Column>
+                <Grid.Column width={2} />
+              </Grid.Row>
+              {this.state.activity !== undefined ? (
+                <Grid.Row>
+                  <Grid.Column width={3} />
+                  <Grid.Column width={9}>
+                    <Activity
+                      date={this.state.activity}
+                      hash={this.state.query}
+                      username={this.state.current}
+                    />
+                  </Grid.Column>
+                  <Grid.Column width={3} />
+                </Grid.Row>
+              ) : (
+                ""
+              )}
+            </React.Fragment>
           )}
         </Grid>
       </React.Fragment>
