@@ -8,8 +8,10 @@ The present doc deals about installing and running `backend`. If you go inside `
 
 1. Create a virtual environment.
 2. Install the required packages to run the tool.
-3. Create and Run the initial migrations.
-
+3. Create the phabricator account and generate a Conduit API token.
+4. Run the migrations.
+5. Create super user
+3. Run the local server.
 
 
 ## Creating a virtual environment:
@@ -48,6 +50,8 @@ To activate the virtual environment, type the following command (in the same dir
 source WMContraband/bin/activate
 ```
 
+## Install the required packages to run the tool: 
+
 Now go inside the `Contraband` directory (inside `backend`). Install all the packages that are required to run the project using the command.
 ```commandline
 pip install -r requirements.txt
@@ -60,17 +64,23 @@ django-admin --version
 
 The output is something like: `2.2.2`.
 
-Before running the project, you need to provide an API key to fetch the details from the phabricator. So create a phabricator account from [here](https://phabricator.wikimedia.org/auth/start/?next=%2F). Use **Log In or Register** through Mediawiki(If you don't have a Mediawiki account, you can create it from [here](https://www.mediawiki.org/w/index.php?title=Special:CreateAccount)).
 
-Once you login to thephabricator. You can generate a Conduit API token from `https://phabricator.wikimedia.org/settings/user/{Your username}/page/apitokens/` (fill your username in the link).
+## Create the phabricator account and generate a Conduit API token:
+
+Before running the development server, you need to provide an API key to fetch the details from the phabricator. So create a phabricator account from [here](https://phabricator.wikimedia.org/auth/start/?next=%2F). Use **Log In or Register** through Mediawiki(If you don't have a Mediawiki account, you can create it from [here](https://www.mediawiki.org/w/index.php?title=Special:CreateAccount)).
+
+Once you login to the phabricator. You can generate a Conduit API token from `https://phabricator.wikimedia.org/settings/user/{Your username}/page/apitokens/` (fill your username in the link).
 
 Copy the API token, and paste it in the variable named `API_TOKEN` in the file `backend/Contraband/contraband/settings.py`
+
+## Run the migrations:
 
 Now, you need to run the migration files. Type the following command:
 ```commandline
 python manage.py migrate
 ```
 
+## Create super user:
 You have successfully created the schema now. Inorder to access the models you need to create a superuser. Use this command:
 ```commandline
 python manage.py createsuperuser
@@ -78,6 +88,8 @@ python manage.py createsuperuser
 
 The above prompts for username, email and password. The command creates a user with the corresponding username and password. You can see the database tables or models using it.
 
+
+## Run the local server:
 Finally, run the server with the command:
 ```commandline
 python manage.py runserver
