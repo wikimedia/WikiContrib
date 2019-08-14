@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { fetchAsynchronous } from "./components/fetch";
-import fetchFileAsynchronous from "./components/fetchFile";
-import MessageDisplay from "./components/message";
+import { fetchAsynchronous } from "./Components/fetch";
+import fetchFileAsynchronous from "./Components/fetchFile";
+import MessageDisplay from "./Components/message";
 import { Redirect } from "react-router-dom";
-import { QueryCreateApi, QueryDetailApi } from "./api";
+import { QueryCreateApi, QueryDetailApi } from "./Services/api";
 import DataFrame from "dataframe-js";
 import csv from "./img/csv.png";
 import format from "./img/format.png";
-import NavBar from "./components/nav";
+import NavBar from "./Components/nav";
 import {
   Card,
   Grid,
@@ -21,7 +21,7 @@ import {
   Transition,
   Loader
 } from "semantic-ui-react";
-import NotFound from "./components/404";
+import NotFound from "./Components/404";
 
 var emptyObj = {
   fullname: "",

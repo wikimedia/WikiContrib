@@ -1,6 +1,6 @@
 import React from "react";
 import { fetchAsynchronous } from "./fetch";
-import { getUsers } from "../api";
+import { getUsers } from "../Services/api";
 import { Icon, Loader } from "semantic-ui-react";
 
 class Dropdown extends React.Component {

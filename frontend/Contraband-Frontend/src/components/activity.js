@@ -1,6 +1,6 @@
 import React from "react";
 import { fetchAsynchronous } from "./fetch";
-import { commits_by_date } from "./../api";
+import { commits_by_date } from "./../Services/api";
 import { Card, Placeholder, Grid } from "semantic-ui-react";
 
 class Activity extends React.Component {

@@ -1,5 +1,5 @@
 import React from "react";
-import NavBar from "./components/nav";
+import NavBar from "./Components/nav";
 import {
   Grid,
   Button,
@@ -10,7 +10,7 @@ import {
   Placeholder,
   Transition
 } from "semantic-ui-react";
-import { fetchAsynchronous } from "./components/fetch";
+import { fetchAsynchronous } from "./Components/fetch";
 import { Link } from "react-router-dom";
 import {
   filter_2,
@@ -23,12 +23,12 @@ import {
   full_months,
   get_timestamp,
   filterDetailApi
-} from "./api";
-import UserSearch from "./components/dropdown";
+} from "./Services/api";
+import UserSearch from "./Components/dropdown";
 import { Line } from "react-chartjs-2";
 import UserContribution from "./contribution";
-import Activity from "./components/activity";
-import NotFound from "./components/404";
+import Activity from "./Components/activity";
+import NotFound from "./Components/404";
 
 class DisplayUser extends React.Component {
   constructor(props) {
