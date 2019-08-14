@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'aquo6@!a_0&r1n$=%t2$299*k$q3-(por8kc$^egvf=awgu*nm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -148,7 +148,7 @@ API_TOKEN = env('PHAB_KEY')
 CORS_ORIGIN_ALLOW_ALL = True
 
 try:
-    from .local_settings_sample import *
+    from .local_settings import *
 except ImportError:
     pass
 

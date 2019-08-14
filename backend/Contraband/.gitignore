@@ -1,6 +1,6 @@
 static_cdn/
-query/migrations/
-result/migrations/
+query/migrations/__pycache__/
+result/migrations/__pycache__/
 contraband/.env
 query/__pycache__/
 contraband/__pycache__/

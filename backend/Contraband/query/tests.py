@@ -10,7 +10,7 @@ from test_data import query_create_url as create_url, query_create_csv as create
 from rest_framework.test import APIRequestFactory, APIClient
 from .models import Query, QueryUser, QueryFilter
 from os import remove
-from contraband.settings import COMMIT_STATUS
+from contraband.settings import COMMIT_STATUS, BASE_URL
 
 
 class TestUrls(TestCase):
@@ -30,10 +30,6 @@ class TestUrls(TestCase):
     def test_query_check_url(self):
         url = reverse('check-query', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, CheckQuery.__module__ + "." + CheckQuery.__name__)
-
-
-class TestModels(TestCase):
-    pass
 
 
 class TestViews(TestCase):
@@ -135,3 +131,16 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class TestModels(TestCase):
+
+    def test_query_model(self):
+        with open('test_data/test_csv_upload.csv') as fp:
+            create_csv['csv_file'] = fp
+            response = self.client.post(create_url, create_csv)
+
+        path = 'uploads/' + response.url.split("/")[2] + ".csv"
+        remove(path)
+        query = Query.objects.all()[0]
+        uri = BASE_URL + path
+
+        self.assertEqual(query.csv_file_uri, uri)
