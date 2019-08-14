@@ -19,7 +19,8 @@ import {
   Placeholder,
   Checkbox,
   Transition,
-  Loader
+  Loader,
+  Header
 } from "semantic-ui-react";
 import NotFound from "./components/404";
 
@@ -289,7 +290,7 @@ export class Query extends Component {
   };
 
   render = () => {
-    document.body.style.backgroundColor = "#f5f5f5";
+    document.body.style.backgroundColor = "#f8f9fa";
     return (
       <React.Fragment>
         {this.state.redirect !== false ? (
@@ -306,7 +307,7 @@ export class Query extends Component {
           <Loader active>Loading</Loader>
         ) : (
           <React.Fragment>
-            <NavBar />
+            {/* <NavBar /> */}
 
             <MessageDisplay
               message={this.state.message.message}
@@ -320,40 +321,42 @@ export class Query extends Component {
                 <Grid.Column computer={3} tablet={1} mobile={1} />
                 <Grid.Column computer={10} tablet={14} mobile={14}>
                   {this.state.progress ? (
-                    <Card className="query_create">
-                      {this.state.bulk ? (
-                        <React.Fragment>
-                          <Placeholder fluid style={{ height: 70, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                          <div className="divide" />
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                        </React.Fragment>
-                      ) : (
-                        <React.Fragment>
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                        </React.Fragment>
-                      )}
-                    </Card>
+                      <Card className="query_create">
+                        {this.state.bulk ? (
+                          <React.Fragment>
+                            <Placeholder fluid style={{ height: 70, margin: 10 }}>
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                            <div className="divide" />
+                            <Placeholder fluid style={{ height: 20, margin: 10 }}>
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                          </React.Fragment>
+                        ) : (
+                          <React.Fragment>
+                            <Placeholder fluid style={{ height: 20, margin: 10 }}>
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                            <Placeholder fluid style={{ height: 20, margin: 10 }}>
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                            <Placeholder fluid style={{ height: 20, margin: 10 }}>
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                          </React.Fragment>
+                        )}
+                      </Card>
                   ) : (
                     <Transition
                       visible={this.state.visible}
                       duration={500}
                       animation="fade"
                     >
+                      <React.Fragment>
+                      <Header className="title">Contraband</Header>
                       <Card className="query_create">
                         {this.state.bulk ? (
-                          <React.Fragment>
+                          <React.Fragment>                      
                             <div style={{ marginBottom: 10 }}>
                               <h4
                                 style={{
@@ -362,12 +365,11 @@ export class Query extends Component {
                                   color: "#878dcd"
                                 }}
                               >
-                                Import by CSV
                               </h4>
                               <Popup
                                 content={
                                   <div>
-                                    <h4>Add csv</h4> Add the usernames in CSV
+                                    <h4>Add CSV</h4> Add the usernames in CSV
                                     file and upload it.
                                     <br />
                                     <b>CSV file format:</b>
@@ -385,7 +387,7 @@ export class Query extends Component {
                                       cursor: "pointer",
                                       marginBottom: 1,
                                       float: "right",
-                                      color: "#878dcd"
+                                      color: "#222"
                                     }}
                                   />
                                 }
@@ -426,7 +428,7 @@ export class Query extends Component {
                                 >
                                   <img src={csv} />
                                   <br />
-                                  Drop your csv file here
+                                  Drop your CSV file here
                                   <input
                                     type="file"
                                     accept=".csv"
@@ -440,7 +442,7 @@ export class Query extends Component {
                               </label>
                             ) : (
                               <React.Fragment>
-                                <Table singleLine>
+                                <Table singleLine className="user_table">
                                   <Table.Header
                                     style={{
                                       color: "red"
@@ -572,70 +574,8 @@ export class Query extends Component {
                                 color: "#878dcd"
                               }}
                             >
-                              Add Usernames
                             </h4>
-                            <Popup
-                              content={
-                                <div>
-                                  <h4>Add usernames</h4> Add usernames directly
-                                  through the table and initiate the query.
-                                </div>
-                              }
-                              on="click"
-                              pinned
-                              position="bottom center"
-                              trigger={
-                                <Icon
-                                  name="info circle"
-                                  size="large"
-                                  style={{
-                                    cursor: "pointer",
-                                    float: "right",
-                                    color: "#878dcd"
-                                  }}
-                                />
-                              }
-                            />
-
-                            <Table singleLine>
-                              <Table.Header as={"thead"}>
-                                <Table.Row>
-                                  <Table.HeaderCell
-                                    style={{
-                                      textAlign: "center",
-                                      background: "#878dcd",
-                                      color: "white"
-                                    }}
-                                  >
-                                    Full name
-                                  </Table.HeaderCell>
-                                  <Table.HeaderCell
-                                    style={{
-                                      textAlign: "center",
-                                      background: "#878dcd",
-                                      color: "white"
-                                    }}
-                                  >
-                                    Gerrit username
-                                  </Table.HeaderCell>
-                                  <Table.HeaderCell
-                                    style={{
-                                      textAlign: "center",
-                                      background: "#878dcd",
-                                      color: "white"
-                                    }}
-                                  >
-                                    Phabricator username
-                                  </Table.HeaderCell>
-                                  <Table.HeaderCell
-                                    style={{
-                                      textAlign: "center",
-                                      background: "#878dcd",
-                                      color: "white"
-                                    }}
-                                  />
-                                </Table.Row>
-                              </Table.Header>
+                            <Table singleLine className="user_table">
                               <Table.Body>
                                 {this.state.rows.map((obj, index) => (
                                   <Table.Row key={index}>
@@ -644,7 +584,7 @@ export class Query extends Component {
                                         className="user_input"
                                         value={obj.fullname}
                                         name="fullname"
-                                        placeholder="Enter fullname"
+                                        placeholder="Full Name"
                                         onChange={e =>
                                           this.handlChange(
                                             e.target.name,
@@ -659,7 +599,7 @@ export class Query extends Component {
                                         className="user_input"
                                         value={obj.gerrit_username}
                                         name="gerrit_username"
-                                        placeholder="Enter Gerrit username"
+                                        placeholder="Gerrit Username"
                                         onChange={e =>
                                           this.handlChange(
                                             e.target.name,
@@ -674,7 +614,7 @@ export class Query extends Component {
                                         className="user_input"
                                         value={obj.phabricator_username}
                                         name="phabricator_username"
-                                        placeholder="Enter Phab. Username"
+                                        placeholder="Phabricator Username"
                                         onChange={e =>
                                           this.handlChange(
                                             e.target.name,
@@ -689,7 +629,7 @@ export class Query extends Component {
                                         name="minus circle"
                                         style={{
                                           cursor: "pointer",
-                                          color: "#fa5050"
+                                          color: "#fa5050",
                                         }}
                                         onClick={() => this.removeRow(index)}
                                       />
@@ -698,7 +638,7 @@ export class Query extends Component {
                                 ))}
                               </Table.Body>
                             </Table>
-                            <Button
+                            {/* <Button
                               icon
                               className="reset"
                               onClick={() => {
@@ -725,9 +665,14 @@ export class Query extends Component {
                               className="table_row_add"
                               onClick={this.addrow}
                             >
-                              <Icon name="plus" style={{ marginRight: 5 }} />
-                              Add
+                              <Icon name="search" />
                             </Button>
+                            <Button
+                              className="table_row_add"
+                              onClick={this.addrow}
+                            >
+                              <Icon name="user plus" />
+                            </Button> */}
                           </div>
                         )}
                         <br />
@@ -741,25 +686,45 @@ export class Query extends Component {
                               }
                               checked={this.state.bulk}
                             />
-
-                            <Button
+                          </div>
+                        </Card.Content>
+                      </Card>
+                      <Button
                               onClick={this.createQuery}
                               className="continue"
                               disabled={this.state.loading}
                               loading={this.state.loading}
                             >
-                              {this.state.operation ? (
-                                <React.Fragment>
-                                  {this.state.bulk ? "Upload & " : ""}Continue
-                                </React.Fragment>
-                              ) : (
-                                "Update"
-                              )}
-                              <Icon name="chevron circle right" />
+                              <Icon name="search" />
                             </Button>
-                          </div>
-                        </Card.Content>
-                      </Card>
+                            <Button
+                              className="table_row_add"
+                              onClick={this.addrow}
+                            >
+                              <Icon name="user plus" />
+                            </Button>
+                            <Button
+                              icon
+                              className="reset"
+                              onClick={() => {
+                                localStorage.removeItem("users");
+                                this.setState({
+                                  message: {
+                                    message: "Cleared the cache data!",
+                                    trigger: true,
+                                    type: 0,
+                                    update: !this.state.message.update
+                                  },
+                                  rows: [Object.assign({}, emptyObj)]
+                                });
+                              }}
+                            >
+                              <Icon
+                                name="trash alternate"
+                                style={{ paddingRight: 4 }}
+                              />
+                            </Button>
+                      </React.Fragment>
                     </Transition>
                   )}
                 </Grid.Column>
