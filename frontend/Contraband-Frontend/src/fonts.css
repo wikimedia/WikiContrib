@@ -1,0 +1,17 @@
+@font-face {
+	font-family: 'Charter';
+	src: url( 'fonts/Charter_regular.woff2' ) format( 'woff2' ),
+		 url( 'fonts/Charter_regular.woff' ) format( 'woff' );
+	font-style: normal;
+	font-weight: 400;
+	text-rendering: optimizeLegibility; /* Attention: Android Stock Browser <= 4.3 doesn't show web font with this setting, but it also doesn't support WOFF :) */
+}
+
+@font-face {
+	font-family: 'Charter';
+	src: url( 'fonts/Charter_bold.woff2' ) format( 'woff2' ),
+		 url( 'fonts/Charter_bold.woff' ) format( 'woff' );
+	font-style: normal;
+	font-weight: 700;
+	text-rendering: optimizeLegibility;
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid } from "semantic-ui-react";
-import emoji from "../img/oh.gif";
+import emoji from "../img/oh.png";
 
 class NotFound extends React.Component {
   render = () => (
