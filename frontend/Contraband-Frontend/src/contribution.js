@@ -4,7 +4,11 @@ import { months, contribution_color, get_timestamp } from "./Services/api";
 import Loading from "./Components/Loading";
 
 const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-const monthMap = months.reduce((map, month, index) => (map[month] = index), {});
+const monthMap = months.reduce((map, month, index) => {
+  console.log(map);
+  map[month] = index;
+  return map;
+}, {});
 
 const GenerateDay = props => {
   let color = "rgb(227, 231, 229)";
