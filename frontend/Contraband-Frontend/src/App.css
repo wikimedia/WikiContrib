@@ -1,6 +1,5 @@
-
-@import 'fonts.css';
-@import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
+@import "fonts.css";
+@import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
 
 h1.accounts {
   color: #54595d;
@@ -9,7 +8,7 @@ h1.accounts {
 
 .ui.header.title {
   font-family: "Charter";
-  font-size: 5em;
+  font-size: 5rem;
 }
 
 .ui.header.name {
@@ -19,8 +18,8 @@ h1.accounts {
 
 .ui.single.line.table.user_table {
   border: none;
-  padding: 0.5em;
-  padding-bottom: 2em;
+  padding: 0.5rem;
+  padding-bottom: 2rem;
 }
 
 /* NavBar */
@@ -83,7 +82,7 @@ h1.accounts {
   margin-top: 10px;
   background: #ffffff;
   border-radius: 5px;
-  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
 }
 
 .ui.card.chart_container {
@@ -99,11 +98,11 @@ h1.accounts {
   border: none;
   border-radius: 2px;
   /* background: #f5f5f5; */
-  padding: 0.5em 0.2em;
+  padding: 0.5rem 0.2rem;
   border-bottom: 3px solid #72777d;
   width: 95%;
   transition: 0.3s;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   color: #000;
 }
 
@@ -126,7 +125,7 @@ h1.accounts {
   font-weight: bold;
   width: "80%";
   text-align: center;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   border: 2px dashed #c8ccd1;
   border-radius: 10px;
   cursor: pointer;
@@ -220,10 +219,10 @@ h1.accounts {
   height: 60px;
   text-align: center;
   padding: 10px 0;
-  font-size: 2em;
+  font-size: 2rem;
   /* line-height: 1.428571429; */
   /* border-radius: 30px; */
-  box-shadow: 0 2px 4px 0 rgba( 0, 0, 0, 0.50 );
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .ui.button.table_row_add:hover,
@@ -243,10 +242,10 @@ h1.accounts {
   height: 60px;
   text-align: center;
   padding: 10px 0;
-  font-size: 2em;
+  font-size: 2rem;
   /* line-height: 1.428571429; */
   /* border-radius: 30px; */
-  box-shadow: 0 2px 4px 0 rgba( 0, 0, 0, 0.50 );
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .ui.single.line.table {
@@ -264,10 +263,10 @@ h1.accounts {
   height: 60px;
   text-align: center;
   padding: 10px 0;
-  font-size: 2em;
+  font-size: 2rem;
   /* line-height: 1.428571429; */
   /* border-radius: 30px; */
-  box-shadow: 0 2px 4px 0 rgba( 0, 0, 0, 0.50 );
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .ui.button.reset:hover {
@@ -442,9 +441,9 @@ h1.accounts {
 
 .ui.icon.button.filters {
   left: 0px !important;
-  margin-top: 2em;
+  margin-top: 2rem;
   /* background: white; */
-  margin-left: -3em;
+  margin-left: -3rem;
   /* float: right; */
   background: #222 !important;
   color: white !important;
@@ -452,7 +451,7 @@ h1.accounts {
   transition: 0.3s;
   text-align: center;
   /* padding: 10px; */
-  font-size: 1.5em;
+  font-size: 1.5rem;
   box-shadow: 0 2px 4px 0 rgba( 0, 0, 0, 0.50 );
 }
 
@@ -460,7 +459,7 @@ h1.accounts {
   width: 95%;
   background: #f1f1f1;
   border: none;
-  margin-top: 2em;
+  margin-top: 2rem;
   padding: 10px;
 }
 
@@ -481,8 +480,8 @@ h1.accounts {
 .left_arrow {
   position: fixed;
   left: 0;
-  margin: 2em;
-  top: 25em;
+  margin: 2rem;
+  top: 25rem;
   z-index: 2;
 }
 
@@ -490,13 +489,13 @@ h1.accounts {
   position: fixed;
   right: 0;
   z-index: 2;
-  margin: 2em;
-  top: 25em;
+  margin: 2rem;
+  top: 25rem;
 }
 
 .ui.button.page_button {
   background: #03b6fc !important;
   color: white !important;
-  padding-top: 2em !important;
-  padding-bottom: 2em !important;
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
 }

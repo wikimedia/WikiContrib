@@ -1,6 +1,7 @@
 import React from "react";
 import { Icon, Menu, Popup, Button } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import { production } from "./../App";
 
 class NavBar extends React.Component {
   constructor(props) {
@@ -31,7 +32,13 @@ class NavBar extends React.Component {
                   <Button
                     as={Link}
                     className="navbar_buttons"
-                    to={"/query/" + this.props.query + "/update/"}
+                    to={
+                      production
+                        ? "/contrabandapp/query/" +
+                          this.props.query +
+                          "/update/"
+                        : "/query/" + this.props.query + "/update/"
+                    }
                   >
                     <Icon name="redo" />
                     Update
@@ -44,7 +51,11 @@ class NavBar extends React.Component {
                 content={"Create new query"}
                 position={"bottom center"}
                 trigger={
-                  <Button as={Link} to="/" className="navbar_buttons">
+                  <Button
+                    as={Link}
+                    to={production ? "/contrabandapp/" : "/"}
+                    className="navbar_buttons"
+                  >
                     <Icon name="plus circle" />
                     New
                   </Button>
