@@ -107,7 +107,7 @@ class UserSearch extends React.Component {
       loading: false,
       list: [],
       strng: "",
-      message: "Search users"
+      message: "Search Users in Query"
     };
   }
 
@@ -181,7 +181,7 @@ class UserSearch extends React.Component {
         <Dropdown
           value={this.state.strng}
           set={this.set}
-          placeholder="Search users"
+          placeholder="Search Users in Query"
           options={this.state.list}
           noResultsMessage={this.state.message}
           loading={this.state.loading}

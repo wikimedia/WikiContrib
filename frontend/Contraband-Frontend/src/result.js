@@ -8,7 +8,8 @@ import {
   Popup,
   Dropdown,
   Placeholder,
-  Transition
+  Transition,
+  Header
 } from "semantic-ui-react";
 import { fetchAsynchronous } from "./components/fetch";
 import { Link } from "react-router-dom";
@@ -47,8 +48,9 @@ class DisplayUser extends React.Component {
         </React.Fragment>
       ) : (
         <React.Fragment>
-          <h2>{this.props.username}'s Activity</h2>
+          <Header className="name">{this.props.username}'s Activity</Header>
           <span>
+            <h1 className="accounts">
             Gerrit:{" "}
             {this.props.gerrit_username !== "" ? (
               <a
@@ -78,6 +80,7 @@ class DisplayUser extends React.Component {
             ) : (
               "None"
             )}
+            </h1>
           </span>
         </React.Fragment>
       )}
@@ -317,11 +320,11 @@ class QueryResult extends React.Component {
   };
 
   render = () => {
-    document.body.style.backgroundColor = "#ffffff";
+    document.body.style.backgroundColor = "#f8f9fa";
     let { update_filters: uf, current_filters: cf } = this.state;
     return (
       <React.Fragment>
-        <NavBar display={true} query={this.state.query} />
+        {/* <NavBar display={true} query={this.state.query} /> */}
         {this.state.prev !== null ? (
           <Popup
             content={"Fetch about " + this.state.prev}
@@ -364,8 +367,8 @@ class QueryResult extends React.Component {
 
         <Grid>
           <Grid.Row>
-            <Grid.Column width={4} />
-            <Grid.Column width={8}>
+            <Grid.Column width={2} />
+            <Grid.Column width={12}>
               <div className="result">
                 {this.state.page_load ? (
                   <Placeholder fluid style={{ height: 30, margin: 5 }}>
@@ -552,14 +555,14 @@ class QueryResult extends React.Component {
                 </Transition>
               </div>
             </Grid.Column>
-            <Grid.Column width={4} />
+            <Grid.Column width={2} />
           </Grid.Row>
           {this.state.notFound ? (
             <NotFound />
           ) : (
             <React.Fragment>
               <Grid.Row>
-                <Grid.Column width={4} />
+                <Grid.Column width={2} />
                 <Grid.Column width={8}>
                   <DisplayUser
                     loading={this.state.loading}
@@ -568,7 +571,7 @@ class QueryResult extends React.Component {
                     phabricator_username={this.state.phab_username}
                   />
                 </Grid.Column>
-                <Grid.Column width={4} />
+                <Grid.Column width={2} />
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column computer={2} mobile={1} tablet={1} />
@@ -582,7 +585,8 @@ class QueryResult extends React.Component {
                       </Card.Content>
                     </Card>
                   ) : (
-                    <Card style={{ width: "100%", marginTop: 10 }}>
+                    // <Card style={{ width: "100%", marginTop: 10 }}>
+                    <Card className="chart_container">
                       <span style={{ textAlign: "center" }}>
                         <b>Phabricator </b>
                         <Line
@@ -603,7 +607,7 @@ class QueryResult extends React.Component {
                       </Card.Content>
                     </Card>
                   ) : (
-                    <Card style={{ width: "100%", marginTop: 10 }}>
+                    <Card className="chart_container">
                       <span style={{ textAlign: "center" }}>
                         <b>Gerrit </b>
                         <Line ref="chart" data={this.getGraphData("gerrit")} />
