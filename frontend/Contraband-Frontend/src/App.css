@@ -2,9 +2,19 @@
 @import 'fonts.css';
 @import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
 
+h1.accounts {
+  color: #54595d;
+  font-weight: 200;
+}
+
 .ui.header.title {
   font-family: "Charter";
   font-size: 5em;
+}
+
+.ui.header.name {
+  font-family: "Charter";
+  font-size: 4em;
 }
 
 .ui.single.line.table.user_table {
@@ -68,6 +78,15 @@
 
 .ui.card.query_create,
 .ui.card.query_add_filter {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
+}
+
+.ui.card.chart_container {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
@@ -284,14 +303,22 @@
 /* user activity */
 
 .user_activity {
-  border: 1px solid #c6cecd;
+  /* border: 1px solid #c6cecd;
   padding: 10px;
   width: 100%;
   margin: 10px;
   padding-bottom: 20px;
   border-radius: 5px;
   text-align: center;
-  margin-left: 0px;
+  margin-left: 0px; */
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  padding-bottom: 20px;
+  margin: 10px;
+  background: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
 }
 
 .day {
@@ -361,14 +388,22 @@
   z-index: 1;
 }
 #dropdown {
-  width: 100%;
+  /* width: 100%;
   border: 1px solid #ede2e1;
   border-radius: 5px;
   position: absolute;
   padding: 8px;
   z-index: 1;
-  background: white;
+  background: white; */
   /* display: flex; */
+  width: 95%;
+  font-size: 1.5em;
+  font-family: "Lato", sans-serif;
+  padding: 10px;
+  margin-top: 2em;
+  background: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
 }
 
 #dropdown:hover {
@@ -407,9 +442,18 @@
 
 .ui.icon.button.filters {
   left: 0px !important;
-  margin-top: 1em;
-  background: white;
+  margin-top: 2em;
+  /* background: white; */
   margin-left: -3em;
+  /* float: right; */
+  background: #222 !important;
+  color: white !important;
+  padding: 17px !important;
+  transition: 0.3s;
+  text-align: center;
+  /* padding: 10px; */
+  font-size: 1.5em;
+  box-shadow: 0 2px 4px 0 rgba( 0, 0, 0, 0.50 );
 }
 
 .filter_view {
