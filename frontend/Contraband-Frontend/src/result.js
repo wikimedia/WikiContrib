@@ -1,5 +1,5 @@
-import React from "react";
-import NavBar from "./components/nav";
+import React from 'react';
+import NavBar from './components/nav';
 import {
   Grid,
   Button,
@@ -9,10 +9,10 @@ import {
   Dropdown,
   Placeholder,
   Transition,
-  Header
-} from "semantic-ui-react";
-import { fetchAsynchronous } from "./components/fetch";
-import { Link } from "react-router-dom";
+  Header,
+} from 'semantic-ui-react';
+import { fetchAsynchronous } from './components/fetch';
+import { Link } from 'react-router-dom';
 import {
   filter_2,
   get_dates,
@@ -23,14 +23,36 @@ import {
   format_status,
   full_months,
   get_timestamp,
-  filterDetailApi
-} from "./api";
-import UserSearch from "./components/dropdown";
-import { Line } from "react-chartjs-2";
-import UserContribution from "./contribution";
-import Activity from "./components/activity";
-import NotFound from "./components/404";
+  filterDetailApi,
+} from './api';
+import UserSearch from './components/dropdown';
+import { Line } from 'react-chartjs-2';
+import UserContribution from './contribution';
+import Activity from './components/activity';
+import NotFound from './components/404';
 
+const chartOptions = {
+  legend: {
+    position: 'top',
+  },
+  scales: {
+    xAxes: [
+      {
+        gridLines: {
+          display: true,
+        },
+      },
+    ],
+    yAxes: [
+      {
+        gridLines: {
+          display: true,
+        },
+        display: true
+      },
+    ],
+  },
+};
 class DisplayUser extends React.Component {
   constructor(props) {
     super(props);
@@ -51,35 +73,35 @@ class DisplayUser extends React.Component {
           <Header className="name">{this.props.username}'s Activity</Header>
           <span>
             <h1 className="accounts">
-            Gerrit:{" "}
-            {this.props.gerrit_username !== "" ? (
-              <a
-                target="_blank"
-                href={
-                  "https://gerrit.wikimedia.org/r/#/q/" +
-                  this.props.gerrit_username
-                }
-              >
-                {this.props.gerrit_username}
-              </a>
-            ) : (
-              "None"
-            )}{" "}
-            | Phabricator:{" "}
-            {this.props.phabricator_username !== "" ? (
-              <a
-                target="_blank"
-                href={
-                  "https://phabricator.wikimedia.org/p/" +
-                  this.props.phabricator_username +
-                  "/"
-                }
-              >
-                {this.props.phabricator_username}
-              </a>
-            ) : (
-              "None"
-            )}
+              Gerrit:{' '}
+              {this.props.gerrit_username !== '' ? (
+                <a
+                  target="_blank"
+                  href={
+                    'https://gerrit.wikimedia.org/r/#/q/' +
+                    this.props.gerrit_username
+                  }
+                >
+                  {this.props.gerrit_username}
+                </a>
+              ) : (
+                'None'
+              )}{' '}
+              | Phabricator:{' '}
+              {this.props.phabricator_username !== '' ? (
+                <a
+                  target="_blank"
+                  href={
+                    'https://phabricator.wikimedia.org/p/' +
+                    this.props.phabricator_username +
+                    '/'
+                  }
+                >
+                  {this.props.phabricator_username}
+                </a>
+              ) : (
+                'None'
+              )}
             </h1>
           </span>
         </React.Fragment>
@@ -94,14 +116,14 @@ class QueryResult extends React.Component {
     let data = false;
     let filters = {
       status: [],
-      start_time: "",
-      end_time: ""
+      start_time: '',
+      end_time: '',
     };
 
-    if ("data" in this.props.location && this.props.location.data !== "") {
+    if ('data' in this.props.location && this.props.location.data !== '') {
       data = this.props.location.data;
       filters = data.filters;
-      filters.status = data.filters.status.split(",");
+      filters.status = data.filters.status.split(',');
     }
 
     this.state = {
@@ -112,14 +134,14 @@ class QueryResult extends React.Component {
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
       notFound: false,
-      value: "",
+      value: '',
       activity: undefined,
       current_filters: Object.assign({}, filters),
       update_filters: Object.assign({}, filters),
       page_load: data === false,
       view_filters: false,
       gerrit_username: data !== false ? data.current_gerrit : null,
-      phab_username: data !== false ? data.current_phabricator : null
+      phab_username: data !== false ? data.current_phabricator : null,
     };
   }
 
@@ -129,51 +151,51 @@ class QueryResult extends React.Component {
 
   getGraphData = platform => {
     let data = {};
-    if (platform === "phabricator") {
+    if (platform === 'phabricator') {
       data = {
-        type: "stacked",
+        type: 'stacked',
         labels: months,
         datasets: [
           {
-            label: "Assigned",
+            label: 'Assigned',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: "#cae3e2",
-            backgroundColor: "rgb(202, 227, 226, 0.4)",
-            lineTension: 0.1
+            borderColor: '#cae3e2',
+            backgroundColor: 'rgb(202, 227, 226, 0.4)',
+            lineTension: 0.1,
           },
           {
-            label: "Owned",
+            label: 'Owned',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: "#d9cae3",
-            backgroundColor: "rgb(217, 202, 227, 0.4)",
-            lineTension: 0.1
+            borderColor: '#d9cae3',
+            backgroundColor: 'rgb(217, 202, 227, 0.4)',
+            lineTension: 0.1,
           },
           {
-            label: "All",
+            label: 'All',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: "#bae6b5",
-            backgroundColor: "rgb(186, 230, 181, 0.4)",
-            lineTension: 0.1
-          }
-        ]
+            borderColor: '#bae6b5',
+            backgroundColor: 'rgb(186, 230, 181, 0.4)',
+            lineTension: 0.1,
+          },
+        ],
       };
     } else {
       data = {
         labels: months,
         datasets: [
           {
-            label: "Contributions",
+            label: 'Contributions',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: "rgba(75,192,192,1)",
-            backgroundColor: "rgba(75,192,192,0.4)",
-            lineTension: 0.1
-          }
-        ]
+            borderColor: 'rgba(75,192,192,1)',
+            backgroundColor: 'rgba(75,192,192,0.4)',
+            lineTension: 0.1,
+          },
+        ],
       };
     }
     this.state.data.forEach(e => {
       let index = new Date(parseInt(e.time) * 1000).getMonth();
-      if (platform === "phabricator" && platform in e) {
+      if (platform === 'phabricator' && platform in e) {
         if (e.assigned && !e.owned) {
           data.datasets[0].data[index] += 1;
           data.datasets[2].data[index] += 1;
@@ -185,7 +207,7 @@ class QueryResult extends React.Component {
           data.datasets[1].data[index] += 1;
           data.datasets[2].data[index] += 1;
         }
-      } else if (platform !== "phabricator" && platform in e) {
+      } else if (platform !== 'phabricator' && platform in e) {
         data.datasets[0].data[index] += 1;
       }
     });
@@ -195,7 +217,7 @@ class QueryResult extends React.Component {
   callback = response => {
     if (response.error !== 1) {
       let filters = response.filters;
-      filters.status = filters.status.split(",");
+      filters.status = filters.status.split(',');
       this.setState({
         data: response.result,
         current: response.current,
@@ -206,13 +228,13 @@ class QueryResult extends React.Component {
         loading: false,
         current_filters: filters,
         page_load: false,
-        update_filters: filters
+        update_filters: filters,
       });
     } else {
       this.setState({
         loading: false,
         page_load: false,
-        notFound: true
+        notFound: true,
       });
     }
   };
@@ -220,20 +242,20 @@ class QueryResult extends React.Component {
   componentDidMount = () => {
     if (this.state.data.length === 0) {
       this.setState({ loading: true, notFound: false });
-      let uri = fetchDetails.replace("<hash>", this.state.query);
-      fetchAsynchronous(uri, "GET", {}, {}, this.callback);
+      let uri = fetchDetails.replace('<hash>', this.state.query);
+      fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
     }
   };
 
   getDetails = username => {
     let uri =
-      fetchDetails.replace("<hash>", this.state.query) + "?user=" + username;
-    fetchAsynchronous(uri, "GET", {}, {}, this.callback);
+      fetchDetails.replace('<hash>', this.state.query) + '?user=' + username;
+    fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
     this.setState({
       loading: true,
       activity: undefined,
-      value: "",
-      notFound: false
+      value: '',
+      notFound: false,
     });
   };
 
@@ -241,14 +263,14 @@ class QueryResult extends React.Component {
     let { update_filters: uf, current_filters: cf } = this.state;
     if (JSON.stringify(uf) !== JSON.stringify(cf)) {
       let out = {};
-      if (uf.status.join(",") !== cf.status.join(",")) {
-        out["status"] = uf.status.join(",");
+      if (uf.status.join(',') !== cf.status.join(',')) {
+        out['status'] = uf.status.join(',');
       }
       if (uf.start_time !== cf.start_time) {
-        out["start_time"] = uf.start_time;
+        out['start_time'] = uf.start_time;
       }
       if (uf.end_time !== cf.end_time) {
-        out["end_time"] = uf.end_time;
+        out['end_time'] = uf.end_time;
       }
 
       return out;
@@ -261,12 +283,12 @@ class QueryResult extends React.Component {
       this.setState({
         data: response.result,
         current_filters: this.state.update_filters,
-        loading: false
+        loading: false,
       });
     } else {
       this.setState({
         loading: false,
-        notFound: true
+        notFound: true,
       });
     }
   };
@@ -274,13 +296,13 @@ class QueryResult extends React.Component {
   handleSearchClick = () => {
     let data = this.check_filters();
     if (data !== false) {
-      data["username"] = this.state.current;
+      data['username'] = this.state.current;
       this.setState({ loading: true, activity: undefined, notFound: false });
       fetchAsynchronous(
-        filterDetailApi.replace("<hash>", this.state.query),
-        "PATCH",
+        filterDetailApi.replace('<hash>', this.state.query),
+        'PATCH',
         data,
-        { "Content-Type": "application/json" },
+        { 'Content-Type': 'application/json' },
         this.updatecallback
       );
     }
@@ -289,46 +311,46 @@ class QueryResult extends React.Component {
   onUserSearch = obj => {
     this.setState({ value: obj.value, loading: true, notFound: false });
     let uri =
-      fetchDetails.replace("<hash>", this.state.query) + "?user=" + obj.value;
-    fetchAsynchronous(uri, "GET", {}, {}, this.callback);
+      fetchDetails.replace('<hash>', this.state.query) + '?user=' + obj.value;
+    fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
   };
 
   handleReset = () => {
     let time = new Date();
     let month = time.getMonth() + 1;
     let filters = {
-      end_time: time.getFullYear() + "-" + month + "-01",
-      start_time: time.getFullYear() - 1 + "-" + month + "-01",
-      status: phab_status.concat(gerrit_status).concat(["p-open", "g-open"]),
-      username: this.state.current
+      end_time: time.getFullYear() + '-' + month + '-01',
+      start_time: time.getFullYear() - 1 + '-' + month + '-01',
+      status: phab_status.concat(gerrit_status).concat(['p-open', 'g-open']),
+      username: this.state.current,
     };
     this.setState({
       loading: true,
       activity: undefined,
       update_filters: Object.assign(filters),
-      notFound: false
+      notFound: false,
     });
     let data = Object.assign({}, filters);
-    data.status = filters.status.join(",");
+    data.status = filters.status.join(',');
     fetchAsynchronous(
-      filterDetailApi.replace("<hash>", this.state.query),
-      "PATCH",
+      filterDetailApi.replace('<hash>', this.state.query),
+      'PATCH',
       data,
-      { "Content-Type": "application/json" },
+      { 'Content-Type': 'application/json' },
       this.updatecallback
     );
   };
 
   render = () => {
-    document.body.style.backgroundColor = "#f8f9fa";
+    document.body.style.backgroundColor = '#f8f9fa';
     let { update_filters: uf, current_filters: cf } = this.state;
     return (
       <React.Fragment>
         {/* <NavBar display={true} query={this.state.query} /> */}
         {this.state.prev !== null ? (
           <Popup
-            content={"Fetch about " + this.state.prev}
-            position={"bottom left"}
+            content={'Fetch about ' + this.state.prev}
+            position={'bottom left'}
             trigger={
               <div className="left_arrow">
                 <Button
@@ -342,14 +364,14 @@ class QueryResult extends React.Component {
             }
           />
         ) : (
-          ""
+          ''
         )}
 
         {this.state.next !== null ? (
           <div className="right_arrow">
             <Popup
-              content={"Fetch about " + this.state.next}
-              position={"bottom right"}
+              content={'Fetch about ' + this.state.next}
+              position={'bottom right'}
               trigger={
                 <Button
                   primary
@@ -362,7 +384,7 @@ class QueryResult extends React.Component {
             />
           </div>
         ) : (
-          ""
+          ''
         )}
 
         <Grid>
@@ -394,7 +416,7 @@ class QueryResult extends React.Component {
                               className="filters"
                               onClick={() =>
                                 this.setState({
-                                  view_filters: !this.state.view_filters
+                                  view_filters: !this.state.view_filters,
                                 })
                               }
                             />
@@ -410,7 +432,7 @@ class QueryResult extends React.Component {
                   visible={this.state.view_filters}
                 >
                   <div className="filter_view">
-                    <h4 style={{ textAlign: "center" }}>Query Filters</h4>
+                    <h4 style={{ textAlign: 'center' }}>Query Filters</h4>
                     <Grid>
                       <Grid.Row>
                         <Grid.Column computer={16} tablet={16} mobile={16}>
@@ -422,7 +444,7 @@ class QueryResult extends React.Component {
                             multiple
                             selection
                             options={format_status(
-                              gerrit_status.concat(phab_status, "open")
+                              gerrit_status.concat(phab_status, 'open')
                             )}
                             value={uf.status}
                             onChange={(e, obj) => {
@@ -430,7 +452,7 @@ class QueryResult extends React.Component {
                               let filters = Object.assign({}, uf);
                               filters.status = value;
                               this.setState({
-                                update_filters: filters
+                                update_filters: filters,
                               });
                             }}
                             placeholder="Status of Commit"
@@ -449,17 +471,17 @@ class QueryResult extends React.Component {
                             icon={false}
                             value={
                               full_months[new Date(uf.end_time).getMonth()] +
-                              ", " +
+                              ', ' +
                               new Date(uf.end_time).getFullYear()
                             }
                             options={get_dates()}
                             onChange={(e, obj) => {
-                              let date = obj.value.split(",");
+                              let date = obj.value.split(',');
                               date[1] = date[1].substr(1);
                               date[0] = full_months.indexOf(date[0]) + 1;
                               let filters = Object.assign({}, uf);
                               filters.end_time =
-                                date[1] + "-" + date[0] + "-01";
+                                date[1] + '-' + date[0] + '-01';
                               let days = get_timestamp(
                                 new Date(uf.end_time),
                                 new Date(uf.start_time)
@@ -483,9 +505,9 @@ class QueryResult extends React.Component {
                               );
                               let month = start_time.getMonth() + 1;
                               filters.start_time =
-                                start_time.getFullYear() + "-" + month + "-01";
+                                start_time.getFullYear() + '-' + month + '-01';
                               this.setState({
-                                update_filters: filters
+                                update_filters: filters,
                               });
                             }}
                             placeholder="Select Date"
@@ -528,7 +550,7 @@ class QueryResult extends React.Component {
                               let month = date.getMonth() + 1;
                               let filters = Object.assign({}, uf);
                               filters.start_time =
-                                date.getFullYear() + "-" + month + "-" + 1;
+                                date.getFullYear() + '-' + month + '-' + 1;
                               this.setState({ update_filters: filters });
                             }}
                             placeholder="Get by date"
@@ -537,7 +559,7 @@ class QueryResult extends React.Component {
                         </Grid.Column>
                       </Grid.Row>
                     </Grid>
-                    <div style={{ width: "100%" }}>
+                    <div style={{ width: '100%' }}>
                       <Button
                         className="reset_filters"
                         onClick={() => this.handleReset()}
@@ -577,7 +599,7 @@ class QueryResult extends React.Component {
                 <Grid.Column computer={2} mobile={1} tablet={1} />
                 <Grid.Column computer={6} mobile={14} tablet={6}>
                   {this.state.loading ? (
-                    <Card style={{ marginTop: 10, width: "80%" }}>
+                    <Card style={{ marginTop: 10, width: '80%' }}>
                       <Card.Content>
                         <Placeholder>
                           <Placeholder.Image rectangular />
@@ -585,13 +607,13 @@ class QueryResult extends React.Component {
                       </Card.Content>
                     </Card>
                   ) : (
-                    // <Card style={{ width: "100%", marginTop: 10 }}>
                     <Card className="chart_container">
-                      <span style={{ textAlign: "center" }}>
-                        <b>Phabricator </b>
+                      <span style={{ textAlign: 'center' }}>
+                        <Header className="chart"> PHABRICATOR </Header>
                         <Line
                           ref="chart"
-                          data={this.getGraphData("phabricator")}
+                          data={this.getGraphData('phabricator')}
+                          options={chartOptions}
                         />
                       </span>
                     </Card>
@@ -599,7 +621,7 @@ class QueryResult extends React.Component {
                 </Grid.Column>
                 <Grid.Column computer={6} mobile={14} tablet={6}>
                   {this.state.loading ? (
-                    <Card style={{ marginTop: 10, width: "80%" }}>
+                    <Card style={{ marginTop: 10, width: '80%' }}>
                       <Card.Content>
                         <Placeholder>
                           <Placeholder.Image rectangular />
@@ -608,9 +630,12 @@ class QueryResult extends React.Component {
                     </Card>
                   ) : (
                     <Card className="chart_container">
-                      <span style={{ textAlign: "center" }}>
-                        <b>Gerrit </b>
-                        <Line ref="chart" data={this.getGraphData("gerrit")} />
+                      <span style={{ textAlign: 'center' }}>
+                        <Header className="chart"> GERRIT </Header>
+                        <Line ref="chart" 
+                          data={this.getGraphData('gerrit')} 
+                          options={chartOptions}
+                        />
                       </span>
                     </Card>
                   )}
@@ -620,6 +645,8 @@ class QueryResult extends React.Component {
               <Grid.Row>
                 <Grid.Column width={2} />
                 <Grid.Column width={12}>
+                <Card className="chart_container">
+                <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
                   <UserContribution
                     start_time={cf.start_time}
                     end_time={cf.end_time}
@@ -628,6 +655,7 @@ class QueryResult extends React.Component {
                     set={this.set}
                     loading={this.state.loading}
                   />
+                  </Card>
                 </Grid.Column>
                 <Grid.Column width={2} />
               </Grid.Row>
@@ -644,7 +672,7 @@ class QueryResult extends React.Component {
                   <Grid.Column width={3} />
                 </Grid.Row>
               ) : (
-                ""
+                ''
               )}
             </React.Fragment>
           )}

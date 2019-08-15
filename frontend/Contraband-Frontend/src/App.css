@@ -11,6 +11,16 @@ h1.accounts {
   font-size: 5rem;
 }
 
+.ui.header.chart {
+  font-family: "Lato ", sans-serif;
+  font-size: 2rem;
+  font-weight: 200;
+  color: #54595d;
+  margin-top: 0em;
+  text-align: left;
+  padding-left: 0.2em;
+}
+
 .ui.header.name {
   font-family: "Charter";
   font-size: 4em;
@@ -300,29 +310,15 @@ h1.accounts {
 }
 
 /* user activity */
-
 .user_activity {
-  /* border: 1px solid #c6cecd;
-  padding: 10px;
-  width: 100%;
-  margin: 10px;
-  padding-bottom: 20px;
-  border-radius: 5px;
-  text-align: center;
-  margin-left: 0px; */
   text-align: center;
   width: 100%;
   padding: 10px;
   padding-bottom: 20px;
-  margin: 10px;
-  background: #ffffff;
-  border-radius: 5px;
-  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
 }
 
 .day {
-  padding: 6px;
-  width: 5px;
+  padding: 8px;
   background: rgb(227, 231, 229);
   border: 1px solid white;
   cursor: pointer;
@@ -434,9 +430,9 @@ h1.accounts {
 
 .user_contribution_text {
   text-align: left;
-  margin-left: 2%;
+  margin-left: 1%;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 3em;
 }
 
 .ui.icon.button.filters {

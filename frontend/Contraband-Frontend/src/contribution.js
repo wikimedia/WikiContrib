@@ -1,6 +1,6 @@
-import React from "react";
-import { Popup, Placeholder } from "semantic-ui-react";
-import { months, contribution_color, get_timestamp } from "./api";
+import React from 'react';
+import { Popup, Placeholder } from 'semantic-ui-react';
+import { months, contribution_color, get_timestamp, contributionColors } from './api';
 
 const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -11,7 +11,7 @@ class GenerateDay extends React.Component {
   }
 
   render = () => {
-    let color = "rgb(227, 231, 229)";
+    let color = 'rgb(227, 231, 229)';
     let data = 0;
     try {
       data = this.props.data[this.props.year][months.indexOf(this.props.month)][
@@ -32,13 +32,13 @@ class GenerateDay extends React.Component {
         style={{ background: color }}
         onClick={() => {
           this.props.set({
-            activity: this.props.year + "-" + month + "-" + this.props.date
+            activity: this.props.year + '-' + month + '-' + this.props.date,
           });
           window.scrollTo(0, document.body.scrollHeight);
         }}
       >
         <div className="tooltip">
-          {data} {data === 1 ? "Contribution" : "Contributions"}
+          {data} {data === 1 ? 'Contribution' : 'Contributions'}
           on {this.props.month} {this.props.date}, {this.props.year}
         </div>
       </div>
@@ -54,7 +54,7 @@ class GenerateMonth extends React.Component {
 
   getDays = (year, month) => {
     let day = days[months.indexOf(month)];
-    if (month === "Feb") {
+    if (month === 'Feb') {
       if (year % 4 === 0) {
         day = 29;
         if (year % 100 === 0 && year % 400 !== 0) {
@@ -101,9 +101,9 @@ class GenerateMonth extends React.Component {
       );
     }
     return (
-      <div style={{ textAlign: "center" }}>
+      <div style={{ textAlign: 'center' }}>
         <span
-          style={{ color: "rgb(80, 82, 81)", paddingLeft: 5, fontSize: 12 }}
+          style={{ color: 'rgb(80, 82, 81)', paddingLeft: 5, fontSize: 12 }}
         >
           {this.props.month}
         </span>
@@ -123,7 +123,7 @@ class UserContribution extends React.Component {
     var rv = {};
     for (let i of this.props.data) {
       let temp = 0;
-      let date = new Date(parseInt(i.time + "000"));
+      let date = new Date(parseInt(i.time + '000'));
       let year = date.getFullYear();
       if (!(year in rv)) {
         rv[year] = {};
@@ -168,7 +168,7 @@ class UserContribution extends React.Component {
             key={numb_months}
             year={year}
             data={data}
-            style={{ display: "inline" }}
+            style={{ display: 'inline' }}
             set={this.props.set}
           />
         );
@@ -186,10 +186,10 @@ class UserContribution extends React.Component {
       <React.Fragment>
         {!this.props.loading ? (
           <span className="user_contribution_text">
-            {this.props.user} has {this.props.data.length} Contributions
+            {this.props.data.length}
           </span>
         ) : (
-          ""
+          ''
         )}
         <div className="user_activity">
           {this.props.loading ? (
@@ -215,54 +215,53 @@ class UserContribution extends React.Component {
 
               <div
                 style={{
-                  right: "5%",
-                  position: "absolute"
+                  right: '5%',
+                  position: 'absolute',
                 }}
               >
                 <div>
                   <span
                     style={{
-                      color: "rgb(80, 82, 81)",
+                      color: 'rgb(80, 82, 81)',
                       marginRight: 5,
-                      fontSize: 12
+                      fontSize: 12,
                     }}
                   >
                     Less
                   </span>
-                  <div className="day" style={{ display: "inline-block" }} />
                   <div
                     className="day"
                     style={{
-                      display: "inline-block",
-                      background: "rgb(198, 228, 139)"
+                      display: 'inline-block',
+                      background: contributionColors.none,
                     }}
                   />
                   <div
                     className="day"
                     style={{
-                      display: "inline-block",
-                      background: "rgb(123, 201, 111)"
+                      display: 'inline-block',
+                      background: contributionColors.level1,
                     }}
                   />
                   <div
                     className="day"
                     style={{
-                      display: "inline-block",
-                      background: "rgb(35, 154, 59)"
+                      display: 'inline-block',
+                      background: contributionColors.level2,
                     }}
                   />
                   <div
                     className="day"
                     style={{
-                      display: "inline-block",
-                      background: "rgb(25, 97, 39)"
+                      display: 'inline-block',
+                      background: contributionColors.level3,
                     }}
                   />
                   <span
                     style={{
-                      color: "rgb(80, 82, 81)",
+                      color: 'rgb(80, 82, 81)',
                       marginLeft: 5,
-                      fontSize: 12
+                      fontSize: 12,
                     }}
                   >
                     More

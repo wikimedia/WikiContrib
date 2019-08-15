@@ -1,23 +1,23 @@
-import React from "react";
-import { fetchAsynchronous } from "./fetch";
-import { commits_by_date } from "./../api";
-import { Card, Placeholder, Grid } from "semantic-ui-react";
+import React from 'react';
+import { fetchAsynchronous } from './fetch';
+import { commits_by_date } from './../api';
+import { Card, Placeholder, Grid } from 'semantic-ui-react';
 
 class Activity extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
-      data: []
+      data: [],
     };
   }
 
   fetchAPI = () => {
     let uri =
-      commits_by_date.replace("<hash>", this.props.hash) +
-      "?created=" +
+      commits_by_date.replace('<hash>', this.props.hash) +
+      '?created=' +
       this.props.date;
-    fetchAsynchronous(uri, "GET", {}, {}, this.callback);
+    fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
   };
 
   componentDidMount = () => {
@@ -34,7 +34,7 @@ class Activity extends React.Component {
   callback = response => {
     this.setState({
       loading: false,
-      data: response.results
+      data: response.results,
     });
   };
 
@@ -43,14 +43,14 @@ class Activity extends React.Component {
       <React.Fragment>
         {this.state.loading ? (
           <React.Fragment>
-            <Card style={{ width: "100%", padding: "2%" }}>
+            <Card style={{ width: '100%', padding: '2%' }}>
               <Placeholder fluid>
                 <Placeholder.Line />
                 <Placeholder.Line />
                 <Placeholder.Line />
               </Placeholder>
             </Card>
-            <Card style={{ width: "100%", padding: "2%" }}>
+            <Card style={{ width: '100%', padding: '2%' }}>
               <Placeholder fluid>
                 <Placeholder.Line />
                 <Placeholder.Line />
@@ -64,12 +64,12 @@ class Activity extends React.Component {
               <React.Fragment>
                 <h4>User Activity on {this.props.date}</h4>
                 {this.state.data.map((obj, index) => (
-                  <Card style={{ width: "100%" }} key={index}>
+                  <Card style={{ width: '100%' }} key={index}>
                     <Card.Content>
-                      {obj.platform === "Phabricator" ? (
+                      {obj.platform === 'Phabricator' ? (
                         <a
                           href={
-                            "https://phabricator.wikimedia.org/" + obj.redirect
+                            'https://phabricator.wikimedia.org/' + obj.redirect
                           }
                           target="_blank"
                         >
@@ -78,7 +78,7 @@ class Activity extends React.Component {
                       ) : (
                         <a
                           href={
-                            "https://gerrit.wikimedia.org/r/#/q/" + obj.redirect
+                            'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect
                           }
                           target="_blank"
                         >
@@ -86,10 +86,10 @@ class Activity extends React.Component {
                         </a>
                       )}
                       <div>
-                        <span style={{ display: "inline", float: "left" }}>
+                        <span style={{ display: 'inline', float: 'left' }}>
                           <b>PLATFORM:</b> {obj.platform}
                         </span>
-                        <span style={{ display: "inline", float: "right" }}>
+                        <span style={{ display: 'inline', float: 'right' }}>
                           <b>STATUS:</b> {obj.status}
                         </span>
                       </div>
@@ -100,10 +100,10 @@ class Activity extends React.Component {
             ) : (
               <div
                 style={{
-                  textAlign: "center",
-                  fontWeight: "bold",
+                  textAlign: 'center',
+                  fontWeight: 'bold',
                   fontSize: 20,
-                  width: "100%"
+                  width: '100%',
                 }}
               >
                 {this.props.username} has no activity on this day.

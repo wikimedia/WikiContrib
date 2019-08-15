@@ -1,7 +1,7 @@
-import React from "react";
-import { Icon, Menu, Popup, Button } from "semantic-ui-react";
-import { Link } from "react-router-dom";
-import { production } from "./../App";
+import React from 'react';
+import { Icon, Menu, Popup, Button } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
+import { production } from './../App';
 
 class NavBar extends React.Component {
   constructor(props) {
@@ -22,22 +22,22 @@ class NavBar extends React.Component {
     <Menu secondary className="navbar">
       <Menu.Item name="Contraband" as={Link} to="/" className="navbar_header" />
       <Menu.Item position="right">
-        {"display" in this.props && this.props.display ? (
+        {'display' in this.props && this.props.display ? (
           <React.Fragment>
-            <Menu.Item position="right" style={{ color: "white" }}>
+            <Menu.Item position="right" style={{ color: 'white' }}>
               <Popup
-                content={"Update the query"}
-                position={"bottom center"}
+                content={'Update the query'}
+                position={'bottom center'}
                 trigger={
                   <Button
                     as={Link}
                     className="navbar_buttons"
                     to={
                       production
-                        ? "/contrabandapp/query/" +
+                        ? '/contrabandapp/query/' +
                           this.props.query +
-                          "/update/"
-                        : "/query/" + this.props.query + "/update/"
+                          '/update/'
+                        : '/query/' + this.props.query + '/update/'
                     }
                   >
                     <Icon name="redo" />
@@ -46,14 +46,14 @@ class NavBar extends React.Component {
                 }
               />
             </Menu.Item>
-            <Menu.Item style={{ color: "white" }}>
+            <Menu.Item style={{ color: 'white' }}>
               <Popup
-                content={"Create new query"}
-                position={"bottom center"}
+                content={'Create new query'}
+                position={'bottom center'}
                 trigger={
                   <Button
                     as={Link}
-                    to={production ? "/contrabandapp/" : "/"}
+                    to={production ? '/contrabandapp/' : '/'}
                     className="navbar_buttons"
                   >
                     <Icon name="plus circle" />
@@ -64,13 +64,13 @@ class NavBar extends React.Component {
             </Menu.Item>
           </React.Fragment>
         ) : (
-          ""
+          ''
         )}
         <Popup
           content={this.about_content}
           on="click"
           trigger={
-            <Menu.Item position="right" style={{ color: "white" }}>
+            <Menu.Item position="right" style={{ color: 'white' }}>
               <Icon name="question circle outline" />
             </Menu.Item>
           }

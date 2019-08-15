@@ -16,7 +16,7 @@ const fetchFileAsynchronous = (
   callback = callback_func;
   percent = upload_percent;
   error = error_callback;
-  extractChunk("");
+  extractChunk('');
 };
 
 const extractChunk = response => {
@@ -39,22 +39,22 @@ const extractChunk = response => {
 const uploadChunk = hash => {
   let data = new FormData();
   if (chunk === chunks) {
-    data.append("complete", 0);
+    data.append('complete', 0);
   } else {
-    data.append("complete", -1);
+    data.append('complete', -1);
   }
   if (chunk > 1) {
-    data.append("hash_code", hash);
+    data.append('hash_code', hash);
   }
-  data.append("file", 0);
-  data.append("chunk", chunk);
+  data.append('file', 0);
+  data.append('chunk', chunk);
   let begin = (chunk - 1) * 1024 * 1024;
   let csv_file = file.slice(begin, begin + 1024 * 1024);
-  data.append("csv_file", csv_file);
+  data.append('csv_file', csv_file);
 
   fetch(uri, {
     method: method,
-    body: data
+    body: data,
   })
     .then(response => response.json())
     .then(object => {
