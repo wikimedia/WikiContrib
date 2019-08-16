@@ -41,12 +41,18 @@ const chartOptions = {
         gridLines: {
           display: true,
         },
+        ticks: {
+          fontSize: 15
+        }
       },
     ],
     yAxes: [
       {
         gridLines: {
           display: true,
+        },
+        ticks: {
+          fontSize: 15
         },
         display: true
       },
@@ -159,23 +165,23 @@ class QueryResult extends React.Component {
           {
             label: 'Assigned',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: '#cae3e2',
-            backgroundColor: 'rgb(202, 227, 226, 0.4)',
-            lineTension: 0.1,
+            // borderColor: 'rgba(221, 51, 51, 1)',
+            // backgroundColor: 'rgba(221, 51, 51, 0.2)',
+            lineTension: 0.4,
           },
           {
             label: 'Owned',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: '#d9cae3',
-            backgroundColor: 'rgb(217, 202, 227, 0.4)',
-            lineTension: 0.1,
+            borderColor: 'rgba(255, 204, 51, 0.6)',
+            backgroundColor: 'rgba(255, 204, 51, 0.2)',
+            lineTension: 0.4,
           },
           {
             label: 'All',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: '#bae6b5',
-            backgroundColor: 'rgb(186, 230, 181, 0.4)',
-            lineTension: 0.1,
+            borderColor: 'rgba(0, 175, 137, 0.6)',
+            backgroundColor: 'rgba(0, 175, 137, 0.2)',
+            lineTension: 0.4,
           },
         ],
       };
@@ -186,8 +192,8 @@ class QueryResult extends React.Component {
           {
             label: 'Contributions',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            borderColor: 'rgba(75,192,192,1)',
-            backgroundColor: 'rgba(75,192,192,0.4)',
+            borderColor: 'rgba(0, 175, 137, 0.6)',
+            backgroundColor: 'rgba(0, 175, 137, 0.2)',
             lineTension: 0.1,
           },
         ],

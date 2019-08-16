@@ -54,7 +54,7 @@ export const full_months = [
 
 export const contributionColors = {
   none: '#efeded',
-  level1: '#94c8bc',
+  level1: '#b1d7ce',
   level2: '#00af89',
   level3: '#14866d',
   level4: '#0a3d32'
