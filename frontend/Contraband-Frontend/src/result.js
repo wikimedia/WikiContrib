@@ -30,6 +30,7 @@ import { Line } from "react-chartjs-2";
 import UserContribution from "./contribution";
 import Activity from "./components/activity";
 import NotFound from "./components/404";
+import { production } from "./App";
 
 class DisplayUser extends React.Component {
   constructor(props) {
@@ -51,35 +52,35 @@ class DisplayUser extends React.Component {
           <Header className="name">{this.props.username}'s Activity</Header>
           <span>
             <h1 className="accounts">
-            Gerrit:{" "}
-            {this.props.gerrit_username !== "" ? (
-              <a
-                target="_blank"
-                href={
-                  "https://gerrit.wikimedia.org/r/#/q/" +
-                  this.props.gerrit_username
-                }
-              >
-                {this.props.gerrit_username}
-              </a>
-            ) : (
-              "None"
-            )}{" "}
-            | Phabricator:{" "}
-            {this.props.phabricator_username !== "" ? (
-              <a
-                target="_blank"
-                href={
-                  "https://phabricator.wikimedia.org/p/" +
-                  this.props.phabricator_username +
-                  "/"
-                }
-              >
-                {this.props.phabricator_username}
-              </a>
-            ) : (
-              "None"
-            )}
+              Gerrit:{" "}
+              {this.props.gerrit_username !== "" ? (
+                <a
+                  target="_blank"
+                  href={
+                    "https://gerrit.wikimedia.org/r/#/q/" +
+                    this.props.gerrit_username
+                  }
+                >
+                  {this.props.gerrit_username}
+                </a>
+              ) : (
+                "None"
+              )}{" "}
+              | Phabricator:{" "}
+              {this.props.phabricator_username !== "" ? (
+                <a
+                  target="_blank"
+                  href={
+                    "https://phabricator.wikimedia.org/p/" +
+                    this.props.phabricator_username +
+                    "/"
+                  }
+                >
+                  {this.props.phabricator_username}
+                </a>
+              ) : (
+                "None"
+              )}
             </h1>
           </span>
         </React.Fragment>
@@ -325,6 +326,7 @@ class QueryResult extends React.Component {
     return (
       <React.Fragment>
         {/* <NavBar display={true} query={this.state.query} /> */}
+
         {this.state.prev !== null ? (
           <Popup
             content={"Fetch about " + this.state.prev}
@@ -377,7 +379,7 @@ class QueryResult extends React.Component {
                 ) : (
                   <Grid>
                     <Grid.Row>
-                      <Grid.Column computer={15} tablet={14} mobile={12}>
+                      <Grid.Column computer={14} tablet={12} mobile={8}>
                         <UserSearch
                           set={this.onUserSearch}
                           hash={this.state.query}
@@ -396,6 +398,26 @@ class QueryResult extends React.Component {
                                 this.setState({
                                   view_filters: !this.state.view_filters
                                 })
+                              }
+                            />
+                          }
+                        />
+                      </Grid.Column>
+                      <Grid.Column computer={1} tablet={2} mobile={4}>
+                        <Popup
+                          content="Update"
+                          position="top center"
+                          trigger={
+                            <Button
+                              className="update_query"
+                              icon="write"
+                              as={Link}
+                              to={
+                                production
+                                  ? "/contrabandapp/query/" +
+                                    this.state.query +
+                                    "/update/"
+                                  : "/query/" + this.state.query + "/update/"
                               }
                             />
                           }
