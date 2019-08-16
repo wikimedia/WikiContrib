@@ -101,7 +101,7 @@ h1.accounts {
   margin-top: 10px;
   background: #ffffff;
   border-radius: 5px;
-  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
 }
 
 .user_input {
@@ -396,7 +396,7 @@ h1.accounts {
   margin-top: 2em;
   background: #ffffff;
   border-radius: 5px;
-  box-shadow: 0 4px 16px 0 rgba( 0, 0, 0, 0.25 );
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
 }
 
 #dropdown:hover {
@@ -446,7 +446,13 @@ h1.accounts {
   text-align: center;
   /* padding: 10px; */
   font-size: 1.5rem;
-  box-shadow: 0 2px 4px 0 rgba( 0, 0, 0, 0.50 );
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  margin-top: 3rem;
+}
+
+.ui.icon.button.filters:hover {
+  opacity: 0.8;
 }
 
 .filter_view {
@@ -492,4 +498,20 @@ h1.accounts {
   color: white !important;
   padding-top: 2rem !important;
   padding-bottom: 2rem !important;
+}
+
+.ui.icon.button.update_query {
+  background: #222 !important;
+  transition: 0.3s !important;
+  color: white;
+  z-index: 1;
+  font-size: 1.5rem;
+  opacity: 1;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  margin-top: 3rem;
+  margin-left: -2vw;
+}
+
+.ui.icon.button.update_query:hover {
+  opacity: 0.8;
 }
