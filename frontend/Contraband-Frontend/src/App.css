@@ -1,5 +1,5 @@
-@import "fonts.css";
-@import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
+@import 'fonts.css';
+@import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
 
 h1.accounts {
   color: #54595d;
@@ -7,12 +7,12 @@ h1.accounts {
 }
 
 .ui.header.title {
-  font-family: "Charter";
+  font-family: 'Charter';
   font-size: 5rem;
 }
 
 .ui.header.chart {
-  font-family: "Lato ", sans-serif;
+  font-family: 'Lato ', sans-serif;
   font-size: 2rem;
   font-weight: 200;
   color: #54595d;
@@ -22,7 +22,7 @@ h1.accounts {
 }
 
 .ui.header.name {
-  font-family: "Charter";
+  font-family: 'Charter';
   font-size: 4em;
 }
 
@@ -133,7 +133,7 @@ h1.accounts {
   padding: 20px;
   color: #a2a9b1;
   font-weight: bold;
-  width: "80%";
+  width: '80%';
   text-align: center;
   font-size: 1.5rem;
   border: 2px dashed #c8ccd1;
@@ -344,7 +344,7 @@ h1.accounts {
   background: rgb(51, 51, 51);
   color: white;
   padding: 2px;
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   width: 210px;
   border-radius: 2px;
   font-size: 12px;
@@ -356,7 +356,7 @@ h1.accounts {
 }
 
 .day .tooltip::after {
-  content: "";
+  content: '';
   border-style: solid;
   border-width: 5px;
   top: 100%;
@@ -391,9 +391,9 @@ h1.accounts {
   /* display: flex; */
   width: 95%;
   font-size: 1.5em;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   padding: 10px;
-  margin-top: 2em;
+  margin-top: 8vh;
   background: #ffffff;
   border-radius: 5px;
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
@@ -448,7 +448,7 @@ h1.accounts {
   font-size: 1.5rem;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   opacity: 1;
-  margin-top: 3rem;
+  margin-top: 8vh;
 }
 
 .ui.icon.button.filters:hover {
@@ -508,7 +508,7 @@ h1.accounts {
   font-size: 1.5rem;
   opacity: 1;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  margin-top: 3rem;
+  margin-top: 8vh;
   margin-left: -2vw;
 }
 
