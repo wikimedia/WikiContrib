@@ -1,12 +1,12 @@
-import React, { Component } from "react";
-import { fetchAsynchronous } from "./components/fetch";
-import fetchFileAsynchronous from "./components/fetchFile";
-import MessageDisplay from "./components/message";
-import { Redirect } from "react-router-dom";
-import { QueryCreateApi, QueryDetailApi } from "./api";
-import DataFrame from "dataframe-js";
-import csv from "./img/csv.png";
-import format from "./img/format.png";
+import React, { Component } from 'react';
+import { fetchAsynchronous } from './components/fetch';
+import fetchFileAsynchronous from './components/fetchFile';
+import MessageDisplay from './components/message';
+import { Redirect } from 'react-router-dom';
+import { QueryCreateApi, QueryDetailApi } from './api';
+import DataFrame from 'dataframe-js';
+import csv from './img/csv.png';
+import format from './img/format.png';
 import {
   Card,
   Grid,
@@ -19,15 +19,15 @@ import {
   Checkbox,
   Transition,
   Loader,
-  Header
-} from "semantic-ui-react";
-import { production } from "./App";
+  Header,
+} from 'semantic-ui-react';
+import { production } from './App';
 
 var emptyObj = {
-  fullname: "",
-  gerrit_username: "",
-  phabricator_username: "",
-  github_username: ""
+  fullname: '',
+  gerrit_username: '',
+  phabricator_username: '',
+  github_username: '',
 };
 
 export class Query extends Component {
@@ -36,21 +36,21 @@ export class Query extends Component {
     super(props);
     let type;
     if (production) {
-      type = this.props.location.pathname === "/contrabandapp/" ? true : false;
+      type = this.props.location.pathname === '/contrabandapp/' ? true : false;
     } else {
-      type = this.props.location.pathname === "/" ? true : false;
+      type = this.props.location.pathname === '/' ? true : false;
     }
     this.state = {
       step: 1,
       rows:
-        localStorage.getItem("users") !== null
-          ? JSON.parse(localStorage.getItem("users"))
+        localStorage.getItem('users') !== null
+          ? JSON.parse(localStorage.getItem('users'))
           : [Object.assign({}, emptyObj)],
       message: {
-        message: "",
-        type: "",
+        message: '',
+        type: '',
         update: false,
-        trigger: false
+        trigger: false,
       },
       file: false,
       loading: false,
@@ -69,15 +69,15 @@ export class Query extends Component {
       bulk: false,
       visible: false,
       loadData: false,
-      notfound: false
+      notfound: false,
     };
   }
 
   componentDidMount = () => {
     if (!this.state.operation) {
       fetchAsynchronous(
-        QueryDetailApi.replace("<hash>", this.props.match.params.hash),
-        "GET",
+        QueryDetailApi.replace('<hash>', this.props.match.params.hash),
+        'GET',
         undefined,
         {},
         this.displayData
@@ -98,20 +98,20 @@ export class Query extends Component {
       if (response.file === 0) {
         this.setState({
           file: {
-            name: this.props.match.params.hash + ".csv",
-            uri: response.hash
+            name: this.props.match.params.hash + '.csv',
+            uri: response.hash,
           },
           bulk: true,
-          progress: false
+          progress: false,
         });
       } else {
         this.setState({
           rows: response.users,
           bulk: false,
           progress: false,
-          original_users: response.users
+          original_users: response.users,
         });
-        localStorage.setItem("users", JSON.stringify(response.users));
+        localStorage.setItem('users', JSON.stringify(response.users));
       }
     }
   };
@@ -119,14 +119,14 @@ export class Query extends Component {
   handlChange = (name, value, index) => {
     let rows = [...this.state.rows];
     rows[index][name] = value;
-    localStorage.removeItem("users");
+    localStorage.removeItem('users');
     if (
       !(
         this.state.rows.length === 1 &&
         JSON.stringify(this.state.rows[0]) === JSON.stringify(emptyObj)
       )
     ) {
-      localStorage.setItem("users", JSON.stringify(this.state.rows));
+      localStorage.setItem('users', JSON.stringify(this.state.rows));
     }
     this.setState({ rows: rows });
   };
@@ -142,10 +142,10 @@ export class Query extends Component {
     if (index === 0 && this.state.rows.length === 1) {
       let message = Object.entries({}, this.state.message);
       if (JSON.stringify(this.state.rows[0]) === JSON.stringify(emptyObj)) {
-        message["message"] = "The table must contain atleast one row";
-        message["trigger"] = true;
-        message["type"] = 1;
-        message["update"] = !this.state.message.update;
+        message['message'] = 'The table must contain atleast one row';
+        message['trigger'] = true;
+        message['type'] = 1;
+        message['update'] = !this.state.message.update;
         this.setState({ message: message });
       } else {
         this.setState({ rows: [Object.assign({}, emptyObj)] });
@@ -154,24 +154,24 @@ export class Query extends Component {
       let rows = [...this.state.rows];
       rows.splice(index, 1);
       this.setState({ rows: rows });
-      localStorage.setItem("users", JSON.stringify(rows));
+      localStorage.setItem('users', JSON.stringify(rows));
     }
   };
 
   addFile = file => {
-    if (file.type === "text/csv") {
+    if (file.type === 'text/csv') {
       this.setState({ file: file });
     } else {
-      document.getElementsByClassName("drag_drop")[0].style.border =
-        "1px dashed rgb(196, 194, 194)";
+      document.getElementsByClassName('drag_drop')[0].style.border =
+        '1px dashed rgb(196, 194, 194)';
 
       this.setState({
         message: {
-          message: "Only CSV files can be uploaded!",
+          message: 'Only CSV files can be uploaded!',
           trigger: true,
           update: !this.state.message.update,
-          type: 1
-        }
+          type: 1,
+        },
       });
     }
   };
@@ -191,11 +191,11 @@ export class Query extends Component {
       error: true,
       loading: false,
       message: {
-        message: "Lost Internet connection, please re-upload the file",
+        message: 'Lost Internet connection, please re-upload the file',
         update: !this.state.message.update,
         type: 1,
-        trigger: true
-      }
+        trigger: true,
+      },
     });
   };
 
@@ -203,19 +203,19 @@ export class Query extends Component {
     if (this.state.file === false) {
       let users = [];
       for (let i in this.state.rows) {
-        users.append(i["username"]);
+        users.append(i['username']);
       }
       let store = { query: query, users: users };
-      localStorage.setItem("users", store);
+      localStorage.setItem('users', store);
     } else {
       let df = DataFrame.fromCSV();
     }
   };
 
   createQuery = () => {
-    localStorage.removeItem("users");
-    localStorage.removeItem("res_users");
-    localStorage.removeItem("res_query");
+    localStorage.removeItem('users');
+    localStorage.removeItem('res_users');
+    localStorage.removeItem('res_query');
     let nonemptyRowExist = () => {
       let rv = false;
       for (let i in this.state.rows) {
@@ -231,30 +231,30 @@ export class Query extends Component {
       this.setState({
         message: {
           message:
-            "You can not upload csv file and provide users in single query",
+            'You can not upload csv file and provide users in single query',
           update: !this.state.message.update,
           trigger: true,
-          type: 1
-        }
+          type: 1,
+        },
       });
     } else if (this.state.file === false && !nonemptyRowExist()) {
       this.setState({
         message: {
-          message: "Please provide the data regarding users.",
+          message: 'Please provide the data regarding users.',
           update: !this.state.message.update,
           trigger: true,
-          type: 1
-        }
+          type: 1,
+        },
       });
     } else {
       this.setState({ loading: true, notfound: false });
       let uri = this.state.operation
         ? QueryCreateApi
-        : QueryDetailApi.replace("<hash>", this.props.match.params.hash);
+        : QueryDetailApi.replace('<hash>', this.props.match.params.hash);
       if (this.state.file !== false) {
         fetchFileAsynchronous(
           this.state.file,
-          this.state.operation ? "POST" : "PATCH",
+          this.state.operation ? 'POST' : 'PATCH',
           uri,
           this.callback,
           (chunk, chunks) => {
@@ -267,16 +267,16 @@ export class Query extends Component {
           this.state.original_users === this.state.rows &&
           !this.state.operation
         ) {
-          this.callback("");
+          this.callback('');
         } else {
           let data = { file: -1 };
-          data["users"] = this.getExactRows();
+          data['users'] = this.getExactRows();
           this.setState({ loadData: true, notfound: false });
           fetchAsynchronous(
             uri,
-            this.state.operation ? "POST" : "PATCH",
+            this.state.operation ? 'POST' : 'PATCH',
             data,
-            { "Content-Type": "application/json" },
+            { 'Content-Type': 'application/json' },
             this.callback
           );
         }
@@ -285,32 +285,32 @@ export class Query extends Component {
   };
 
   callback = response => {
-    let hash = "";
+    let hash = '';
     if (this.state.operation) {
       hash = response.query;
     } else {
       hash = this.props.match.params.hash;
     }
     this.setState({
-      redirect: production ? "contrabandapp/" + hash : hash,
+      redirect: production ? 'contrabandapp/' + hash : hash,
       loading: false,
-      loadData: response
+      loadData: response,
     });
   };
 
   render = () => {
-    document.body.style.backgroundColor = "#f8f9fa";
+    document.body.style.backgroundColor = '#f8f9fa';
     return (
       <React.Fragment>
         {this.state.redirect !== false ? (
           <Redirect
             to={{
-              pathname: "/" + this.state.redirect + "/",
-              data: this.state.loadData
+              pathname: '/' + this.state.redirect + '/',
+              data: this.state.loadData,
             }}
           />
         ) : (
-          ""
+          ''
         )}
         {this.state.loadData !== false ? (
           <Loader active>Loading</Loader>
@@ -324,7 +324,7 @@ export class Query extends Component {
               update={this.state.message.update}
               trigger={this.state.message.trigger}
             />
-            <div style={{ marginTop: "10%" }} />
+            <div style={{ marginTop: '10%' }} />
             <Grid>
               <Grid.Row>
                 <Grid.Column computer={3} tablet={1} mobile={1} />
@@ -370,8 +370,8 @@ export class Query extends Component {
                                 <h4
                                   style={{
                                     marginLeft: 10,
-                                    display: "inline",
-                                    color: "#878dcd"
+                                    display: 'inline',
+                                    color: '#878dcd',
                                   }}
                                 />
                                 <Popup
@@ -392,10 +392,10 @@ export class Query extends Component {
                                       name="info circle"
                                       size="large"
                                       style={{
-                                        cursor: "pointer",
+                                        cursor: 'pointer',
                                         marginBottom: 1,
-                                        float: "right",
-                                        color: "#222"
+                                        float: 'right',
+                                        color: '#222',
                                       }}
                                     />
                                   }
@@ -407,15 +407,15 @@ export class Query extends Component {
                                     className="drag_drop"
                                     onDragLeave={e => {
                                       document.getElementsByClassName(
-                                        "drag_drop"
+                                        'drag_drop'
                                       )[0].style.border =
-                                        "1px dashed rgb(196, 194, 194)";
+                                        '1px dashed rgb(196, 194, 194)';
                                     }}
                                     onDragOver={e => {
                                       e.preventDefault();
                                       document.getElementsByClassName(
-                                        "drag_drop"
-                                      )[0].style.border = "1px solid #878dcd";
+                                        'drag_drop'
+                                      )[0].style.border = '1px solid #878dcd';
                                     }}
                                     onDrop={e => {
                                       e.preventDefault();
@@ -428,9 +428,9 @@ export class Query extends Component {
                                         );
                                       } else {
                                         document.getElementsByClassName(
-                                          "drag_drop"
+                                          'drag_drop'
                                         )[0].style.border =
-                                          "1px dashed rgb(196, 194, 194)";
+                                          '1px dashed rgb(196, 194, 194)';
                                       }
                                     }}
                                   >
@@ -440,7 +440,7 @@ export class Query extends Component {
                                     <input
                                       type="file"
                                       accept=".csv"
-                                      style={{ display: "none" }}
+                                      style={{ display: 'none' }}
                                       id="addcsv"
                                       onChange={e =>
                                         this.addFile(e.target.files[0])
@@ -453,15 +453,15 @@ export class Query extends Component {
                                   <Table singleLine className="user_table">
                                     <Table.Header
                                       style={{
-                                        color: "red"
+                                        color: 'red',
                                       }}
                                     >
                                       <Table.Row>
                                         <Table.HeaderCell
                                           style={{
-                                            textAlign: "center",
-                                            color: "white",
-                                            background: "#878dcd"
+                                            textAlign: 'center',
+                                            color: 'white',
+                                            background: '#878dcd',
                                           }}
                                         >
                                           FileName
@@ -469,23 +469,23 @@ export class Query extends Component {
                                         {this.state.loading ? (
                                           <Table.HeaderCell
                                             style={{
-                                              textAlign: "center",
-                                              color: "white",
-                                              background: "#878dcd"
+                                              textAlign: 'center',
+                                              color: 'white',
+                                              background: '#878dcd',
                                             }}
                                           >
                                             Status
                                           </Table.HeaderCell>
                                         ) : (
-                                          ""
+                                          ''
                                         )}
                                         {this.state.loading ? (
-                                          ""
+                                          ''
                                         ) : (
                                           <Table.HeaderCell
                                             style={{
-                                              color: "white",
-                                              background: "#878dcd"
+                                              color: 'white',
+                                              background: '#878dcd',
                                             }}
                                           />
                                         )}
@@ -495,7 +495,7 @@ export class Query extends Component {
                                       <Table.Row>
                                         <Table.Cell
                                           style={{
-                                            textAlign: "center"
+                                            textAlign: 'center',
                                           }}
                                         >
                                           <span title={this.state.file.name}>
@@ -503,21 +503,21 @@ export class Query extends Component {
                                               ? this.state.file.name.slice(
                                                   0,
                                                   24
-                                                ) + ".."
+                                                ) + '..'
                                               : this.state.file.name}
                                           </span>
                                         </Table.Cell>
                                         {this.state.loading ? (
                                           <Table.Cell
-                                            style={{ textAlign: "center" }}
+                                            style={{ textAlign: 'center' }}
                                             width={8}
                                           >
                                             {!this.state.operation &&
                                             this.state.file.hasOwnProperty(
-                                              "uri"
+                                              'uri'
                                             ) ? (
                                               <span
-                                                style={{ color: "#7ac142" }}
+                                                style={{ color: '#7ac142' }}
                                               >
                                                 Uploaded!
                                               </span>
@@ -525,7 +525,7 @@ export class Query extends Component {
                                               <React.Fragment>
                                                 {this.state.error ? (
                                                   <span
-                                                    style={{ color: "#f46461" }}
+                                                    style={{ color: '#f46461' }}
                                                   >
                                                     Error
                                                   </span>
@@ -537,7 +537,7 @@ export class Query extends Component {
                                                     precision={1}
                                                     indicating
                                                     style={{
-                                                      marginTop: 18
+                                                      marginTop: 18,
                                                     }}
                                                     active
                                                   />
@@ -546,24 +546,24 @@ export class Query extends Component {
                                             )}
                                           </Table.Cell>
                                         ) : (
-                                          ""
+                                          ''
                                         )}
                                         {this.state.loading ? (
-                                          ""
+                                          ''
                                         ) : (
                                           <Table.Cell
-                                            style={{ textAlign: "center" }}
+                                            style={{ textAlign: 'center' }}
                                           >
                                             <Icon
                                               name="minus circle"
                                               style={{
-                                                cursor: "pointer",
-                                                color: "#fa5050"
+                                                cursor: 'pointer',
+                                                color: '#fa5050',
                                               }}
                                               onClick={() => {
                                                 this.setState({
                                                   file: false,
-                                                  error: false
+                                                  error: false,
                                                 });
                                               }}
                                             />
@@ -580,8 +580,8 @@ export class Query extends Component {
                               <h4
                                 style={{
                                   marginLeft: 10,
-                                  display: "inline",
-                                  color: "#878dcd"
+                                  display: 'inline',
+                                  color: '#878dcd',
                                 }}
                               />
                               <Table singleLine className="user_table">
@@ -589,7 +589,7 @@ export class Query extends Component {
                                   {this.state.rows.map((obj, index) => (
                                     <Table.Row key={index}>
                                       <Table.Cell
-                                        style={{ textAlign: "center" }}
+                                        style={{ textAlign: 'center' }}
                                       >
                                         <input
                                           className="user_input"
@@ -606,7 +606,7 @@ export class Query extends Component {
                                         />
                                       </Table.Cell>
                                       <Table.Cell
-                                        style={{ textAlign: "center" }}
+                                        style={{ textAlign: 'center' }}
                                       >
                                         <input
                                           className="user_input"
@@ -623,7 +623,7 @@ export class Query extends Component {
                                         />
                                       </Table.Cell>
                                       <Table.Cell
-                                        style={{ textAlign: "center" }}
+                                        style={{ textAlign: 'center' }}
                                       >
                                         <input
                                           className="user_input"
@@ -640,13 +640,13 @@ export class Query extends Component {
                                         />
                                       </Table.Cell>
                                       <Table.Cell
-                                        style={{ textAlign: "center" }}
+                                        style={{ textAlign: 'center' }}
                                       >
                                         <Icon
                                           name="minus circle"
                                           style={{
-                                            cursor: "pointer",
-                                            color: "#fa5050"
+                                            cursor: 'pointer',
+                                            color: '#fa5050',
                                           }}
                                           onClick={() => this.removeRow(index)}
                                         />
@@ -721,15 +721,15 @@ export class Query extends Component {
                           icon
                           className="reset"
                           onClick={() => {
-                            localStorage.removeItem("users");
+                            localStorage.removeItem('users');
                             this.setState({
                               message: {
-                                message: "Cleared the cache data!",
+                                message: 'Cleared the cache data!',
                                 trigger: true,
                                 type: 0,
-                                update: !this.state.message.update
+                                update: !this.state.message.update,
                               },
-                              rows: [Object.assign({}, emptyObj)]
+                              rows: [Object.assign({}, emptyObj)],
                             });
                           }}
                         >

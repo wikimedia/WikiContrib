@@ -1,5 +1,5 @@
-import React from "react";
-import NavBar from "./components/nav";
+import React from 'react';
+import NavBar from './components/nav';
 
 const Doc = () => (
   <React.Fragment>

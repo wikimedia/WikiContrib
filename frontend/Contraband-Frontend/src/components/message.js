@@ -1,12 +1,12 @@
-import React, { Component, Fragment } from "react";
-import { Transition, Message } from "semantic-ui-react";
+import React, { Component, Fragment } from 'react';
+import { Transition, Message } from 'semantic-ui-react';
 
 export default class MessageDisplay extends Component {
   constructor(props) {
     super(props);
     this.state = {
       trigger: false,
-      update: false
+      update: false,
     };
     this.timeout = false;
   }
@@ -19,7 +19,7 @@ export default class MessageDisplay extends Component {
       this.setState(
         {
           update: !this.state.update,
-          trigger: this.props.trigger
+          trigger: this.props.trigger,
         },
         () => {
           this.timeout = setTimeout(
@@ -32,7 +32,7 @@ export default class MessageDisplay extends Component {
   };
 
   handleDismiss = () => {
-    this.setState({ trigger: false, message: "", type: 1 });
+    this.setState({ trigger: false, message: '', type: 1 });
     clearTimeout(this.timeout);
   };
 
@@ -47,11 +47,11 @@ export default class MessageDisplay extends Component {
           <Message
             id="messages"
             style={{
-              background: this.props.type === 1 ? "#ed092f" : "#1da789",
-              color: "white"
+              background: this.props.type === 1 ? '#ed092f' : '#1da789',
+              color: 'white',
             }}
             onDismiss={this.handleDismiss}
-            header={this.props.type === 1 ? "Error" : "Success"}
+            header={this.props.type === 1 ? 'Error' : 'Success'}
             content={this.props.message}
           />
         </Transition>
