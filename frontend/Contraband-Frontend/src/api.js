@@ -119,17 +119,17 @@ export const format_status = arr => {
       rv.push({
         key: i,
         value: i,
-        text: 'Gerrit: ' + i,
+        text: 'GERRIT: ' + i,
       });
     }
 
     if (phab_status.includes(i)) {
-      rv.push({ key: i, value: i, text: 'Phab: ' + i });
+      rv.push({ key: i, value: i, text: 'PHABRICATOR: ' + i });
     }
 
     if (i == 'open') {
-      rv.push({ key: 'g-open', value: 'g-open', text: 'Gerrit: ' + i });
-      rv.push({ key: 'p-open', value: 'p-open', text: 'Phab: ' + i });
+      rv.push({ key: 'g-open', value: 'g-open', text: 'GERRIT: ' + i });
+      rv.push({ key: 'p-open', value: 'p-open', text: 'PHABRICATOR: ' + i });
     }
   }
   return rv;
