@@ -14,7 +14,6 @@ class Dropdown extends React.Component {
   render = () => {
     return (
       <div className="drop">
-        <div style={{ position: 'relative', margin: 10 }}>
           <div id="dropdown">
             <div style={{ display: 'flex' }}>
               {this.props.loading ? (
@@ -95,7 +94,6 @@ class Dropdown extends React.Component {
             )}
           </div>
         </div>
-      </div>
     );
   };
 }

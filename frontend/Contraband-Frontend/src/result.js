@@ -459,12 +459,11 @@ class QueryResult extends React.Component {
                   duration={300}
                   visible={this.state.view_filters}
                 >
-                  <div className="filter_view">
-                    <h4 style={{ textAlign: 'center' }}>Query Filters</h4>
+                  <Card className="filter_view">
                     <Grid>
                       <Grid.Row>
                         <Grid.Column computer={16} tablet={16} mobile={16}>
-                          <h5>Status of the commit: </h5>
+                          <Header>Contribution Status</Header>
                           <Dropdown
                             style={{ marginTop: 10 }}
                             fluid
@@ -490,7 +489,7 @@ class QueryResult extends React.Component {
                       </Grid.Row>
                       <Grid.Row>
                         <Grid.Column computer={8} tablet={16} mobile={16}>
-                          <h5>From:</h5>
+                          <Header>From</Header>
                           <Dropdown
                             style={{ marginTop: 10 }}
                             fluid
@@ -543,7 +542,7 @@ class QueryResult extends React.Component {
                           />
                         </Grid.Column>
                         <Grid.Column computer={8} tablet={16} mobile={16}>
-                          <h5>Time range:</h5>
+                          <Header>Time Range</Header>
                           <Dropdown
                             style={{ marginTop: 10 }}
                             fluid
@@ -589,19 +588,19 @@ class QueryResult extends React.Component {
                     </Grid>
                     <div style={{ width: '100%' }}>
                       <Button
-                        className="reset_filters"
-                        onClick={() => this.handleReset()}
-                      >
-                        Reset
-                      </Button>
-                      <Button
                         className="apply_filters"
                         onClick={() => this.handleSearchClick()}
                       >
-                        Apply
+                        APPLY
+                      </Button>
+                      <Button
+                        className="reset_filters"
+                        onClick={() => this.handleReset()}
+                      >
+                        RESET
                       </Button>
                     </div>
-                  </div>
+                    </Card>
                 </Transition>
               </div>
             </Grid.Column>
