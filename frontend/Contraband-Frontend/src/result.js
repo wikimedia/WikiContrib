@@ -23,14 +23,14 @@ import {
   format_status,
   full_months,
   get_timestamp,
-  filterDetailApi
-} from "./api";
-import UserSearch from "./components/dropdown";
-import { Line } from "react-chartjs-2";
-import UserContribution from "./contribution";
-import Activity from "./components/activity";
-import NotFound from "./components/404";
-import { production } from "./App";
+  filterDetailApi,
+} from './api';
+import UserSearch from './components/dropdown';
+import { Line } from 'react-chartjs-2';
+import UserContribution from './contribution';
+import Activity from './components/activity';
+import NotFound from './components/404';
+import { production } from './App';
 
 const chartOptions = {
   legend: {
@@ -43,8 +43,8 @@ const chartOptions = {
           display: true,
         },
         ticks: {
-          fontSize: 15
-        }
+          fontSize: 15,
+        },
       },
     ],
     yAxes: [
@@ -53,9 +53,9 @@ const chartOptions = {
           display: true,
         },
         ticks: {
-          fontSize: 15
+          fontSize: 15,
         },
-        display: true
+        display: true,
       },
     ],
   },
@@ -70,49 +70,49 @@ class DisplayUser extends React.Component {
     <div>
       {this.props.loading ? (
         <React.Fragment>
-          <Placeholder>
+          <Placeholder style={{ color: '#f8f9fa' }}>
             <Placeholder.Line />
             <Placeholder.Line />
           </Placeholder>
         </React.Fragment>
       ) : (
-        <React.Fragment>
-          <Header className="name">{this.props.username}'s Activity</Header>
-          <span>
-            <h1 className="accounts">
-              Gerrit:{' '}
-              {this.props.gerrit_username !== '' ? (
-                <a
-                  target="_blank"
-                  href={
-                    'https://gerrit.wikimedia.org/r/#/q/' +
-                    this.props.gerrit_username
-                  }
-                >
-                  {this.props.gerrit_username}
-                </a>
-              ) : (
-                'None'
-              )}{' '}
-              | Phabricator:{' '}
-              {this.props.phabricator_username !== '' ? (
-                <a
-                  target="_blank"
-                  href={
-                    'https://phabricator.wikimedia.org/p/' +
-                    this.props.phabricator_username +
-                    '/'
-                  }
-                >
-                  {this.props.phabricator_username}
-                </a>
-              ) : (
-                'None'
-              )}
-            </h1>
-          </span>
-        </React.Fragment>
-      )}
+          <React.Fragment>
+            <Header className="name">{this.props.username}'s Activity</Header>
+            <span>
+              <h1 className="accounts">
+                Gerrit:{' '}
+                {this.props.gerrit_username !== '' ? (
+                  <a
+                    target="_blank"
+                    href={
+                      'https://gerrit.wikimedia.org/r/#/q/' +
+                      this.props.gerrit_username
+                    }
+                  >
+                    {this.props.gerrit_username}
+                  </a>
+                ) : (
+                    'None'
+                  )}{' '}
+                | Phabricator:{' '}
+                {this.props.phabricator_username !== '' ? (
+                  <a
+                    target="_blank"
+                    href={
+                      'https://phabricator.wikimedia.org/p/' +
+                      this.props.phabricator_username +
+                      '/'
+                    }
+                  >
+                    {this.props.phabricator_username}
+                  </a>
+                ) : (
+                    'None'
+                  )}
+              </h1>
+            </span>
+          </React.Fragment>
+        )}
     </div>
   );
 }
@@ -166,8 +166,6 @@ class QueryResult extends React.Component {
           {
             label: 'Assigned',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            // borderColor: 'rgba(221, 51, 51, 1)',
-            // backgroundColor: 'rgba(221, 51, 51, 0.2)',
             lineTension: 0.4,
           },
           {
@@ -372,8 +370,8 @@ class QueryResult extends React.Component {
             }
           />
         ) : (
-          ''
-        )}
+            ''
+          )}
 
         {this.state.next !== null ? (
           <div className="right_arrow">
@@ -392,8 +390,8 @@ class QueryResult extends React.Component {
             />
           </div>
         ) : (
-          ''
-        )}
+            ''
+          )}
 
         <Grid>
           <Grid.Row>
@@ -405,55 +403,56 @@ class QueryResult extends React.Component {
                     <Placeholder.Line />
                   </Placeholder>
                 ) : (
-                  <Grid>
-                    <Grid.Row>
-                      <Grid.Column computer={14} tablet={12} mobile={8}>
-                        <UserSearch
-                          set={this.onUserSearch}
-                          hash={this.state.query}
-                          value={this.state.value}
-                        />
-                      </Grid.Column>
-                      <Grid.Column computer={1} tablet={2} mobile={4}>
-                        <Popup
-                          content="View Filters"
-                          position="top center"
-                          trigger={
-                            <Button
-                              icon="options"
-                              className="filters"
-                              onClick={() =>
-                                this.setState({
-                                  view_filters: !this.state.view_filters,
-                                })
-                              }
-                            />
-                          }
-                        />
-                      </Grid.Column>
-                      <Grid.Column computer={1} tablet={2} mobile={4}>
-                        <Popup
-                          content="Update"
-                          position="top center"
-                          trigger={
-                            <Button
-                              className="update_query"
-                              icon="write"
-                              as={Link}
-                              to={
-                                production
-                                  ? "/contrabandapp/query/" +
+                    <Grid>
+                      <Grid.Row>
+                        <Grid.Column computer={14} tablet={12} mobile={16}>
+                          <UserSearch
+                            set={this.onUserSearch}
+                            hash={this.state.query}
+                            value={this.state.value}
+                          />
+                        </Grid.Column>
+
+                        <Grid.Column computer={1} tablet={2} mobile={8} style={{ marginTop: window.innerWidth >= 768 ? '8vh' : '', textAlign: 'right' }}>
+                          <Popup
+                            content="View Filters"
+                            position="top center"
+                            trigger={
+                              <Button
+                                icon="options"
+                                className="filters"
+                                onClick={() =>
+                                  this.setState({
+                                    view_filters: !this.state.view_filters,
+                                  })
+                                }
+                              />
+                            }
+                          />
+                        </Grid.Column>
+                        <Grid.Column computer={1} tablet={2} mobile={8} style={{ marginTop: window.innerWidth >= 768 ? '8vh' : '' }}>
+                          <Popup
+                            content="Update"
+                            position="top center"
+                            trigger={
+                              <Button
+                                className="update_query"
+                                icon="write"
+                                as={Link}
+                                to={
+                                  production
+                                    ? '/contrabandapp/query/' +
                                     this.state.query +
-                                    "/update/"
-                                  : "/query/" + this.state.query + "/update/"
-                              }
-                            />
-                          }
-                        />
-                      </Grid.Column>
-                    </Grid.Row>
-                  </Grid>
-                )}
+                                    '/update/'
+                                    : '/query/' + this.state.query + '/update/'
+                                }
+                              />
+                            }
+                          />
+                        </Grid.Column>
+                      </Grid.Row>
+                    </Grid>
+                  )}
                 <Transition
                   animation="fade down"
                   duration={300}
@@ -517,12 +516,12 @@ class QueryResult extends React.Component {
                                 days == 30
                                   ? 1
                                   : days == 60
-                                  ? 2
-                                  : days == 90
-                                  ? 3
-                                  : days == 180
-                                  ? 6
-                                  : 12;
+                                    ? 2
+                                    : days == 90
+                                      ? 3
+                                      : days == 180
+                                        ? 6
+                                        : 12;
 
                               let updated_val = new Date(filters.end_time);
                               let start_time = new Date(
@@ -563,12 +562,12 @@ class QueryResult extends React.Component {
                                 value <= 31
                                   ? 1
                                   : value <= 61
-                                  ? 2
-                                  : value <= 92
-                                  ? 3
-                                  : value <= 183
-                                  ? 6
-                                  : 12;
+                                    ? 2
+                                    : value <= 92
+                                      ? 3
+                                      : value <= 183
+                                        ? 6
+                                        : 12;
                               date = new Date(
                                 date.getFullYear(),
                                 date.getMonth() - incr,
@@ -600,7 +599,7 @@ class QueryResult extends React.Component {
                         RESET
                       </Button>
                     </div>
-                    </Card>
+                  </Card>
                 </Transition>
               </div>
             </Grid.Column>
@@ -609,100 +608,107 @@ class QueryResult extends React.Component {
           {this.state.notFound ? (
             <NotFound />
           ) : (
-            <React.Fragment>
-              <Grid.Row>
-                <Grid.Column width={2} />
-                <Grid.Column width={8}>
-                  <DisplayUser
-                    loading={this.state.loading}
-                    username={this.state.current}
-                    gerrit_username={this.state.gerrit_username}
-                    phabricator_username={this.state.phab_username}
-                  />
-                </Grid.Column>
-                <Grid.Column width={2} />
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column computer={2} mobile={1} tablet={1} />
-                <Grid.Column computer={6} mobile={14} tablet={6}>
-                  {this.state.loading ? (
-                    <Card style={{ marginTop: 10, width: '80%' }}>
-                      <Card.Content>
-                        <Placeholder>
-                          <Placeholder.Image rectangular />
-                        </Placeholder>
-                      </Card.Content>
-                    </Card>
-                  ) : (
-                    <Card className="chart_container">
-                      <span style={{ textAlign: 'center' }}>
-                        <Header className="chart"> PHABRICATOR </Header>
-                        <Line
-                          ref="chart"
-                          data={this.getGraphData('phabricator')}
-                          options={chartOptions}
-                        />
-                      </span>
-                    </Card>
-                  )}
-                </Grid.Column>
-                <Grid.Column computer={6} mobile={14} tablet={6}>
-                  {this.state.loading ? (
-                    <Card style={{ marginTop: 10, width: '80%' }}>
-                      <Card.Content>
-                        <Placeholder>
-                          <Placeholder.Image rectangular />
-                        </Placeholder>
-                      </Card.Content>
-                    </Card>
-                  ) : (
-                    <Card className="chart_container">
-                      <span style={{ textAlign: 'center' }}>
-                        <Header className="chart"> GERRIT </Header>
-                        <Line ref="chart" 
-                          data={this.getGraphData('gerrit')} 
-                          options={chartOptions}
-                        />
-                      </span>
-                    </Card>
-                  )}
-                </Grid.Column>
-                <Grid.Column computer={2} mobile={1} tablet={1} />
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={2} />
-                <Grid.Column width={12}>
-                <Card className="chart_container">
-                <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
-                  <UserContribution
-                    start_time={cf.start_time}
-                    end_time={cf.end_time}
-                    user={this.state.current}
-                    data={this.state.data}
-                    set={this.set}
-                    loading={this.state.loading}
-                  />
-                  </Card>
-                </Grid.Column>
-                <Grid.Column width={2} />
-              </Grid.Row>
-              {this.state.activity !== undefined ? (
+              <React.Fragment>
                 <Grid.Row>
-                  <Grid.Column width={3} />
-                  <Grid.Column width={9}>
-                    <Activity
-                      date={this.state.activity}
-                      hash={this.state.query}
+                  <Grid.Column width={2} />
+                  <Grid.Column width={8}>
+                    <DisplayUser
+                      loading={this.state.loading}
                       username={this.state.current}
+                      gerrit_username={this.state.gerrit_username}
+                      phabricator_username={this.state.phab_username}
                     />
                   </Grid.Column>
-                  <Grid.Column width={3} />
+                  <Grid.Column width={2} />
                 </Grid.Row>
-              ) : (
-                ''
-              )}
-            </React.Fragment>
-          )}
+                <Grid.Row>
+                  <Grid.Column computer={2} mobile={1} tablet={1} />
+                  <Grid.Column computer={12} tablet={14} mobile={14}>
+                    <Grid>
+                      <Grid.Row>
+                        <Grid.Column computer={8} mobile={16} tablet={8}>
+                          {this.state.loading ? (
+                            <Card style={{ marginTop: 10, width: '100%' }}>
+                              <Card.Content>
+                                <Placeholder fluid style={{ height: '25em' }}>
+                                  <Placeholder.Line />
+                                </Placeholder>
+                              </Card.Content>
+                            </Card>
+                          ) : (
+                              <Card className="chart_container">
+                                <span style={{ textAlign: 'center' }}>
+                                  <Header className="chart"> PHABRICATOR </Header>
+                                  <Line
+                                    ref="chart"
+                                    data={this.getGraphData('phabricator')}
+                                    options={chartOptions}
+                                  />
+                                </span>
+                              </Card>
+                            )}
+                        </Grid.Column>
+                        <Grid.Column computer={8} mobile={16} tablet={8}>
+                          {this.state.loading ? (
+                            <Card style={{ marginTop: 10, width: '100%' }}>
+                              <Card.Content>
+                                <Placeholder fluid style={{ height: '25em' }}>
+                                  <Placeholder.Line />
+                                </Placeholder>
+                              </Card.Content>
+                            </Card>
+                          ) : (
+                              <Card className="chart_container">
+                                <span style={{ textAlign: 'center' }}>
+                                  <Header className="chart"> GERRIT </Header>
+                                  <Line
+                                    ref="chart"
+                                    data={this.getGraphData('gerrit')}
+                                    options={chartOptions}
+                                  />
+                                </span>
+                              </Card>
+                            )}
+                        </Grid.Column>
+                      </Grid.Row>
+                    </Grid>
+                  </Grid.Column>
+                  <Grid.Column computer={2} mobile={1} tablet={1} />
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column width={2} />
+                  <Grid.Column width={12}>
+                    <Card className="chart_container">
+                      <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
+                      <UserContribution
+                        start_time={cf.start_time}
+                        end_time={cf.end_time}
+                        user={this.state.current}
+                        data={this.state.data}
+                        set={this.set}
+                        loading={this.state.loading}
+                      />
+                    </Card>
+                  </Grid.Column>
+                  <Grid.Column width={2} />
+                </Grid.Row>
+                {this.state.activity !== undefined ? (
+                  <Grid.Row>
+                    <Grid.Column width={3} />
+                    <Grid.Column width={9}>
+                      <Activity
+                        date={this.state.activity}
+                        hash={this.state.query}
+                        username={this.state.current}
+                      />
+                    </Grid.Column>
+                    <Grid.Column width={3} />
+                  </Grid.Row>
+                ) : (
+                    ''
+                  )}
+              </React.Fragment>
+            )}
         </Grid>
       </React.Fragment>
     );

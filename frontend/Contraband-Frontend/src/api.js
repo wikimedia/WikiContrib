@@ -57,8 +57,8 @@ export const contributionColors = {
   level1: '#b1d7ce',
   level2: '#00af89',
   level3: '#14866d',
-  level4: '#0a3d32'
-}
+  level4: '#0a3d32',
+};
 
 export const contribution_color = contr => {
   if (contr === 0) {
@@ -148,4 +148,38 @@ export const get_timestamp = (date1, date2) => {
     day = 60;
   }
   return day;
+};
+
+export const UserActivityBreakPoint = () => {
+  let width = window.innerWidth;
+  if (width >= 1300) {
+    return 12;
+  } else if (width >= 768) {
+    return 6;
+  } else if (width >= 576) {
+    return 4;
+  } else if (width >= 450) {
+    return 3;
+  } else {
+    return 2;
+  }
+};
+
+export const getPadding = () => {
+  let width = window.innerWidth;
+  if (width >= 1300) {
+    if (width > 1600) {
+      return 4;
+    } else {
+      return Math.ceil(4 - ((1600 - width) / 300) * 4);
+    }
+  } else if (width >= 768) {
+    return Math.ceil(4 - ((1300 - width) / 832) * 4);
+  } else if (width >= 576) {
+    return Math.ceil(4 - ((768 - width) / 192) * 4);
+  } else if (width >= 450) {
+    return Math.ceil(4 - ((576 - width) / 126) * 4);
+  } else {
+    return Math.ceil(4 - ((450 - width) / 400) * 4);
+  }
 };

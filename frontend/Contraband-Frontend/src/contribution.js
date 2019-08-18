@@ -1,6 +1,13 @@
 import React from 'react';
 import { Popup, Placeholder } from 'semantic-ui-react';
-import { months, contribution_color, get_timestamp, contributionColors } from './api';
+import {
+  months,
+  contribution_color,
+  get_timestamp,
+  contributionColors,
+  UserActivityBreakPoint,
+  getPadding,
+} from './api';
 
 const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -25,11 +32,12 @@ class GenerateDay extends React.Component {
     }
 
     color = contribution_color(data);
+    let pad = getPadding();
     let month = months.indexOf(this.props.month) + 1;
     return (
       <div
         className="day"
-        style={{ background: color }}
+        style={{ background: color, padding: 6 + pad }}
         onClick={() => {
           this.props.set({
             activity: this.props.year + '-' + month + '-' + this.props.date,
@@ -161,17 +169,32 @@ class UserContribution extends React.Component {
           : 12;
       let start_month = new Date(this.props.start_time).getMonth();
       let year = new Date(this.props.start_time).getFullYear();
+      let breakpoint = UserActivityBreakPoint(),
+        items = [];
       while (numb_months != 0) {
-        render_months.push(
-          <GenerateMonth
-            month={months[start_month]}
-            key={numb_months}
-            year={year}
-            data={data}
-            style={{ display: 'inline' }}
-            set={this.props.set}
-          />
-        );
+        if ((numb_months - 1) % breakpoint === 0) {
+          items.push(
+            <GenerateMonth
+              month={months[start_month]}
+              key={numb_months}
+              year={year}
+              data={data}
+              set={this.props.set}
+            />
+          );
+          render_months.push(<div className="flex-row">{items}</div>);
+          items = [];
+        } else {
+          items.push(
+            <GenerateMonth
+              month={months[start_month]}
+              key={numb_months}
+              year={year}
+              data={data}
+              set={this.props.set}
+            />
+          );
+        }
 
         numb_months -= 1;
         start_month += 1;
@@ -209,10 +232,15 @@ class UserContribution extends React.Component {
             </div>
           ) : (
             <React.Fragment>
-              {render_months.map((obj, ind) => (
-                <div className="activity">{obj}</div>
-              ))}
-
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                {render_months}
+              </div>
               <div
                 style={{
                   right: '5%',
@@ -232,6 +260,7 @@ class UserContribution extends React.Component {
                   <div
                     className="day"
                     style={{
+                      padding: 6 + getPadding(),
                       display: 'inline-block',
                       background: contributionColors.none,
                     }}
@@ -239,6 +268,7 @@ class UserContribution extends React.Component {
                   <div
                     className="day"
                     style={{
+                      padding: 6 + getPadding(),
                       display: 'inline-block',
                       background: contributionColors.level1,
                     }}
@@ -246,6 +276,7 @@ class UserContribution extends React.Component {
                   <div
                     className="day"
                     style={{
+                      padding: 6 + getPadding(),
                       display: 'inline-block',
                       background: contributionColors.level2,
                     }}
@@ -253,6 +284,7 @@ class UserContribution extends React.Component {
                   <div
                     className="day"
                     style={{
+                      padding: 6 + getPadding(),
                       display: 'inline-block',
                       background: contributionColors.level3,
                     }}
