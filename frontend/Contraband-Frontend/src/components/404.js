@@ -1,13 +1,15 @@
 import React from 'react';
-import { Grid } from 'semantic-ui-react';
 import emoji from '../img/oh.png';
 
+/**
+ * 404 Component
+ */
 class NotFound extends React.Component {
   render = () => (
     <React.Fragment>
       {'add_spacing' in this.props ? <div style={{ marginTop: '10em' }} /> : ''}
 
-      <div style={{ textAlign: 'center', width: '100%' }}>
+      <div className="notFound">
         <img src={emoji} />
         <h1>OOps!!</h1>
         <h1>404</h1>

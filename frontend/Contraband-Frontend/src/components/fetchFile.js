@@ -8,6 +8,15 @@ const fetchFileAsynchronous = (
   upload_percent,
   error_callback
 ) => {
+  /**
+   * Upload the files to the server through chunked upload.
+   * @param {file} csv_file -> file to be uploaded.
+   * @param {String} request_method -> HTTP method to perform the request.
+   * @param {String} request_url -> URL to be fetched.
+   * @param {Object} callback_func -> Call the function on success.
+   * @param {Object} upload_percent -> After processing each chunk add the progress.
+   * @param {Object} error_callback -> Call the function on error. 
+   */
   chunk = 0;
   chunks = 0;
   file = csv_file;
@@ -20,6 +29,10 @@ const fetchFileAsynchronous = (
 };
 
 const extractChunk = response => {
+  /**
+   * Split the file to get the chunk to be uploaded in next request.
+   * @param {Object} response -> Response of the previous request.
+   */
   chunk = chunk + 1;
   if (chunk === 1) {
     chunks = Math.ceil(file.size / 1048576);
@@ -37,6 +50,10 @@ const extractChunk = response => {
 };
 
 const uploadChunk = hash => {
+  /**
+   * Upoad the splitted chunk to the server.
+   * @param {String} hash -> query hash_code.
+   */
   let data = new FormData();
   if (chunk === chunks) {
     data.append('complete', 0);

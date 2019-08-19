@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
-import { Query, QueryDelete } from './query';
+import { Query } from './query';
 import QueryResult from './result';
 import NotFound from './components/404';
-import Doc from './doc';
 import UserContribution from './contribution';
 
 /*
@@ -31,8 +30,6 @@ class App extends Component {
             path={domain + '/contribution/'}
             component={UserContribution}
           />
-          {/* Docs page */}
-          <Route exact path={domain + '/docs/'} component={Doc} />
           {/* Create a new Query */}
           <Route exact path={domain + '/'} component={Query} />
           {/* Update a Query */}
@@ -40,12 +37,6 @@ class App extends Component {
             exact
             path={domain + '/query/:hash/update/'}
             component={Query}
-          />
-          {/* Delete a Query */}
-          <Route
-            exact
-            path={domain + '/query/:hash/delete/'}
-            component={QueryDelete}
           />
           {/* Result to the query */}
           <Route exact path={domain + '/:hash/'} component={QueryResult} />
