@@ -1,8 +1,12 @@
 import React from 'react';
 import { fetchAsynchronous } from './fetch';
 import { commits_by_date } from './../api';
-import { Card, Placeholder, Grid } from 'semantic-ui-react';
+import { Card, Placeholder, Header } from 'semantic-ui-react';
 
+
+/**
+ * Show all the user Commits on a specific day
+ */
 class Activity extends React.Component {
   constructor(props) {
     super(props);
@@ -13,6 +17,9 @@ class Activity extends React.Component {
   }
 
   fetchAPI = () => {
+    /**
+     * Fetch API to get the commits on a specific date.
+     */
     let uri =
       commits_by_date.replace('<hash>', this.props.hash) +
       '?created=' +
@@ -32,6 +39,10 @@ class Activity extends React.Component {
   };
 
   callback = response => {
+    /**
+     * Callback function to feed the fetched data from API to the state of current component.
+     * @param {Object} response JSON data returned from the API.
+     */
     this.setState({
       loading: false,
       data: response.results,
@@ -43,14 +54,14 @@ class Activity extends React.Component {
       <React.Fragment>
         {this.state.loading ? (
           <React.Fragment>
-            <Card style={{ width: '100%', padding: '2%' }}>
+            <Card className="commits_load">
               <Placeholder fluid>
                 <Placeholder.Line />
                 <Placeholder.Line />
                 <Placeholder.Line />
               </Placeholder>
             </Card>
-            <Card style={{ width: '100%', padding: '2%' }}>
+            <Card className="commits_load">
               <Placeholder fluid>
                 <Placeholder.Line />
                 <Placeholder.Line />
@@ -59,58 +70,49 @@ class Activity extends React.Component {
             </Card>
           </React.Fragment>
         ) : (
-          <React.Fragment>
-            {this.state.data.length !== 0 ? (
-              <React.Fragment>
-                <h4>User Activity on {this.props.date}</h4>
-                {this.state.data.map((obj, index) => (
-                  <Card style={{ width: '100%' }} key={index}>
-                    <Card.Content>
-                      {obj.platform === 'Phabricator' ? (
-                        <a
-                          href={
-                            'https://phabricator.wikimedia.org/' + obj.redirect
-                          }
-                          target="_blank"
-                        >
-                          <h3>{obj.heading}</h3>
-                        </a>
-                      ) : (
-                        <a
-                          href={
-                            'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect
-                          }
-                          target="_blank"
-                        >
-                          <h3>{obj.heading}</h3>
-                        </a>
-                      )}
-                      <div>
-                        <span style={{ display: 'inline', float: 'left' }}>
-                          <b>PLATFORM:</b> {obj.platform}
-                        </span>
-                        <span style={{ display: 'inline', float: 'right' }}>
-                          <b>STATUS:</b> {obj.status}
-                        </span>
-                      </div>
-                    </Card.Content>
-                  </Card>
-                ))}
-              </React.Fragment>
-            ) : (
-              <div
-                style={{
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  fontSize: 20,
-                  width: '100%',
-                }}
-              >
-                {this.props.username} has no activity on this day.
-              </div>
-            )}
-          </React.Fragment>
-        )}
+            <React.Fragment>
+              {this.state.data.length !== 0 ? (
+                <React.Fragment>
+                  <h4>User Activity on {this.props.date}</h4>
+                  {this.state.data.map((obj, index) => (
+                    <Card className="commits_load" key={index}>
+                      <Card.Content>
+                        {obj.platform === 'Phabricator' ? (
+                          <a
+                            href={
+                              'https://phabricator.wikimedia.org/' + obj.redirect
+                            }
+                            target="_blank"
+                          >
+                            <h3>{obj.heading}</h3>
+                          </a>
+                        ) : (
+                            <a
+                              href={
+                                'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect
+                              }
+                              target="_blank"
+                            >
+                              <h3>{obj.heading}</h3>
+                            </a>
+                          )}
+                        <div>
+                          <span style={{ display: 'inline', float: 'left' }}>
+                            <b>PLATFORM:</b> {obj.platform}
+                          </span>
+                          <span style={{ display: 'inline', float: 'right' }}>
+                            <b>STATUS:</b> {obj.status}
+                          </span>
+                        </div>
+                      </Card.Content>
+                    </Card>
+                  ))}
+                </React.Fragment>
+              ) : (
+                  <Header className="chart" style={{ textAlign: "center" }}> {this.props.username} has no activity on this day. </Header>
+                )}
+            </React.Fragment>
+          )}
       </React.Fragment>
     );
   };

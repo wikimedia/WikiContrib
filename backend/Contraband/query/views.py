@@ -20,6 +20,9 @@ from result.views import UserUpdateStatus, UserUpdateTimeStamp
 
 
 def create_hash():
+    """
+    :return: hash code to create the Query.
+    """
     hash_code = get_random_string(64)
     while Query.objects.filter(hash_code=hash_code).exists():
         hash_code = get_random_string(64)
@@ -27,9 +30,18 @@ def create_hash():
 
 
 class CheckQuery(APIView):
+    """
+    :Summary: Check if a query already exists.
+    """
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
+        """
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: Response Object query: bool; filter: bool
+        """
         query = Query.objects.filter(hash_code=self.kwargs['hash'])
         if query:
             filter_exist = QueryFilter.objects.filter(query=query[0]).exists()
@@ -42,9 +54,18 @@ class CheckQuery(APIView):
 
 
 class AddQueryUser(CreateAPIView):
+    """
+    :Summary: Create a query.
+    """
     serializer_class = QuerySerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: redirect to '/result/<hash>/'
+        """
         try:
             if int(request.data['file']) is 0:
                 if int(request.data['chunk']) is 1:
@@ -122,7 +143,7 @@ class AddQueryUser(CreateAPIView):
                             status=','.join(COMMIT_STATUS)
                         )
 
-                        # Add the usernames & platforms to the query
+                        # Add username's & platform's to the query
                         temp = 1
                         for i in request.data['users']:
                             data = i.copy()
@@ -163,13 +184,26 @@ class AddQueryUser(CreateAPIView):
 
 
 class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    """
+    :Summary: View, Update or Delete a Query.
+    """
     serializer_class = QuerySerializer
     http_method_names = ['get', 'patch', 'delete']
 
     def get_object(self):
+        """
+        :return: ModalObject of Query
+        """
         return get_object_or_404(Query, hash_code=self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
+        """
+        :Summary: GET request to view the query.
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: Response Object containing the data of of all the users in the Query.
+        """
         if self.get_object().file:
             return Response({"uri": self.get_object().csv_file_uri, 'file': 0})
         else:
@@ -180,6 +214,13 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             return Response(data)
 
     def patch(self, request, *args, **kwargs):
+        """
+        :Summary: PATCH request to update the query.
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: HTTPRedirect with redirect location (to /result/<hash>/)
+        """
         try:
             if int(request.data['file']) is 0:
                 # Update the CSV file
@@ -260,6 +301,13 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
+        """
+         :Summary: DELETE request to delete the query.
+         :param request: request Object.
+         :param args: arguments passed to the function.
+         :param kwargs: Key, values passed to the function.
+         :return: Success Response.
+         """
         super(QueryRetrieveUpdateDeleteView, self).delete(request, *args, **kwargs)
         return Response({
             "message": "Successfully deleted the Query",
@@ -268,6 +316,9 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
 
 class QueryFilterView(RetrieveUpdateDestroyAPIView):
+    """
+    :Summary: View, Update Filters to the Query.
+    """
     serializer_class = QueryFilterSerializer
     http_method_names = ['get', 'patch']
 
@@ -275,6 +326,13 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
         return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
+        """
+        :Summary: GET request to view the query filters.
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: Query filters of the given query.
+        """
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if QueryFilter.objects.filter(query=query).exists():
             return super(QueryFilterView, self).get(request, *args, **kwargs)
@@ -287,6 +345,15 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             })
 
     def patch(self, request, *args, **kwargs):
+        """
+        :Summary: PATCH request to Update the query filters.
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: response of UserUpdateStatus() (or) UserUpdateTimeStamp() function
+         depending upon the filters user updated.
+        """
+
         rv = {
             "username": request.data['username'],
             "query": self.get_object().query.hash_code

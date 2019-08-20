@@ -2,14 +2,12 @@ from rest_framework.views import exception_handler
 
 
 def custom_exception_handler(exc, context):
-    '''
-
+    """
+    :Summary: Generate a common response format: `{"message": "Error message",  "error": 0/1}`
     :param exc
     :param context
-    :return: response
-    :operation: Generate a common response format: `{"message": "Error message",  "error": 0/1}`
-
-    '''
+    :return: Response Object
+    """
 
     # Get the response from rest_framework.views.exception_handler
     response = exception_handler(exc=exc, context=context)

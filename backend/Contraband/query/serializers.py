@@ -4,13 +4,18 @@ from .models import Query, QueryUser, QueryFilter
 
 
 class QuerySerializer(ModelSerializer):
-
+    """
+    :Summary: Serialize data of Query Model
+    """
     class Meta:
         model = Query
         fields = ('pk', 'hash_code', 'csv_file_uri')
 
 
 class QueryUserSerializer(ModelSerializer):
+    """
+    :Summary: Serialize data of QueryUser Model
+    """
     fullname = CharField(required=False, allow_blank=False)
     gerrit_username = CharField(required=False, allow_blank=True)
     github_username = CharField(required=False, allow_blank=True)
@@ -23,6 +28,9 @@ class QueryUserSerializer(ModelSerializer):
 
 
 class QueryFilterSerializer(ModelSerializer):
+    """
+    :Summary: Serialize data of QueryFilter Model
+    """
     start_time = DateField(required=False, allow_null=True)
     end_time = DateField(required=False, allow_null=True)
     status = CharField(required=False, allow_blank=True)

@@ -4,7 +4,6 @@ import fetchFileAsynchronous from './components/fetchFile';
 import MessageDisplay from './components/message';
 import { Redirect } from 'react-router-dom';
 import { QueryCreateApi, QueryDetailApi } from './api';
-import DataFrame from 'dataframe-js';
 import csv from './img/csv.png';
 import format from './img/format.png';
 import {
@@ -30,6 +29,10 @@ var emptyObj = {
   github_username: '',
 };
 
+
+/**
+ * Create or Update Query
+ */
 export class Query extends Component {
   constructor(props) {
     console.log(props);
@@ -43,7 +46,7 @@ export class Query extends Component {
     this.state = {
       step: 1,
       rows:
-        localStorage.getItem('users') !== null
+        localStorage.getItem('users') !== null && type
           ? JSON.parse(localStorage.getItem('users'))
           : [Object.assign({}, emptyObj)],
       message: {
@@ -88,10 +91,19 @@ export class Query extends Component {
   };
 
   set = obj => {
+    /**
+     * Update the state of current component through the child components.
+     * @param {Object} obj Object with all the updated params of the current state.
+     */
     this.setState(obj);
   };
 
   displayData = response => {
+    /**
+     * Callback function that feeds the current state with the data of users(fetched through the Api)
+     *  while updating the query.
+     * @param {Object} response List of Users (or) CSV file returned by the API.
+     */
     if (response.error === 1) {
       this.setState({ notfound: true });
     } else {
@@ -111,27 +123,35 @@ export class Query extends Component {
           progress: false,
           original_users: response.users,
         });
-        localStorage.setItem('users', JSON.stringify(response.users));
       }
     }
   };
 
   handlChange = (name, value, index) => {
+    /**
+     * Every time the users are updated, Add to localstorage.
+     * @param {String} name
+     * @param {String} value Updated value.
+     * @param {Integer} index Tabular Index at which the value is updated.
+     */
     let rows = [...this.state.rows];
     rows[index][name] = value;
-    localStorage.removeItem('users');
-    if (
+    if (this.state.operation &&
       !(
         this.state.rows.length === 1 &&
         JSON.stringify(this.state.rows[0]) === JSON.stringify(emptyObj)
       )
     ) {
+      localStorage.removeItem('users');
       localStorage.setItem('users', JSON.stringify(this.state.rows));
     }
     this.setState({ rows: rows });
   };
 
   addrow = () => {
+    /**
+     * Append row to the existing table.
+     */
     let rows = [...this.state.rows];
     rows.push(Object.assign({}, emptyObj));
 
@@ -139,6 +159,10 @@ export class Query extends Component {
   };
 
   removeRow = index => {
+    /**
+     * Remove row from the existing table.
+     * @param {Integer} index Index of the row to be removed in the table.
+     */
     if (index === 0 && this.state.rows.length === 1) {
       let message = Object.entries({}, this.state.message);
       if (JSON.stringify(this.state.rows[0]) === JSON.stringify(emptyObj)) {
@@ -154,11 +178,17 @@ export class Query extends Component {
       let rows = [...this.state.rows];
       rows.splice(index, 1);
       this.setState({ rows: rows });
-      localStorage.setItem('users', JSON.stringify(rows));
+      if (this.state.operation) {
+        localStorage.setItem('users', JSON.stringify(rows));
+      }
     }
   };
 
   addFile = file => {
+    /**
+     * Add CSV file to the tool.
+     * @param {file} file file added to upload.
+     */
     if (file.type === 'text/csv') {
       this.setState({ file: file });
     } else {
@@ -177,6 +207,10 @@ export class Query extends Component {
   };
 
   getExactRows = () => {
+    /**
+     * Caluclate count of Exact rows the user filled excluding empty rows.
+     * @returns {Integer} count of rows.
+     */
     let users = [];
     for (let i in this.state.rows) {
       if (JSON.stringify(this.state.rows[i]) !== JSON.stringify(emptyObj)) {
@@ -187,6 +221,9 @@ export class Query extends Component {
   };
 
   errorCallback = () => {
+    /**
+     * Trigger if Internet is lost while uploading the data.
+     */
     this.setState({
       error: true,
       loading: false,
@@ -199,20 +236,10 @@ export class Query extends Component {
     });
   };
 
-  storeRows = query => {
-    if (this.state.file === false) {
-      let users = [];
-      for (let i in this.state.rows) {
-        users.append(i['username']);
-      }
-      let store = { query: query, users: users };
-      localStorage.setItem('users', store);
-    } else {
-      let df = DataFrame.fromCSV();
-    }
-  };
-
   createQuery = () => {
+    /**
+     * fetch the API to create / update Query.
+     */
     localStorage.removeItem('users');
     localStorage.removeItem('res_users');
     localStorage.removeItem('res_query');
@@ -285,6 +312,10 @@ export class Query extends Component {
   };
 
   callback = response => {
+    /**
+     * Callback function to redirect on creating the Query.
+     * @param {Object} response Response of the API.
+     */
     let hash = '';
     if (this.state.operation) {
       hash = response.query;
@@ -310,364 +341,353 @@ export class Query extends Component {
             }}
           />
         ) : (
-          ''
-        )}
+            ''
+          )}
         {this.state.loadData !== false ? (
           <Loader active>Loading</Loader>
         ) : (
-          <React.Fragment>
-            {/* <NavBar /> */}
-
-            <MessageDisplay
-              message={this.state.message.message}
-              type={this.state.message.type}
-              update={this.state.message.update}
-              trigger={this.state.message.trigger}
-            />
-            <div style={{ marginTop: '10%' }} />
-            <Grid>
-              <Grid.Row>
-                <Grid.Column computer={3} tablet={1} mobile={1} />
-                <Grid.Column computer={10} tablet={14} mobile={14}>
-                  {this.state.progress ? (
-                    <Card className="query_create">
-                      {this.state.bulk ? (
-                        <React.Fragment>
-                          <Placeholder fluid style={{ height: 70, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                          <div className="divide" />
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                        </React.Fragment>
-                      ) : (
-                        <React.Fragment>
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                          <Placeholder fluid style={{ height: 20, margin: 10 }}>
-                            <Placeholder.Line className="placeholder_line" />
-                          </Placeholder>
-                        </React.Fragment>
-                      )}
-                    </Card>
-                  ) : (
-                    <Transition
-                      visible={this.state.visible}
-                      duration={500}
-                      animation="fade"
-                    >
-                      <React.Fragment>
-                        <Header className="title">Contraband</Header>
-                        <Card className="query_create">
-                          {this.state.bulk ? (
+            <React.Fragment>
+              <MessageDisplay
+                message={this.state.message.message}
+                type={this.state.message.type}
+                update={this.state.message.update}
+                trigger={this.state.message.trigger}
+              />
+              <div style={{ marginTop: '10%' }} />
+              <Grid>
+                <Grid.Row>
+                  <Grid.Column computer={3} tablet={1} mobile={1} />
+                  <Grid.Column computer={10} tablet={14} mobile={14}>
+                    {this.state.progress ? (
+                      <Card className="query_create">
+                        {this.state.bulk ? (
+                          <React.Fragment>
+                            <Placeholder fluid className="csv_load">
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                            <div className="divide" />
+                            <Placeholder className="load">
+                              <Placeholder.Line className="placeholder_line" />
+                            </Placeholder>
+                          </React.Fragment>
+                        ) : (
                             <React.Fragment>
-                              <div style={{ marginBottom: 10 }}>
-                                <h4
-                                  style={{
-                                    marginLeft: 10,
-                                    display: 'inline',
-                                    color: '#878dcd',
-                                  }}
-                                />
-                                <Popup
-                                  content={
-                                    <div>
-                                      <h4>Add CSV</h4> Add the usernames in CSV
-                                      file and upload it.
+                              <Placeholder fluid className="wide">
+                                <Placeholder.Line className="placeholder_line" />
+                              </Placeholder>
+                              <Placeholder fluid className="wide">
+                                <Placeholder.Line className="placeholder_line" />
+                              </Placeholder>
+                              <Placeholder fluid className="wide">
+                                <Placeholder.Line className="placeholder_line" />
+                              </Placeholder>
+                            </React.Fragment>
+                          )}
+                      </Card>
+                    ) : (
+                        <Transition
+                          visible={this.state.visible}
+                          duration={500}
+                          animation="fade"
+                        >
+                          <React.Fragment>
+                            <Header className="title">Contraband</Header>
+                            <Card className="query_create">
+                              {this.state.bulk ? (
+                                <React.Fragment>
+                                  <div style={{ marginBottom: 10 }}>
+                                    <Popup
+                                      content={
+                                        <div>
+                                          <h4>Add CSV</h4> Add the usernames in CSV
+                                          file and upload it.
                                       <br />
-                                      <b>CSV file format:</b>
-                                      <img src={format} />
-                                    </div>
-                                  }
-                                  on="click"
-                                  pinned
-                                  position="bottom center"
-                                  trigger={
-                                    <Icon
-                                      name="info circle"
-                                      size="large"
-                                      style={{
-                                        cursor: 'pointer',
-                                        marginBottom: 1,
-                                        float: 'right',
-                                        color: '#222',
-                                      }}
-                                    />
-                                  }
-                                />
-                              </div>
-                              {this.state.file === false ? (
-                                <label htmlFor="addcsv">
-                                  <div
-                                    className="drag_drop"
-                                    onDragLeave={e => {
-                                      document.getElementsByClassName(
-                                        'drag_drop'
-                                      )[0].style.border =
-                                        '1px dashed rgb(196, 194, 194)';
-                                    }}
-                                    onDragOver={e => {
-                                      e.preventDefault();
-                                      document.getElementsByClassName(
-                                        'drag_drop'
-                                      )[0].style.border = '1px solid #878dcd';
-                                    }}
-                                    onDrop={e => {
-                                      e.preventDefault();
-                                      if (
-                                        e.dataTransfer.items[0].getAsFile() !==
-                                        null
-                                      ) {
-                                        this.addFile(
-                                          e.dataTransfer.items[0].getAsFile()
-                                        );
-                                      } else {
-                                        document.getElementsByClassName(
-                                          'drag_drop'
-                                        )[0].style.border =
-                                          '1px dashed rgb(196, 194, 194)';
+                                          <b>CSV file format:</b>
+                                          <img src={format} />
+                                        </div>
                                       }
-                                    }}
-                                  >
-                                    <img src={csv} />
-                                    <br />
-                                    Drop your CSV file here
-                                    <input
-                                      type="file"
-                                      accept=".csv"
-                                      style={{ display: 'none' }}
-                                      id="addcsv"
-                                      onChange={e =>
-                                        this.addFile(e.target.files[0])
+                                      on="click"
+                                      pinned
+                                      position="bottom center"
+                                      trigger={
+                                        <Icon
+                                          name="info circle"
+                                          size="large"
+                                          className="info_csv"
+                                        />
                                       }
                                     />
                                   </div>
-                                </label>
-                              ) : (
-                                <React.Fragment>
-                                  <Table singleLine className="user_table">
-                                    <Table.Header
-                                      style={{
-                                        color: 'red',
-                                      }}
-                                    >
-                                      <Table.Row>
-                                        <Table.HeaderCell
-                                          style={{
-                                            textAlign: 'center',
-                                            color: 'white',
-                                            background: '#878dcd',
-                                          }}
-                                        >
-                                          FileName
+                                  {this.state.file === false ? (
+                                    <label htmlFor="addcsv">
+                                      <div
+                                        className="drag_drop"
+                                        onDragLeave={e => {
+                                          document.getElementsByClassName(
+                                            'drag_drop'
+                                          )[0].style.border =
+                                            '1px dashed rgb(196, 194, 194)';
+                                        }}
+                                        onDragOver={e => {
+                                          e.preventDefault();
+                                          document.getElementsByClassName(
+                                            'drag_drop'
+                                          )[0].style.border = '1px solid #878dcd';
+                                        }}
+                                        onDrop={e => {
+                                          e.preventDefault();
+                                          if (
+                                            e.dataTransfer.items[0].getAsFile() !==
+                                            null
+                                          ) {
+                                            this.addFile(
+                                              e.dataTransfer.items[0].getAsFile()
+                                            );
+                                          } else {
+                                            document.getElementsByClassName(
+                                              'drag_drop'
+                                            )[0].style.border =
+                                              '1px dashed rgb(196, 194, 194)';
+                                          }
+                                        }}
+                                      >
+                                        <img src={csv} />
+                                        <br />
+                                        Drop your CSV file here
+                                    <input
+                                          type="file"
+                                          accept=".csv"
+                                          style={{ display: 'none' }}
+                                          id="addcsv"
+                                          onChange={e =>
+                                            this.addFile(e.target.files[0])
+                                          }
+                                        />
+                                      </div>
+                                    </label>
+                                  ) : (
+                                      <React.Fragment>
+                                        <Table singleLine className="user_table">
+                                          <Table.Header
+                                            style={{
+                                              color: 'red',
+                                            }}
+                                          >
+                                            <Table.Row>
+                                              <Table.HeaderCell className="csv_add">
+                                                FileName
                                         </Table.HeaderCell>
-                                        {this.state.loading ? (
-                                          <Table.HeaderCell
-                                            style={{
-                                              textAlign: 'center',
-                                              color: 'white',
-                                              background: '#878dcd',
-                                            }}
-                                          >
-                                            Status
+                                              {this.state.loading ? (
+                                                <Table.HeaderCell className="csv_add">
+                                                  Status
                                           </Table.HeaderCell>
-                                        ) : (
-                                          ''
-                                        )}
-                                        {this.state.loading ? (
-                                          ''
-                                        ) : (
-                                          <Table.HeaderCell
-                                            style={{
-                                              color: 'white',
-                                              background: '#878dcd',
-                                            }}
-                                          />
-                                        )}
-                                      </Table.Row>
-                                    </Table.Header>
-                                    <Table.Body>
-                                      <Table.Row>
-                                        <Table.Cell
-                                          style={{
-                                            textAlign: 'center',
-                                          }}
-                                        >
-                                          <span title={this.state.file.name}>
-                                            {this.state.file.name.length > 25
-                                              ? this.state.file.name.slice(
-                                                  0,
-                                                  24
-                                                ) + '..'
-                                              : this.state.file.name}
-                                          </span>
-                                        </Table.Cell>
-                                        {this.state.loading ? (
-                                          <Table.Cell
-                                            style={{ textAlign: 'center' }}
-                                            width={8}
-                                          >
-                                            {!this.state.operation &&
-                                            this.state.file.hasOwnProperty(
-                                              'uri'
-                                            ) ? (
-                                              <span
-                                                style={{ color: '#7ac142' }}
-                                              >
-                                                Uploaded!
-                                              </span>
-                                            ) : (
-                                              <React.Fragment>
-                                                {this.state.error ? (
-                                                  <span
-                                                    style={{ color: '#f46461' }}
-                                                  >
-                                                    Error
-                                                  </span>
-                                                ) : (
-                                                  <Progress
-                                                    value={this.state.chunk}
-                                                    total={this.state.chunks}
-                                                    progress="percent"
-                                                    precision={1}
-                                                    indicating
-                                                    style={{
-                                                      marginTop: 18,
-                                                    }}
-                                                    active
-                                                  />
+                                              ) : (
+                                                  ''
                                                 )}
-                                              </React.Fragment>
-                                            )}
-                                          </Table.Cell>
-                                        ) : (
-                                          ''
-                                        )}
-                                        {this.state.loading ? (
-                                          ''
-                                        ) : (
-                                          <Table.Cell
-                                            style={{ textAlign: 'center' }}
-                                          >
-                                            <Icon
-                                              name="minus circle"
-                                              style={{
-                                                cursor: 'pointer',
-                                                color: '#fa5050',
-                                              }}
-                                              onClick={() => {
-                                                this.setState({
-                                                  file: false,
-                                                  error: false,
-                                                });
-                                              }}
-                                            />
-                                          </Table.Cell>
-                                        )}
-                                      </Table.Row>
-                                    </Table.Body>
-                                  </Table>
+                                              {this.state.loading ? (
+                                                ''
+                                              ) : (
+                                                  <Table.HeaderCell className='csv_add' />
+                                                )}
+                                            </Table.Row>
+                                          </Table.Header>
+                                          <Table.Body>
+                                            <Table.Row>
+                                              <Table.Cell
+                                                style={{
+                                                  textAlign: 'center',
+                                                }}
+                                              >
+                                                <span title={this.state.file.name}>
+                                                  {this.state.file.name.length > 25
+                                                    ? this.state.file.name.slice(
+                                                      0,
+                                                      24
+                                                    ) + '..'
+                                                    : this.state.file.name}
+                                                </span>
+                                              </Table.Cell>
+                                              {this.state.loading ? (
+                                                <Table.Cell
+                                                  style={{ textAlign: 'center' }}
+                                                  width={8}
+                                                >
+                                                  {!this.state.operation &&
+                                                    this.state.file.hasOwnProperty(
+                                                      'uri'
+                                                    ) ? (
+                                                      <span
+                                                        style={{ color: '#7ac142' }}
+                                                      >
+                                                        Uploaded!
+                                              </span>
+                                                    ) : (
+                                                      <React.Fragment>
+                                                        {this.state.error ? (
+                                                          <span
+                                                            style={{ color: '#f46461' }}
+                                                          >
+                                                            Error
+                                                  </span>
+                                                        ) : (
+                                                            <Progress
+                                                              value={this.state.chunk}
+                                                              total={this.state.chunks}
+                                                              progress="percent"
+                                                              precision={1}
+                                                              indicating
+                                                              style={{
+                                                                marginTop: 18,
+                                                              }}
+                                                              active
+                                                            />
+                                                          )}
+                                                      </React.Fragment>
+                                                    )}
+                                                </Table.Cell>
+                                              ) : (
+                                                  ''
+                                                )}
+                                              {this.state.loading ? (
+                                                ''
+                                              ) : (
+                                                  <Table.Cell
+                                                    style={{ textAlign: 'center' }}
+                                                  >
+                                                    <Icon
+                                                      name="minus circle"
+                                                      style={{
+                                                        cursor: 'pointer',
+                                                        color: '#fa5050',
+                                                      }}
+                                                      onClick={() => {
+                                                        this.setState({
+                                                          file: false,
+                                                          error: false,
+                                                        });
+                                                      }}
+                                                    />
+                                                  </Table.Cell>
+                                                )}
+                                            </Table.Row>
+                                          </Table.Body>
+                                        </Table>
+                                      </React.Fragment>
+                                    )}
                                 </React.Fragment>
-                              )}
-                            </React.Fragment>
-                          ) : (
-                            <div className="table_entry">
-                              <h4
-                                style={{
-                                  marginLeft: 10,
-                                  display: 'inline',
-                                  color: '#878dcd',
-                                }}
-                              />
-                              <Table singleLine className="user_table">
-                                <Table.Body>
-                                  {this.state.rows.map((obj, index) => (
-                                    <Table.Row key={index}>
-                                      <Table.Cell
-                                        style={{ textAlign: 'center' }}
-                                      >
-                                        <input
-                                          className="user_input"
-                                          value={obj.fullname}
-                                          name="fullname"
-                                          placeholder="Full Name"
-                                          onChange={e =>
-                                            this.handlChange(
-                                              e.target.name,
-                                              e.target.value,
-                                              index
-                                            )
-                                          }
-                                        />
-                                      </Table.Cell>
-                                      <Table.Cell
-                                        style={{ textAlign: 'center' }}
-                                      >
-                                        <input
-                                          className="user_input"
-                                          value={obj.gerrit_username}
-                                          name="gerrit_username"
-                                          placeholder="Gerrit Username"
-                                          onChange={e =>
-                                            this.handlChange(
-                                              e.target.name,
-                                              e.target.value,
-                                              index
-                                            )
-                                          }
-                                        />
-                                      </Table.Cell>
-                                      <Table.Cell
-                                        style={{ textAlign: 'center' }}
-                                      >
-                                        <input
-                                          className="user_input"
-                                          value={obj.phabricator_username}
-                                          name="phabricator_username"
-                                          placeholder="Phabricator Username"
-                                          onChange={e =>
-                                            this.handlChange(
-                                              e.target.name,
-                                              e.target.value,
-                                              index
-                                            )
-                                          }
-                                        />
-                                      </Table.Cell>
-                                      <Table.Cell
-                                        style={{ textAlign: 'center' }}
-                                      >
-                                        <Icon
-                                          name="minus circle"
-                                          style={{
-                                            cursor: 'pointer',
-                                            color: '#fa5050',
-                                          }}
-                                          onClick={() => this.removeRow(index)}
-                                        />
-                                      </Table.Cell>
-                                    </Table.Row>
-                                  ))}
-                                </Table.Body>
-                              </Table>
-                              {/* <Button
+                              ) : (
+                                  <div className="table_entry">
+                                    <Table singleLine className="user_table">
+                                      <Table.Body>
+                                        {this.state.rows.map((obj, index) => (
+                                          <Table.Row key={index}>
+                                            <Table.Cell
+                                              style={{ textAlign: 'center' }}
+                                            >
+                                              <input
+                                                className="user_input"
+                                                value={obj.fullname}
+                                                name="fullname"
+                                                placeholder="Full Name"
+                                                onChange={e =>
+                                                  this.handlChange(
+                                                    e.target.name,
+                                                    e.target.value,
+                                                    index
+                                                  )
+                                                }
+                                              />
+                                            </Table.Cell>
+                                            <Table.Cell
+                                              style={{ textAlign: 'center' }}
+                                            >
+                                              <input
+                                                className="user_input"
+                                                value={obj.gerrit_username}
+                                                name="gerrit_username"
+                                                placeholder="Gerrit Username"
+                                                onChange={e =>
+                                                  this.handlChange(
+                                                    e.target.name,
+                                                    e.target.value,
+                                                    index
+                                                  )
+                                                }
+                                              />
+                                            </Table.Cell>
+                                            <Table.Cell
+                                              style={{ textAlign: 'center' }}
+                                            >
+                                              <input
+                                                className="user_input"
+                                                value={obj.phabricator_username}
+                                                name="phabricator_username"
+                                                placeholder="Phabricator Username"
+                                                onChange={e =>
+                                                  this.handlChange(
+                                                    e.target.name,
+                                                    e.target.value,
+                                                    index
+                                                  )
+                                                }
+                                              />
+                                            </Table.Cell>
+                                            <Table.Cell
+                                              style={{ textAlign: 'center' }}
+                                            >
+                                              <Icon
+                                                name="minus circle"
+                                                style={{
+                                                  cursor: 'pointer',
+                                                  color: '#fa5050',
+                                                }}
+                                                onClick={() => this.removeRow(index)}
+                                              />
+                                            </Table.Cell>
+                                          </Table.Row>
+                                        ))}
+                                      </Table.Body>
+                                    </Table>
+                                  </div>
+                                )}
+                              <br />
+                              <Card.Content extra>
+                                <div>
+                                  <Checkbox
+                                    toggle
+                                    label="Bulk Add"
+                                    onClick={() =>
+                                      this.setState({ bulk: !this.state.bulk })
+                                    }
+                                    checked={this.state.bulk}
+                                  />
+                                </div>
+                              </Card.Content>
+                            </Card>
+                            <Button
+                              onClick={this.createQuery}
+                              className="continue"
+                              disabled={this.state.loading}
+                              loading={this.state.loading}
+                            >
+                              <Icon name="search" />
+                            </Button>
+                            <Button className="table_row_add" onClick={this.addrow}>
+                              <Icon name="user plus" />
+                            </Button>
+                            <Button
                               icon
                               className="reset"
                               onClick={() => {
-                                localStorage.removeItem("users");
+                                localStorage.removeItem('users');
                                 this.setState({
                                   message: {
-                                    message: "Cleared the cache data!",
+                                    message: 'Cleared the cache data!',
                                     trigger: true,
                                     type: 0,
-                                    update: !this.state.message.update
+                                    update: !this.state.message.update,
                                   },
-                                  rows: [Object.assign({}, emptyObj)]
+                                  rows: [Object.assign({}, emptyObj)],
                                 });
                               }}
                             >
@@ -675,88 +695,17 @@ export class Query extends Component {
                                 name="trash alternate"
                                 style={{ paddingRight: 4 }}
                               />
-                              Reset
                             </Button>
-
-                            <Button
-                              className="table_row_add"
-                              onClick={this.addrow}
-                            >
-                              <Icon name="search" />
-                            </Button>
-                            <Button
-                              className="table_row_add"
-                              onClick={this.addrow}
-                            >
-                              <Icon name="user plus" />
-                            </Button> */}
-                            </div>
-                          )}
-                          <br />
-                          <Card.Content extra>
-                            <div>
-                              <Checkbox
-                                toggle
-                                label="Bulk Add"
-                                onClick={() =>
-                                  this.setState({ bulk: !this.state.bulk })
-                                }
-                                checked={this.state.bulk}
-                              />
-                            </div>
-                          </Card.Content>
-                        </Card>
-                        <Button
-                          onClick={this.createQuery}
-                          className="continue"
-                          disabled={this.state.loading}
-                          loading={this.state.loading}
-                        >
-                          <Icon name="search" />
-                        </Button>
-                        <Button className="table_row_add" onClick={this.addrow}>
-                          <Icon name="user plus" />
-                        </Button>
-                        <Button
-                          icon
-                          className="reset"
-                          onClick={() => {
-                            localStorage.removeItem('users');
-                            this.setState({
-                              message: {
-                                message: 'Cleared the cache data!',
-                                trigger: true,
-                                type: 0,
-                                update: !this.state.message.update,
-                              },
-                              rows: [Object.assign({}, emptyObj)],
-                            });
-                          }}
-                        >
-                          <Icon
-                            name="trash alternate"
-                            style={{ paddingRight: 4 }}
-                          />
-                        </Button>
-                      </React.Fragment>
-                    </Transition>
-                  )}
-                </Grid.Column>
-                <Grid.Column computer={3} tablet={1} mobile={1} />
-              </Grid.Row>
-            </Grid>
-          </React.Fragment>
-        )}
+                          </React.Fragment>
+                        </Transition>
+                      )}
+                  </Grid.Column>
+                  <Grid.Column computer={3} tablet={1} mobile={1} />
+                </Grid.Row>
+              </Grid>
+            </React.Fragment>
+          )}
       </React.Fragment>
     );
   };
-}
-
-export class QueryDelete extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  render = () => <React.Fragment>Query Update</React.Fragment>;
 }

@@ -1,9 +1,7 @@
 import React from 'react';
-import NavBar from './components/nav';
 import {
   Grid,
   Button,
-  Icon,
   Card,
   Popup,
   Dropdown,
@@ -32,6 +30,9 @@ import Activity from './components/activity';
 import NotFound from './components/404';
 import { production } from './App';
 
+/** 
+* Styles to the Line Graphs.
+*/
 const chartOptions = {
   legend: {
     position: 'top',
@@ -60,19 +61,22 @@ const chartOptions = {
     ],
   },
 };
+
+/** 
+* Display Fullname, Phabricator Username and Gerrit Username of the user.
+*/
 class DisplayUser extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
   }
 
   render = () => (
     <div>
       {this.props.loading ? (
         <React.Fragment>
-          <Placeholder style={{ color: '#f8f9fa' }}>
-            <Placeholder.Line />
-            <Placeholder.Line />
+          <Placeholder>
+            <Placeholder.Line className="load_background" />
+            <Placeholder.Line className="load_background" />
           </Placeholder>
         </React.Fragment>
       ) : (
@@ -117,6 +121,9 @@ class DisplayUser extends React.Component {
   );
 }
 
+/** 
+* Display the User Contribution Statistics and User Activity
+*/
 class QueryResult extends React.Component {
   constructor(props) {
     super(props);
@@ -126,6 +133,10 @@ class QueryResult extends React.Component {
       start_time: '',
       end_time: '',
     };
+
+    /**
+     * Perform API fetch, if no data found in this.props.location
+     */
 
     if ('data' in this.props.location && this.props.location.data !== '') {
       data = this.props.location.data;
@@ -153,10 +164,19 @@ class QueryResult extends React.Component {
   }
 
   set = obj => {
+    /**
+     * Update the current component's state from child components.
+     * @param {Object} obj Object with all the updated params of the current state.
+     */
     this.setState(obj);
   };
 
   getGraphData = platform => {
+    /**
+     * Format the User contribution data to input graphs.
+     * @param {String} platform Pltoform according to which the data is to be formatted.
+     * @returns {Object} Formatted data according to the platform inputted.
+     */
     let data = {};
     if (platform === 'phabricator') {
       data = {
@@ -220,6 +240,10 @@ class QueryResult extends React.Component {
   };
 
   callback = response => {
+    /**
+     * Callback function that feeds the fetched information to the state.
+     * @param {Object} response Response data from API fetch
+     */
     if (response.error !== 1) {
       let filters = response.filters;
       filters.status = filters.status.split(',');
@@ -253,6 +277,10 @@ class QueryResult extends React.Component {
   };
 
   getDetails = username => {
+    /**
+     * Fetch the contributions of the user.
+     * @param {String} username Username of the user whose contributions are to be fetched.
+     */
     let uri =
       fetchDetails.replace('<hash>', this.state.query) + '?user=' + username;
     fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
@@ -265,6 +293,10 @@ class QueryResult extends React.Component {
   };
 
   check_filters = () => {
+    /**
+     * Check if the User updated the filters.
+     * @returns {Object} return updated filters. If no filters updated, return False
+     */
     let { update_filters: uf, current_filters: cf } = this.state;
     if (JSON.stringify(uf) !== JSON.stringify(cf)) {
       let out = {};
@@ -284,6 +316,10 @@ class QueryResult extends React.Component {
   };
 
   updatecallback = response => {
+    /**
+     * Callback function to feed the fetched data(on updating filters) to the state.
+     * @param {Object} response Updated data and filters.
+     */
     if (response.error != 1) {
       this.setState({
         data: response.result,
@@ -299,6 +335,9 @@ class QueryResult extends React.Component {
   };
 
   handleSearchClick = () => {
+    /**
+     * Update Filters and fetch API to get the Updated data.
+     */
     let data = this.check_filters();
     if (data !== false) {
       data['username'] = this.state.current;
@@ -314,6 +353,10 @@ class QueryResult extends React.Component {
   };
 
   onUserSearch = obj => {
+    /**
+     * Fetch API on searching for a user
+     * @param {Object} obj Username of the user whose details are to be fetched.
+     */
     this.setState({ value: obj.value, loading: true, notFound: false });
     let uri =
       fetchDetails.replace('<hash>', this.state.query) + '?user=' + obj.value;
@@ -321,6 +364,9 @@ class QueryResult extends React.Component {
   };
 
   handleReset = () => {
+    /**
+     * Restore the initial filters.
+     */
     let time = new Date();
     let month = time.getMonth() + 1;
     let filters = {
@@ -351,8 +397,6 @@ class QueryResult extends React.Component {
     let { update_filters: uf, current_filters: cf } = this.state;
     return (
       <React.Fragment>
-        {/* <NavBar display={true} query={this.state.query} /> */}
-
         {this.state.prev !== null ? (
           <Popup
             content={'Fetch about ' + this.state.prev}
@@ -399,8 +443,8 @@ class QueryResult extends React.Component {
             <Grid.Column width={12}>
               <div className="result">
                 {this.state.page_load ? (
-                  <Placeholder fluid style={{ height: 30, margin: 5 }}>
-                    <Placeholder.Line />
+                  <Placeholder fluid className="search_load">
+                    <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
                     <Grid>
@@ -628,9 +672,9 @@ class QueryResult extends React.Component {
                       <Grid.Row>
                         <Grid.Column computer={8} mobile={16} tablet={8}>
                           {this.state.loading ? (
-                            <Card style={{ marginTop: 10, width: '100%' }}>
+                            <Card className="graph_load">
                               <Card.Content>
-                                <Placeholder fluid style={{ height: '25em' }}>
+                                <Placeholder fluid className="image_load">
                                   <Placeholder.Line />
                                 </Placeholder>
                               </Card.Content>
@@ -650,9 +694,9 @@ class QueryResult extends React.Component {
                         </Grid.Column>
                         <Grid.Column computer={8} mobile={16} tablet={8}>
                           {this.state.loading ? (
-                            <Card style={{ marginTop: 10, width: '100%' }}>
+                            <Card className="graph_load">
                               <Card.Content>
-                                <Placeholder fluid style={{ height: '25em' }}>
+                                <Placeholder fluid className="image_load">
                                   <Placeholder.Line />
                                 </Placeholder>
                               </Card.Content>

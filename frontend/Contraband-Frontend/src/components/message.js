@@ -1,6 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import { Transition, Message } from 'semantic-ui-react';
 
+/**
+ * Display Error messages.
+ */
 export default class MessageDisplay extends Component {
   constructor(props) {
     super(props);

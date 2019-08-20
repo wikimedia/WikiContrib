@@ -6,6 +6,9 @@ from contraband.settings import DEBUG
 
 
 class Query(models.Model):
+    """
+    :Summary: Store details of Query.
+    """
     hash_code = models.CharField(default=get_random_string(64), unique=True, max_length=64)
     file = models.BooleanField(default=False)
     csv_file = models.FileField(upload_to='uploads/', null=True, blank=True)
@@ -25,6 +28,9 @@ class Query(models.Model):
 
 
 class QueryUser(models.Model):
+    """
+    :Summary: Store username's of Users in a specific Query.
+    """
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     fullname = models.CharField(max_length=100, default="")
     gerrit_username = models.CharField(max_length=40, default="")
@@ -36,6 +42,9 @@ class QueryUser(models.Model):
 
 
 class QueryFilter(models.Model):
+    """
+    :Summary: Store filters of a Query.
+    """
     query = models.OneToOneField(Query, on_delete=models.CASCADE)
     start_time = models.DateField(null=True, blank=True)
     end_time = models.DateField(null=True, blank=True)

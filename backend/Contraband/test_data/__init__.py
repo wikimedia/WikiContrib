@@ -1,5 +1,8 @@
 from contraband.settings import BASE_URL
 
+"""
+This file contains the sample data to run tests.
+"""
 
 query_create_url = BASE_URL + "query/add/user/"
 

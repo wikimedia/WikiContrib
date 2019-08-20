@@ -3,6 +3,9 @@ import { fetchAsynchronous } from './fetch';
 import { getUsers } from '../api';
 import { Icon, Loader } from 'semantic-ui-react';
 
+/**
+ * Implement UI to the User search dropdown.
+ */
 class Dropdown extends React.Component {
   constructor(props) {
     super(props);
@@ -14,90 +17,93 @@ class Dropdown extends React.Component {
   render = () => {
     return (
       <div className="drop">
-          <div id="dropdown">
-            <div style={{ display: 'flex' }}>
-              {this.props.loading ? (
-                <Loader
-                  inline={true}
-                  active
-                  size="mini"
-                  style={{ marginTop: 3 }}
-                />
-              ) : (
+        <div id="dropdown">
+          <div style={{ display: 'flex' }}>
+            {this.props.loading ? (
+              <Loader
+                inline={true}
+                active
+                size="small"
+                style={{ marginTop: 3, marginRight: 2 }}
+              />
+            ) : (
                 <Icon name="search" style={{ marginTop: 3 }} />
               )}
-              <input
-                onKeyPress={e => {
-                  if (e.which == 13) {
-                    this.props.onSearchChange();
-                  }
-                }}
-                value={this.props.value}
-                onChange={e => {
-                  this.props.set({
-                    message: 'Press Enter to search',
-                    strng: e.target.value,
-                  });
-                }}
-                onFocus={() => {
-                  this.setState({ open: true });
-                  this.props.set({ message: 'Press Enter to search' });
-                  document.querySelectorAll('div#dropdown')[0].style.border =
-                    '1px solid lightblue';
-                }}
-                onBlur={e => {
-                  setTimeout(() => {
-                    this.setState({ open: false });
-                    this.props.onClose();
-                  }, 200);
-                  document.querySelectorAll('div#dropdown')[0].style.border =
-                    '1px solid #ede2e1';
-                }}
-                placeholder={this.state.open ? '' : this.props.placeholder}
-                className="input_dropdown"
-              />
-            </div>
-            {this.state.open ? (
-              <div style={{ overflowY: 'auto', maxHeight: '30vh' }}>
-                {this.state.loading ? (
-                  <div className="message_dropdown">
-                    {this.props.noResultsMessage}
-                  </div>
-                ) : (
+            <input
+              onKeyPress={e => {
+                if (e.which == 13) {
+                  this.props.onSearchChange();
+                }
+              }}
+              value={this.props.value}
+              onChange={e => {
+                this.props.set({
+                  message: 'Press Enter to search',
+                  strng: e.target.value,
+                });
+              }}
+              onFocus={() => {
+                this.setState({ open: true });
+                this.props.set({ message: 'Press Enter to search' });
+                document.querySelectorAll('div#dropdown')[0].style.border =
+                  '1px solid lightblue';
+              }}
+              onBlur={e => {
+                setTimeout(() => {
+                  this.setState({ open: false });
+                  this.props.onClose();
+                }, 200);
+                document.querySelectorAll('div#dropdown')[0].style.border =
+                  '1px solid #ede2e1';
+              }}
+              placeholder={this.state.open ? '' : this.props.placeholder}
+              className="input_dropdown"
+            />
+          </div>
+          {this.state.open ? (
+            <div className="dropdown_max_len">
+              {this.state.loading ? (
+                <div className="message_dropdown">
+                  {this.props.noResultsMessage}
+                </div>
+              ) : (
                   <React.Fragment>
                     {this.props.options.length == 0 ? (
                       <div className="message_dropdown">
                         {this.props.noResultsMessage}
                       </div>
                     ) : (
-                      <React.Fragment>
-                        {this.props.options.map((obj, ind) => (
-                          <div
-                            className="list_dropdown"
-                            key={ind}
-                            onClick={() => {
-                              console.log('came here');
-                              this.setState({ value: obj });
-                              this.props.onChange(obj);
-                            }}
-                          >
-                            {obj}
-                          </div>
-                        ))}
-                      </React.Fragment>
-                    )}
+                        <React.Fragment>
+                          {this.props.options.map((obj, ind) => (
+                            <div
+                              className="list_dropdown"
+                              key={ind}
+                              onClick={() => {
+                                console.log('came here');
+                                this.setState({ value: obj });
+                                this.props.onChange(obj);
+                              }}
+                            >
+                              {obj}
+                            </div>
+                          ))}
+                        </React.Fragment>
+                      )}
                   </React.Fragment>
                 )}
-              </div>
-            ) : (
+            </div>
+          ) : (
               ''
             )}
-          </div>
         </div>
+      </div>
     );
   };
 }
 
+/**
+ * Implement functionality of User search Dropdown.
+ */
 class UserSearch extends React.Component {
   constructor(props) {
     super(props);
@@ -110,6 +116,9 @@ class UserSearch extends React.Component {
   }
 
   getSearchedData = () => {
+    /**
+     * Search for the group of usernames that matches the username given.
+     */
     if (this.state.strng !== '') {
       let rgx = new RegExp(this.state.strng, 'i');
       let users = new Promise((resolve, reject) => {
@@ -140,6 +149,11 @@ class UserSearch extends React.Component {
   };
 
   getList = () => {
+    /**
+     * Check if usernames of the Query (user currently viewing) exists in localStorage.
+     * if exists: search for the all the usernames matched to the queried username
+     * else: perform API request to fetch the usernames.
+     */
     if (
       localStorage.getItem('res_query') !== null &&
       localStorage.getItem('res_query') === this.props.hash
@@ -153,6 +167,11 @@ class UserSearch extends React.Component {
   };
 
   callback = response => {
+    /**
+     * Callback function, to store the response fetched in localstorage and search for the queried username
+     * in fetched usernames.
+     * @param {Object} response List of usernames assosiated with the query.
+     */
     if (!response.hasOwnProperty('error') && response.error !== 1) {
       localStorage.setItem('res_users', response.users);
       localStorage.setItem('res_query', this.props.hash);
@@ -164,6 +183,10 @@ class UserSearch extends React.Component {
   };
 
   set = obj => {
+    /**
+     * Update state of current component through the child components.
+     * @param {Object} obj object of updated state variables.
+     */
     this.setState(obj);
   };
 
