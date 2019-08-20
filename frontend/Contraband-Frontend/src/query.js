@@ -46,7 +46,7 @@ export class Query extends Component {
     this.state = {
       step: 1,
       rows:
-        localStorage.getItem('users') !== null
+        localStorage.getItem('users') !== null && type
           ? JSON.parse(localStorage.getItem('users'))
           : [Object.assign({}, emptyObj)],
       message: {
@@ -123,7 +123,6 @@ export class Query extends Component {
           progress: false,
           original_users: response.users,
         });
-        localStorage.setItem('users', JSON.stringify(response.users));
       }
     }
   };
@@ -137,13 +136,13 @@ export class Query extends Component {
      */
     let rows = [...this.state.rows];
     rows[index][name] = value;
-    localStorage.removeItem('users');
-    if (
+    if (this.state.operation &&
       !(
         this.state.rows.length === 1 &&
         JSON.stringify(this.state.rows[0]) === JSON.stringify(emptyObj)
       )
     ) {
+      localStorage.removeItem('users');
       localStorage.setItem('users', JSON.stringify(this.state.rows));
     }
     this.setState({ rows: rows });
@@ -179,7 +178,9 @@ export class Query extends Component {
       let rows = [...this.state.rows];
       rows.splice(index, 1);
       this.setState({ rows: rows });
-      localStorage.setItem('users', JSON.stringify(rows));
+      if (this.state.operation) {
+        localStorage.setItem('users', JSON.stringify(rows));
+      }
     }
   };
 
@@ -233,20 +234,6 @@ export class Query extends Component {
         trigger: true,
       },
     });
-  };
-
-  storeRows = query => {
-    /**
-     * Store the Rows in localStorage.
-     */
-    if (this.state.file === false) {
-      let users = [];
-      for (let i in this.state.rows) {
-        users.append(i['username']);
-      }
-      let store = { query: query, users: users };
-      localStorage.setItem('users', store);
-    }
   };
 
   createQuery = () => {

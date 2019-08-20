@@ -3,7 +3,9 @@ from .models import ListCommit
 
 
 class UserCommitSerializer(ModelSerializer):
-
+    """
+    :Summary: Serialize the data of ListCommit model
+    """
     class Meta:
         model = ListCommit
         fields = ('heading', 'platform', 'redirect', 'owned', 'assigned', 'status')

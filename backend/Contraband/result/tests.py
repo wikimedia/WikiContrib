@@ -11,6 +11,10 @@ from json import loads
 
 
 def create_query():
+    """
+    :Summmary: Create a query for testing.
+    :return: Query Modal Object.
+    """
     hash = create_hash()
     query = Query.objects.create(hash_code=hash, file=False)
     data = [
@@ -41,24 +45,43 @@ def create_query():
     )
     return query
 
+
 class TestUrls(TestCase):
+    """
+    :Summary: Perform URL testing.
+    """
 
     def test_result_url(self):
+        """
+        :Summary: Test '/result/<hash>/' URL
+        """
         url = reverse('result', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, DisplayResult.__module__ + "." + DisplayResult.__name__)
 
     def test_commits_url(self):
+        """
+        :Summary: Test '/result/<hash>/commits/' URL
+        """
         url = reverse('user_commits', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, GetUserCommits.__module__ + "." + GetUserCommits.__name__)
 
     def test_users_url(self):
+        """
+        :Summary: Test '/result/<hash>/users/' URL
+        """
         url = reverse('query_users', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, GetUsers.__module__ + "." + GetUsers.__name__)
 
 
 class TestViews(TestCase):
+    """
+    :Summary: Perform View Testing.
+    """
 
     def test_get_users_GET(self):
+        """
+        :Summary: Test GetUsers() View GET method
+        """
         query = create_query()
         client = APIClient()
         url = BASE_URL + "result/" + query.hash_code + "/users/"
@@ -71,6 +94,9 @@ class TestViews(TestCase):
         self.assertEqual(response.content, b'{"users":["rammanoj","vasanth"]}')
 
     def test_get_user_commits_GET(self):
+        """
+        :Summary: Test GetUserCommits() View GET method.
+        """
         query = create_query()
         client = APIClient()
         url = BASE_URL + "result/" + query.hash_code + "/?user=vasanth"
@@ -87,6 +113,9 @@ class TestViews(TestCase):
         self.assertEqual("results" in data, True)
 
     def test_display_result_GET(self):
+        """
+        :Summary: Test DisplayResult() View GET method.
+        """
         query = create_query()
         client = APIClient()
         url = BASE_URL + "result/" + query.hash_code + "/?user=vasanth"

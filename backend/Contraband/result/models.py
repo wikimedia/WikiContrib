@@ -3,6 +3,9 @@ from query.models import Query
 
 
 class ListCommit(models.Model):
+    """
+    :Summary: Store User commit details fetched.
+    """
     PLATFORMS = (
         ('pb', 'Phabricator'),
         ('gr', 'Gerrit'),

@@ -19,6 +19,15 @@ from contraband.settings import API_TOKEN
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
+    """
+    :Summary: Get the Phabricator tasks that the user authored.
+    :param url: URL to be fetched.
+    :param request_data: Phabricator token and JSON Request Payload.
+    :param session: ClientSession to perform the API request.
+    :param resp: Global response array to which the response from the API has to be appended.
+    :param phid: Phabricator ID of the user
+    :return: None
+    """
     if request_data['constraints[authorPHIDs][0]'] == '':
         return
     page, after = True, False
@@ -40,6 +49,14 @@ async def get_task_authors(url, request_data, session, resp, phid):
 
 
 async def get_task_assigner(url, request_data, session, resp):
+    """
+    :Summary: Get the Phabricator tasks that the user assigned with.
+    :param url: URL to be fetched.
+    :param request_data: Phabricator token and JSON Request Payload.
+    :param session: ClientSession to perform the API request
+    :param resp: Global response array to which the response from the API has to be appended.
+    :return: None
+    """
     if request_data['constraints[assigned][0]'] == '':
         return
     page, after = True, False
@@ -56,6 +73,13 @@ async def get_task_assigner(url, request_data, session, resp):
 
 
 async def get_gerrit_data(url, session, gerrit_resp):
+    """
+    :Summary: Get all the Gerrit tasks of the user.
+    :param url: URL to be fetched.
+    :param session: ClientSession to perform the API request.
+    :param gerrit_resp: Global response array to which the response from the API has to be appended.
+    :return: None
+    """
     if url.split("?")[1].split("&")[0].split(":")[1] == "":
         return
     async with session.get(url) as response:
@@ -69,6 +93,14 @@ async def get_gerrit_data(url, session, gerrit_resp):
 
 
 def format_data(pd, gd, query, phid):
+    """
+    :Summary: Format the data fetched, store the data to Databases and remove the irrelevant data.
+    :param pd: Phabricator Data.
+    :param gd: Gerrit Data
+    :param query: Query Modal Object
+    :param phid: Phabricator ID of the user.
+    :return: JSON response of all the tasks in which the user involved, in the specified time span.
+    """
     resp = []
     len_pd = len(pd)
     len_gd = len(gd)
@@ -130,6 +162,16 @@ def format_data(pd, gd, query, phid):
 
 
 async def get_data(urls, request_data, loop, gerrit_response, phab_response, phid):
+    """
+    :Summary: Start a session and fetch the data.
+    :param urls: URLS to be fetched.
+    :param request_data: Request Payload to be sent.
+    :param loop: asyncio event loop.
+    :param gerrit_response: Store response data to the requests from Gerrit URLs
+    :param phab_response: Store response data to the requests from Phabricator URLs
+    :param phid: Phabricator ID of the user
+    :return:
+    """
     tasks = []
     async with ClientSession() as session:
         tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response))))
@@ -139,6 +181,17 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
 
 
 def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query, users):
+    """
+    :Summary: Get the contributions of the user
+    :param username: Fullname of the user.
+    :param gerrit_username: Gerrit username of the user.
+    :param createdStart: Start timeStamp from which the contributions has to be fetched.
+    :param createdEnd: End timestamp till which the contributions has to be fetched.
+    :param phid: Phabricator ID of the user.
+    :param query: Query Modal Object.
+    :param users: List of previous, current and next users Fullname's
+    :return: Response Object with query, contributions of user, query filters etc.
+    """
     loop = asyncio.new_event_loop()
     phab_response, gerrit_response = [], []
     asyncio.set_event_loop(loop)
@@ -183,6 +236,9 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
 
 
 class DisplayResult(APIView):
+    """
+    :Summary: Create a Request Payload to the API that fetches the contributions of the user.
+    """
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -267,6 +323,9 @@ class DisplayResult(APIView):
 
 
 class GetUserCommits(ListAPIView):
+    """
+    :Summary: Get all the commits of a user on a specific date.
+    """
     http_method_names = ['get']
     serializer_class = UserCommitSerializer
 
@@ -284,6 +343,9 @@ class GetUserCommits(ListAPIView):
 
 
 class GetUsers(APIView):
+    """
+    :Summary: return all the users that belong to a query.
+    """
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
@@ -306,6 +368,10 @@ class GetUsers(APIView):
 
 
 def UserUpdateTimeStamp(data):
+    """
+    :param data: Hash Code of the Query.
+    :return: contributions of the user on updating Query Filter timestamp.
+    """
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     if data['query'].file:
         try:
@@ -332,6 +398,10 @@ def UserUpdateTimeStamp(data):
 
 
 def UserUpdateStatus(data):
+    """
+    :param data: Hash Code of the Query.
+    :return: contributions of the user on updating Query Filter commit status.
+    """
     result = []
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     status = data['query'].queryfilter.status

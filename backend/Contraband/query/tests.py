@@ -14,27 +14,48 @@ from contraband.settings import COMMIT_STATUS, BASE_URL
 
 
 class TestUrls(TestCase):
+    """
+    :Summary: Perform URL Testing.
+    """
 
     def test_query_create_url(self):
+        """
+        :Summary: Test '/query/add/user/` URL.
+        """
         url = reverse('query-create')
         self.assertEqual(resolve(url)._func_path, AddQueryUser.__module__ + "." + AddQueryUser.__name__)
 
     def test_query_detail_url(self):
+        """
+        :Summary: Test '/query/<hash>/update/user/` URL.
+        """
         url = reverse('query-detail', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, QueryDetailView.__module__ + "." + QueryDetailView.__name__)
 
     def test_query_filter_detail_url(self):
+        """
+        :Summary: Test '/query/<hash>/update/filter/` URL.
+        """
         url = reverse('query-filter-detail', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, QueryFilterView.__module__ + "." + QueryFilterView.__name__)
 
     def test_query_check_url(self):
+        """
+        :Summary: Test '/query/<hash>/check/` URL.
+        """
         url = reverse('check-query', kwargs={"hash": "test_query"})
         self.assertEqual(resolve(url)._func_path, CheckQuery.__module__ + "." + CheckQuery.__name__)
 
 
 class TestViews(TestCase):
+    """
+    :Summary: Perform View Testing.
+    """
 
     def test_query_create_DATA(self):
+        """
+        :Summary: Test AddQueryUser View (i.e Create Query View) by providing JSON data.
+        """
         factory = APIRequestFactory()
         request = factory.post(create_url, create_data, format='json')
         response = AddQueryUser.as_view()(request)
@@ -47,6 +68,9 @@ class TestViews(TestCase):
         self.assertEqual('/result/' + query.hash_code + "/", response.url)
 
     def test_query_create_CSV(self):
+        """
+        :Summary: Test AddQueryUser View (i.e Create Query View) by providing data through CSV file.
+        """
         with open('test_data/test_csv_upload.csv') as fp:
             create_csv['csv_file'] = fp
             response = self.client.post(create_url, create_csv)
@@ -55,7 +79,9 @@ class TestViews(TestCase):
         remove(path)
 
     def test_query_update_DATA(self):
-        # Create the Query
+        """
+        :Summary: Test QueryRetrieveUpdateDeleteView View (i.e Update Query View) by providing JSON data.
+        """
         hash = create_hash()
         query = Query.objects.create(hash_code=hash, file=False)
         for i in create_data['users']:
@@ -78,7 +104,9 @@ class TestViews(TestCase):
         self.assertEqual(headers, '/result/' + query.hash_code + '/')
 
     def test_query_update_CSV(self):
-        # Create the Query
+        """
+        :Summary: Test QueryRetrieveUpdateDeleteView View (i.e Update Query View) by providing data through CSV file.
+        """
         hash = create_hash()
         query = Query.objects.create(hash_code=hash, file=False)
         for i in create_data['users']:
@@ -107,7 +135,9 @@ class TestViews(TestCase):
         remove(path)
 
     def test_query_filter_update(self):
-        # Create the Query
+        """
+        :Summary: Test QueryFilterView View (i.e Query Filter Retrieve / Update View).
+        """
         hash = create_hash()
         query = Query.objects.create(hash_code=hash, file=False)
         for i in create_data['users']:
@@ -132,8 +162,14 @@ class TestViews(TestCase):
 
 
 class TestModels(TestCase):
+    """
+    :Summary: Perform Modal Testing.
+    """
 
     def test_query_model(self):
+        """
+        :Summary: Test Query Model csv_file_uri attribute.
+        """
         with open('test_data/test_csv_upload.csv') as fp:
             create_csv['csv_file'] = fp
             response = self.client.post(create_url, create_csv)

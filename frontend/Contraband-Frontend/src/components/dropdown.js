@@ -23,8 +23,8 @@ class Dropdown extends React.Component {
               <Loader
                 inline={true}
                 active
-                size="mini"
-                style={{ marginTop: 3 }}
+                size="small"
+                style={{ marginTop: 3, marginRight: 2 }}
               />
             ) : (
                 <Icon name="search" style={{ marginTop: 3 }} />
