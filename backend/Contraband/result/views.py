@@ -339,7 +339,18 @@ class GetUserCommits(ListAPIView):
             date = datetime.now().date().strftime("%s")
 
         self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
-        return super(GetUserCommits, self).get(request, *args, **kwargs)
+        context = super(GetUserCommits, self).get(request, *args, **kwargs)
+        data = []
+        status = query.queryfilter.status.split(",")
+        for i in context.data['results']:
+            if i['status'].lower() in status:
+                data.append(i)
+            elif i['status'].lower() == "open" and i['platform'] == 'Gerrit' and "g-open" in status:
+                data.append(i)
+            elif i['status'].lower() == "open" and i['platform'] == 'Phabricator' and "p-open" in status:
+                data.append(i)
+        context.data['results'] = data
+        return context
 
 
 class GetUsers(APIView):

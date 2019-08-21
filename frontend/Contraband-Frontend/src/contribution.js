@@ -86,7 +86,7 @@ class GenerateMonth extends React.Component {
   render = () => {
     let days = this.getDays(this.props.year, this.props.month);
     let items = [];
-    for (let i = 1; i < days + 1; i++) {
+    for (let i = 1; i <= days; i++) {
       let item = [];
 
       while (i % 8 != 0 && i <= days) {
@@ -102,16 +102,18 @@ class GenerateMonth extends React.Component {
         );
         i++;
       }
-      item.push(
-        <GenerateDay
-          key={i}
-          date={i}
-          month={this.props.month}
-          year={this.props.year}
-          data={this.props.data}
-          set={this.props.set}
-        />
-      );
+      if (days != ((8 * items.length) + item.length)) {
+        item.push(
+          <GenerateDay
+            key={i}
+            date={i}
+            month={this.props.month}
+            year={this.props.year}
+            data={this.props.data}
+            set={this.props.set}
+          />
+        );
+      }
       items.push(
         <div className="flex-col" key={i}>
           {item}
@@ -181,8 +183,12 @@ class UserContribution extends React.Component {
               : approx_days == 180
                 ? 6
                 : 12;
-      let start_month = new Date(this.props.start_time).getMonth();
-      let year = new Date(this.props.start_time).getFullYear();
+      let start_month = new Date(this.props.end_time).getMonth() - 1;
+      let year = new Date(this.props.end_time).getFullYear();
+      if (start_month == -1) {
+        start_month = 11;
+        year -= 1;
+      }
       let breakpoint = UserActivityBreakPoint(),
         items = [];
       while (numb_months != 0) {
@@ -211,10 +217,10 @@ class UserContribution extends React.Component {
         }
 
         numb_months -= 1;
-        start_month += 1;
-        if (start_month % 12 === 0) {
-          start_month = 0;
-          year = new Date(this.props.end_time).getFullYear();
+        start_month -= 1;
+        if (start_month === -1) {
+          start_month = 11;
+          year = new Date(this.props.start_time).getFullYear();
         }
       }
     }

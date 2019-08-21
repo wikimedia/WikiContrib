@@ -1,7 +1,7 @@
 @import 'fonts.css';
 @import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
 
-h1.accounts {
+h1.accounts, h2.accounts, h4.accounts {
   color: #54595d;
   font-weight: 200;
 }
@@ -171,12 +171,15 @@ h1.accounts {
 }
 
 .ui.label.label {
-  background: #00af89;
-  /* background: #a2a9b1; */
+  background: #00af89 !important;
   color: #fff;
   font-size: 0.8em;
   border-right: 1px solid #14866d;
   font-weight: 400;
+}
+
+.ui.label.label:hover {
+  color: white !important;
 }
 
 .ui.icon.labeled.input.filter_input input:focus,
@@ -430,15 +433,13 @@ h1.accounts {
 
 .ui.icon.button.filters {
   left: 0px !important;
-  /* background: white; */
   margin-left: -3rem;
-  /* float: right; */
+  float: left !important;
   background: #222 !important;
   color: white !important;
   padding: 17px !important;
   transition: 0.3s;
   text-align: center;
-  /* padding: 10px; */
   font-size: 1.5rem;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   opacity: 1;
@@ -505,7 +506,7 @@ h1.accounts {
 }
 
 .ui.button.page_button {
-  background: #03b6fc !important;
+  background: #36c !important;
   color: white !important;
   padding-top: 2rem !important;
   padding-bottom: 2rem !important;
@@ -514,12 +515,13 @@ h1.accounts {
 .ui.icon.button.update_query {
   background: #222 !important;
   transition: 0.3s !important;
+  float: left !important;
   color: white;
   z-index: 1;
   font-size: 1.5rem;
   opacity: 1;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  margin-left: -2vw;
+  margin-left: -50%;
 }
 
 .ui.icon.button.update_query:hover {

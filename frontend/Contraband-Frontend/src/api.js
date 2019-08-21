@@ -183,3 +183,8 @@ export const getPadding = () => {
     return Math.ceil(4 - ((450 - width) / 400) * 4);
   }
 };
+
+
+export const info_content = "The tool provides user activity from two platforms(Phabricator, \
+                Gerrit) and display it. It fetches the contributions of the user in specified time span and \
+                visualize the data in form of graphs"; 

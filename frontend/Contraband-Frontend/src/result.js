@@ -21,7 +21,7 @@ import {
   format_status,
   full_months,
   get_timestamp,
-  filterDetailApi,
+  filterDetailApi
 } from './api';
 import UserSearch from './components/dropdown';
 import { Line } from 'react-chartjs-2';
@@ -29,6 +29,7 @@ import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
 import { production } from './App';
+import { NavBar } from './components/nav'
 
 /** 
 * Styles to the Line Graphs.
@@ -70,55 +71,64 @@ class DisplayUser extends React.Component {
     super(props);
   }
 
-  render = () => (
-    <div>
-      {this.props.loading ? (
-        <React.Fragment>
-          <Placeholder>
-            <Placeholder.Line className="load_background" />
-            <Placeholder.Line className="load_background" />
-          </Placeholder>
-        </React.Fragment>
-      ) : (
+  render = () => {
+    let { start_time: st, end_time: et } = this.props.filters;
+    st = new Date(st);
+    et = new Date(et);
+    return (
+      <div>
+        {this.props.loading ? (
           <React.Fragment>
-            <Header className="name">{this.props.username}'s Activity</Header>
-            <span>
-              <h1 className="accounts">
-                Gerrit:{' '}
-                {this.props.gerrit_username !== '' ? (
-                  <a
-                    target="_blank"
-                    href={
-                      'https://gerrit.wikimedia.org/r/#/q/' +
-                      this.props.gerrit_username
-                    }
-                  >
-                    {this.props.gerrit_username}
-                  </a>
-                ) : (
-                    'None'
-                  )}{' '}
-                | Phabricator:{' '}
-                {this.props.phabricator_username !== '' ? (
-                  <a
-                    target="_blank"
-                    href={
-                      'https://phabricator.wikimedia.org/p/' +
-                      this.props.phabricator_username +
-                      '/'
-                    }
-                  >
-                    {this.props.phabricator_username}
-                  </a>
-                ) : (
-                    'None'
-                  )}
-              </h1>
-            </span>
+            <Placeholder>
+              <Placeholder.Line className="load_background" />
+              <Placeholder.Line className="load_background" />
+            </Placeholder>
           </React.Fragment>
-        )}
-    </div>
-  );
+        ) : (
+            <React.Fragment>
+              <Header className="name">{this.props.username}'s Activity</Header>
+              <span>
+                <h1 className="accounts">
+                  Gerrit:{' '}
+                  {this.props.gerrit_username !== '' ? (
+                    <a
+                      target="_blank"
+                      href={
+                        'https://gerrit.wikimedia.org/r/#/q/' +
+                        this.props.gerrit_username
+                      }
+                    >
+                      {this.props.gerrit_username}
+                    </a>
+                  ) : (
+                      'None'
+                    )}{' '}
+                  | Phabricator:{' '}
+                  {this.props.phabricator_username !== '' ? (
+                    <a
+                      target="_blank"
+                      href={
+                        'https://phabricator.wikimedia.org/p/' +
+                        this.props.phabricator_username +
+                        '/'
+                      }
+                    >
+                      {this.props.phabricator_username}
+                    </a>
+                  ) : (
+                      'None'
+                    )}
+                </h1>
+                <h2 className="accounts">
+                  {full_months[et.getMonth() - 1] + " " + et.getFullYear()}
+                  - {full_months[st.getMonth()] + " " + st.getFullYear()}
+                </h2>
+              </span>
+            </React.Fragment>
+          )}
+      </div>
+    )
+  }
 }
 
 /** 
@@ -357,7 +367,7 @@ class QueryResult extends React.Component {
      * Fetch API on searching for a user
      * @param {Object} obj Username of the user whose details are to be fetched.
      */
-    this.setState({ value: obj.value, loading: true, notFound: false });
+    this.setState({ value: obj.value, loading: true, notFound: false, activity: undefined });
     let uri =
       fetchDetails.replace('<hash>', this.state.query) + '?user=' + obj.value;
     fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
@@ -368,7 +378,7 @@ class QueryResult extends React.Component {
      * Restore the initial filters.
      */
     let time = new Date();
-    let month = time.getMonth() + 1;
+    let month = time.getMonth() + 2;
     let filters = {
       end_time: time.getFullYear() + '-' + month + '-01',
       start_time: time.getFullYear() - 1 + '-' + month + '-01',
@@ -391,6 +401,26 @@ class QueryResult extends React.Component {
       this.updatecallback
     );
   };
+
+  func = () => {
+    let { update_filters: uf } = this.state;
+    let month = new Date(uf.end_time).getMonth();
+    let year = new Date(uf.end_time).getFullYear();
+    if (month === 0) {
+      month = 11;
+      year -= 1;
+    } else {
+      month -= 1;
+    }
+    console.log(full_months[month] + ", " + year)
+    return full_months[month] + ", " + year;
+    // full_months[new Date(uf.end_time).getMonth() == 0 ?
+    //   11 : new Date(uf.end_time).getMonth() - 1] +
+    //   ', ' +
+    //   new Date(uf.end_time).getMonth() === 0 ? new Date(uf.end_time).getFullYear() - 1 :
+    //   new Date(uf.end_time).getFullYear()
+
+  }
 
   render = () => {
     document.body.style.backgroundColor = '#f8f9fa';
@@ -436,7 +466,7 @@ class QueryResult extends React.Component {
         ) : (
             ''
           )}
-
+        <NavBar />
         <Grid>
           <Grid.Row>
             <Grid.Column width={2} />
@@ -447,6 +477,7 @@ class QueryResult extends React.Component {
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
+
                     <Grid>
                       <Grid.Row>
                         <Grid.Column computer={14} tablet={12} mobile={16}>
@@ -540,15 +571,17 @@ class QueryResult extends React.Component {
                             selection
                             icon={false}
                             value={
-                              full_months[new Date(uf.end_time).getMonth()] +
-                              ', ' +
-                              new Date(uf.end_time).getFullYear()
+                              this.func()
                             }
                             options={get_dates()}
                             onChange={(e, obj) => {
                               let date = obj.value.split(',');
                               date[1] = date[1].substr(1);
-                              date[0] = full_months.indexOf(date[0]) + 1;
+                              date[0] = full_months.indexOf(date[0]) + 2;
+                              if (date[0] == 13) {
+                                date[1] = parseInt(date[1]) + 1;
+                                date[0] = 1;
+                              }
                               let filters = Object.assign({}, uf);
                               filters.end_time =
                                 date[1] + '-' + date[0] + '-01';
@@ -621,6 +654,7 @@ class QueryResult extends React.Component {
                               let filters = Object.assign({}, uf);
                               filters.start_time =
                                 date.getFullYear() + '-' + month + '-' + 1;
+                              console.log(filters)
                               this.setState({ update_filters: filters });
                             }}
                             placeholder="Get by date"
@@ -661,6 +695,7 @@ class QueryResult extends React.Component {
                       username={this.state.current}
                       gerrit_username={this.state.gerrit_username}
                       phabricator_username={this.state.phab_username}
+                      filters={this.state.current_filters}
                     />
                   </Grid.Column>
                   <Grid.Column width={2} />
