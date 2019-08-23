@@ -72,5 +72,9 @@ If the time stamps are changed, then the external APis are requested again and t
 
 There is another view ``GetUserCommits`` that returns all the commits of a user on the paticular date.
 
+**sequence daigram:**
+
+.. image:: ./sequence.jpg
+
 
 If you want to know more about the tool, you can refer the API documentation from `here <https://documenter.getpostman.com/view/6222710/SVYurxMj?version=latest>`_.

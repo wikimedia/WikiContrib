@@ -21,4 +21,5 @@ Thanks for choosing the project to contribute. You can install the repo locally 
 You can choose an issue and fix it. Keep your master branch updated and pull all the changes before making a PR.
 
 **Note:** If you are updating the backend after you make some change, you can check if all the tests are passing using the command:
+
 ``python manage.py test``

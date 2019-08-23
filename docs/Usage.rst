@@ -5,8 +5,8 @@ Usage
 As specified, WikiContrib is used in visualizing the contributions of the wikimedians in the form of graphs and user contribution calendar. Let’s start the discussion with how to use the tool first.
 
 
-Intro to Querys
-===============
+Intro to Queries
+================
 
 Each time you search for the contributions of a single or a group of users, a query is initiated. Each query has a unique **hash** and the **usernames of users** (you provided while creating the query) associated with it. Each query has a lifetime of 30 days i.e the query expires in 30 days from the creation time. Each query also has a group of filters associated with it. There are three filters in a query:
 
@@ -88,7 +88,7 @@ If you click on a specific date in the above calendar, you can see all the commi
 Viewing / Updating filters
 ==========================
 
-You can view the results by following the above process of creatig query, there are also few filters displayed along with the resut. You can update the current filters, it performs an API request and fetches the results of the user according to the filters you provided.
+You can view the results by following the above process of creating query, there are also few filters displayed along with the resut. You can update the current filters, it performs an API request and fetches the results of the user according to the filters you provided.
 
 There is also an option to reset the filters to the default ones. Filters are assosiated to the Query rather than users of the query so if you 
 chanage the filters it will apply to all the users. The contributions of all the users are fetched according to the filters you changed!
