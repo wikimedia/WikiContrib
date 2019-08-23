@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage &mdash; WikiContrib 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working" href="Working.html" />
+    <link rel="prev" title="Intro" href="Intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> WikiContrib
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Intro.html">Intro</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intro-to-querys">Intro to Querys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#query-creation">Query Creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewing-updating-filters">Viewing / Updating filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewing-results">Viewing results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-quries">Updating Quries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deleting-queries">Deleting Queries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Working.html">Working</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">WikiContrib</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Usage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>As specified, WikiContrib is used in visualizing the contributions of the wikimedians in the form of graphs and user contribution calendar. Let’s start the discussion with how to use the tool first.</p>
+<div class="section" id="intro-to-querys">
+<h2>Intro to Querys<a class="headerlink" href="#intro-to-querys" title="Permalink to this headline">¶</a></h2>
+<p>Each time you search for the contributions of a single or a group of users, a query is initiated. Each query has a unique <strong>hash</strong> and the <strong>usernames of users</strong> (you provided while creating the query) associated with it. Each query has a lifetime of 30 days i.e the query expires in 30 days from the creation time. Each query also has a group of filters associated with it. There are three filters in a query:</p>
+<ol class="arabic simple">
+<li><p>Status of the commit.</p></li>
+<li><p>From time.</p></li>
+<li><p>Time Range.</p></li>
+</ol>
+<p><strong>Status of the commit:</strong> This is used in filtering the commits based on their current status like <strong>merged</strong>, <strong>Abandoned</strong> etc. You can even
+provide multiple status once. Suppose you add “Merged” and “Open” to the status filter. It will search for the commits which are merged and open in both the platforms.</p>
+<p><strong>From time:</strong> You can get all the commits from a specified time (i.e month and year).</p>
+<p><strong>Time Range:</strong> From the specified <strong>From time</strong>, you need to give a range of time to which you want to fetch the details (i.e last one year, last one month or last 6 months etc).</p>
+</div>
+<div class="section" id="query-creation">
+<h2>Query Creation<a class="headerlink" href="#query-creation" title="Permalink to this headline">¶</a></h2>
+<p>To create a query, you need to add the data to the query. You can add the data in two different ways:</p>
+<ol class="arabic simple">
+<li><p>Entering username’s manually.</p></li>
+<li><p>Adding username’s in bulk.</p></li>
+</ol>
+<p><strong>Entering usernames manually:</strong></p>
+<p><strong>Home page</strong></p>
+<img alt="_images/home.png" src="_images/home.png" />
+<p>When ever you go to the home page, you can observe a table with following entities(as shown in the above image):</p>
+<ol class="arabic simple">
+<li><p>Fullname</p></li>
+<li><p>Gerrit Username</p></li>
+<li><p>Phabricator Username.</p></li>
+</ol>
+<p>You need to fill the above three details of the user whom you want to view the contributions of. <code class="docutils literal notranslate"><span class="pre">Gerrit</span> <span class="pre">Username</span></code> is used to fetch the data
+from Gerrit APIs and similarly, <code class="docutils literal notranslate"><span class="pre">Phabricator</span> <span class="pre">Username</span></code> is used for Phabricator APIs. But the details fetched from both the APIs are to be displayed</p>
+<blockquote>
+<div><p>with a common name so <code class="docutils literal notranslate"><span class="pre">Fullname</span></code> of the user is also considered. Commits fetched from two different platforms are associated with a common username called <code class="docutils literal notranslate"><span class="pre">Fullname</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Fullname</span></code> is also used in searching the users, we will discuss the searching in the latter part of this tutorial.</p>
+</div></blockquote>
+<p>There is an option provided to add usernames of another user. By clicking on <strong>Button 2</strong>, another empty row is added to the DOM. Similarly, you can add any number of rows and fill the usernames into them. One of the cool things of the tool is
+the username’s you entered will be cached in the device. So, even if you refresh the page or close the page the details you entered will not be lost! You can fill few username’s at some time, close the page and
+re-open it at some other time and add few other username’s.</p>
+<p>You can also clear the cached data. Clicking the <strong>Button 3</strong> clears all the data you entered to the tool. Be careful before you click the button, you will lose all the cached data once you click it.</p>
+<p><strong>Adding Username’s in Bulk:</strong></p>
+<p>Entering username’s of ten’s of users is easy. But what if you want to know the details of hundreds of users? It will take a lot of time and work to fill them manually to the tool.
+So, there is also an option provided to upload all the username’s in a CSV file. You can find a toggle bar with text <strong>Bulk Add</strong> (in the above image). On clicking it, you will be provided with an option to upload a CSV file.
+If you are uploading a CSV file, you need to fill the data in the file in a particular format.</p>
+<p>The CSV format is:</p>
+<img alt="_images/csv.png" src="_images/csv.png" />
+<p><strong>Once the data is provided,</strong> (either entered manually or using a CSV file). You can click the search icon there (i.e <strong>Button 1</strong>), with the data you provided. This initiates a request to the server and starts making API requests to
+Gerrit and Phabricator. Once all the required details are fetched, it redirects to a URL <code class="docutils literal notranslate"><span class="pre">/some_random_hash_code</span></code>. Now you can see the graphs of the user contributions along with a calendar that displays the contributions.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">some_random_hash_code</span></code> is the hash-code generated by the query, you can access the query at any point of time using this hash code.</p>
+<p>User contribuion calendar looks like:</p>
+<img alt="_images/calendar.png" src="_images/calendar.png" />
+<p>If you click on a specific date in the above calendar, you can see all the commits made by the user along with the <code class="docutils literal notranslate"><span class="pre">platform</span></code> and <code class="docutils literal notranslate"><span class="pre">status</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">commit</span></code>.</p>
+<p><strong>Button 4</strong> is the Info button, hovering it gives a popup with an intro paragraph about the tool.</p>
+</div>
+<div class="section" id="viewing-updating-filters">
+<h2>Viewing / Updating filters<a class="headerlink" href="#viewing-updating-filters" title="Permalink to this headline">¶</a></h2>
+<p>You can view the results by following the above process of creatig query, there are also few filters displayed along with the resut. You can update the current filters, it performs an API request and fetches the results of the user according to the filters you provided.</p>
+<p>There is also an option to reset the filters to the default ones. Filters are assosiated to the Query rather than users of the query so if you
+chanage the filters it will apply to all the users. The contributions of all the users are fetched according to the filters you changed!</p>
+<p>Presently, you can see all the contributions of the user for past one year.</p>
+</div>
+<div class="section" id="viewing-results">
+<h2>Viewing results<a class="headerlink" href="#viewing-results" title="Permalink to this headline">¶</a></h2>
+<p>Once the contributions of the user are fetched, there are these things displayed:
+1. Graph of user contributions in Gerrit.
+2. Graph of user contributions in Phabricator.
+3. A simple calender that displays all the user contributions for the time span you provide (similar to github).</p>
+<p>At a time, the contributions of a single user are displayed. There are arrows provided to get the details of the next and previous user to the current user.
+There is also an input box provided. If you want to get the contributions of a specific user, you can search the <code class="docutils literal notranslate"><span class="pre">fullname</span></code> of the user in the search box.
+It displays the recommendations of top 50 matching users.</p>
+</div>
+<div class="section" id="updating-quries">
+<h2>Updating Quries<a class="headerlink" href="#updating-quries" title="Permalink to this headline">¶</a></h2>
+<p>Once you create a query with a set of username’s and if you want to add another username at later point of time, instead of creating a new query for the single username, you can update the query and
+add the corresponding usernames.</p>
+<p>There are four main different types of update’s possible:</p>
+<ol class="arabic simple">
+<li><p>Initially you provided CSV file, now you want to upload another CSV file.</p></li>
+<li><p>Initially you provided CSV file, now you want to provide the details manually in the tool.</p></li>
+<li><p>Initially you provided the details manually in the tool, now you want to a CSV file.</p></li>
+<li><p>Initially you provided the details manually in the tool, now you want to edit the manually entered details.</p></li>
+</ol>
+</div>
+<div class="section" id="deleting-queries">
+<h2>Deleting Queries<a class="headerlink" href="#deleting-queries" title="Permalink to this headline">¶</a></h2>
+<p>Presently, the is no feature to delete a query. The query will be automatically deleted, after 30 days of its creation.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Working.html" class="btn btn-neutral float-right" title="Working" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Intro.html" class="btn btn-neutral float-left" title="Intro" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Wikimeida Foundation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
