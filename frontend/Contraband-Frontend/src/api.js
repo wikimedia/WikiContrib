@@ -140,11 +140,11 @@ export const get_timestamp = (date1, date2) => {
   let day = 30;
   if (days >= 365) {
     day = 365;
-  } else if (days >= 180 && days <= 365) {
+  } else if (days >= 180 && days < 365) {
     day = 180;
-  } else if (days >= 90 && days <= 180) {
+  } else if (days >= 89 && days < 180) {
     day = 90;
-  } else if (days >= 60 && days <= 90) {
+  } else if (days >= 60 && days < 90) {
     day = 60;
   }
   return day;

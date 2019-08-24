@@ -244,7 +244,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     self.get_object().queryuser_set.all().delete()
                     query = self.get_object()
                     query.file = True
-                    query.csv_file = file_path
+                    query.csv_file = self.kwargs['hash'] + ".csv"
                     query.save()
                     rename(file_path + ".part", file_path)
 
