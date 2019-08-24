@@ -36,7 +36,6 @@ var emptyObj = {
  */
 export class Query extends Component {
   constructor(props) {
-    console.log(props);
     super(props);
     let type;
     if (production) {
@@ -317,7 +316,8 @@ export class Query extends Component {
      * Callback function to redirect on creating the Query.
      * @param {Object} response Response of the API.
      */
-    if ("error" in response && response.error === 1) {
+
+    if (response !== "" && response !== "error" in response && response.error === 1) {
       this.setState({
         loading: false,
         message: {

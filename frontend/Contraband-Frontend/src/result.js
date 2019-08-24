@@ -654,7 +654,6 @@ class QueryResult extends React.Component {
                               let filters = Object.assign({}, uf);
                               filters.start_time =
                                 date.getFullYear() + '-' + month + '-' + 1;
-                              console.log(filters)
                               this.setState({ update_filters: filters });
                             }}
                             placeholder="Get by date"
