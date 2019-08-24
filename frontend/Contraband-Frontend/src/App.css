@@ -597,3 +597,17 @@ h1.accounts, h2.accounts, h4.accounts {
   padding: 2% !important; 
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
 }
+
+.ui.button.docs {
+  background: #eaecf0 !important;
+  color: #222 !important;
+  padding-left: 10px !important;
+  padding-right: 8px !important;
+  margin-right: -25px;
+}
+
+.ui.button.info {
+  background: #eaecf0 !important;
+  color: #222 !important;
+  margin-right: -15px !important;
+}
