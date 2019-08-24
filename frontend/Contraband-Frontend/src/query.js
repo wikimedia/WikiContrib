@@ -317,17 +317,29 @@ export class Query extends Component {
      * Callback function to redirect on creating the Query.
      * @param {Object} response Response of the API.
      */
-    let hash = '';
-    if (this.state.operation) {
-      hash = response.query;
+    if ("error" in response && response.error === 1) {
+      this.setState({
+        loading: false,
+        message: {
+          message: response.message,
+          trigger: true,
+          type: 1,
+          update: !this.state.message.update,
+        },
+      })
     } else {
-      hash = this.props.match.params.hash;
+      let hash = '';
+      if (this.state.operation) {
+        hash = response.query;
+      } else {
+        hash = this.props.match.params.hash;
+      }
+      this.setState({
+        redirect: production ? 'contrabandapp/' + hash : hash,
+        loading: false,
+        loadData: response,
+      });
     }
-    this.setState({
-      redirect: production ? 'contrabandapp/' + hash : hash,
-      loading: false,
-      loadData: response,
-    });
   };
 
   render = () => {

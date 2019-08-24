@@ -7,14 +7,14 @@ export const NavBar = () => (
         <Menu.Menu position="right">
             <Menu.Item>
                 <a target="_blank" href="https://wikicontrib.readthedocs.io/en/latest/">
-                    <Button style={{ background: "#eaecf0", color: "#222", paddingLeft: 10, paddingRight: 8, marginRight: -25 }}>
+                    <Button className="docs">
                         <span style={{ marginRight: 5 }}>Docs</span> <Icon name="book" />
                     </Button>
                 </a>
             </Menu.Item>
             <Menu.Item>
                 <Popup
-                    trigger={<Button icon="info" size="large" style={{ background: "#eaecf0", color: "#222", marginRight: -15 }}></Button>}
+                    trigger={<Button icon="info" size="large" className="info"></Button>}
                     position='bottom right'
                     content={<div style={{ textAlign: "center" }}>
                         <span style={{ fontFamily: "Charter", fontWeight: "bold" }}>WikiContrib</span>
