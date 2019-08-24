@@ -21,6 +21,7 @@ import {
   Header,
 } from 'semantic-ui-react';
 import { production } from './App';
+import { NavBar } from './components/nav';
 
 var emptyObj = {
   fullname: '',
@@ -343,17 +344,19 @@ export class Query extends Component {
         ) : (
             ''
           )}
+
         {this.state.loadData !== false ? (
           <Loader active>Loading</Loader>
         ) : (
             <React.Fragment>
+              <NavBar />
               <MessageDisplay
                 message={this.state.message.message}
                 type={this.state.message.type}
                 update={this.state.message.update}
                 trigger={this.state.message.trigger}
               />
-              <div style={{ marginTop: '10%' }} />
+              <div style={{ marginTop: '8%' }} />
               <Grid>
                 <Grid.Row>
                   <Grid.Column computer={3} tablet={1} mobile={1} />
@@ -391,7 +394,9 @@ export class Query extends Component {
                           animation="fade"
                         >
                           <React.Fragment>
-                            <Header className="title">Contraband</Header>
+                            <Header className="title">WikiContrib</Header>
+                            <h4 className="accounts">Get the Contributions of your fellow Wikimedians,
+                            showcase yourself! Visualize their contribs using graphs over different time ranges.</h4>
                             <Card className="query_create">
                               {this.state.bulk ? (
                                 <React.Fragment>
