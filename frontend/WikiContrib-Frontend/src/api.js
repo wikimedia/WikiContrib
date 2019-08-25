@@ -187,4 +187,4 @@ export const getPadding = () => {
 
 export const info_content = "The tool provides user activity from two platforms(Phabricator, \
                 Gerrit) and display it. It fetches the contributions of the user in specified time span and \
-                visualize the data in form of graphs"; 
+                visualize the data in form of graphs";
