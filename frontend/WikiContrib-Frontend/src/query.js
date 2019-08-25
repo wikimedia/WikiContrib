@@ -576,6 +576,7 @@ export class Query extends Component {
                                                       style={{
                                                         cursor: 'pointer',
                                                         color: '#fa5050',
+                                                        fontSize: '1rem'
                                                       }}
                                                       onClick={() => {
                                                         this.setState({
@@ -657,6 +658,7 @@ export class Query extends Component {
                                                 style={{
                                                   cursor: 'pointer',
                                                   color: '#fa5050',
+                                                  fontSize: '1rem'
                                                 }}
                                                 onClick={() => this.removeRow(index)}
                                               />
