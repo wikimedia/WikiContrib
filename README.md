@@ -34,7 +34,7 @@ git clone https://github.com/rammanoj/WikiContrib.git
 
 The tool has two different components i.e Backend and Frontend Each of them has their own installation instructions.
 
-[Backend installation file](https://github.com/rammanoj/WikiContrib/blob/master/backend/Contraband/Install.md) | [Frontend installation file](https://github.com/rammanoj/WikiContrib/tree/master/frontend/Contraband-Frontend/Install.md)
+[Backend installation file](https://github.com/rammanoj/WikiContrib/blob/master/backend/Contraband/Install.md) | [Frontend installation file](https://github.com/rammanoj/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install.md)
 
 ## API & Docs
 

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group
 
 # Create a Custom Site.
 class CustomAdminSite(AdminSite):
-    site_header = _('Contraband')
+    site_header = _('WikiContrib')
 
 
 admin_site = CustomAdminSite()
