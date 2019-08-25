@@ -16,14 +16,14 @@ h1.accounts, h2.accounts, h4.accounts {
   font-size: 2rem;
   font-weight: 200;
   color: #54595d;
-  margin-top: 0em;
+  margin-top: 0rem;
   text-align: left;
-  padding-left: 0.2em;
+  padding-left: 0.2rem;
 }
 
 .ui.header.name {
   font-family: 'Charter';
-  font-size: 4em;
+  font-size: 4rem;
 }
 
 .ui.single.line.table.user_table {
@@ -173,7 +173,7 @@ h1.accounts, h2.accounts, h4.accounts {
 .ui.label.label {
   background: #00af89 !important;
   color: #fff;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   border-right: 1px solid #14866d;
   font-weight: 400;
 }
@@ -388,7 +388,7 @@ h1.accounts, h2.accounts, h4.accounts {
 
 #dropdown {
   width: 95%;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   font-family: 'Lato ', sans-serif;
   padding: 10px;
   margin-top: 8vh;
@@ -428,7 +428,7 @@ h1.accounts, h2.accounts, h4.accounts {
   text-align: left;
   margin-left: 1%;
   font-weight: bold;
-  font-size: 3em;
+  font-size: 3rem;
 }
 
 .ui.icon.button.filters {
@@ -452,11 +452,11 @@ h1.accounts, h2.accounts, h4.accounts {
 .ui.card.filter_view {
   background: #eaecf0;
   width: 80%;
-  margin: 1em;
-  margin-top: -1em;
-  padding: 1em;
+  margin: 1rem;
+  margin-top: -1rem;
+  padding: 1rem;
   font-family: "Lato ", sans-serif;
-  font-size: 1.1em;
+  font-size: 1.1rem;
 }
 
 .ui.button.apply_filters {
@@ -553,7 +553,7 @@ h1.accounts, h2.accounts, h4.accounts {
 }
 
 .ui.fluid.placeholder.image_load {
-  height: 25em !important;
+  height: 25rem !important;
 }
 
 .dropdown_max_len {
@@ -569,7 +569,7 @@ h1.accounts, h2.accounts, h4.accounts {
 
 .contribution_text {
   color: rgb(80, 82, 81) !important;
-  font-size: 12 !important;
+  font-size: 14px !important;
   margin-right: 5px !important;
 }
 
