@@ -7,7 +7,7 @@ Welcome to WikiContrib!
     
    Intro
    Usage
-   Working
+   Internal Working
    Installation
    Contributing
 

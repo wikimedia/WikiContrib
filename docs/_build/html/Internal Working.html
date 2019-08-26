@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Internal Working &mdash; WikiContrib 1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="Installation.html" />
+    <link rel="prev" title="Usage" href="Usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> WikiContrib
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Internal Working</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">WikiContrib</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Internal Working</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Internal Working.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="internal-working">
+<h1>Internal Working<a class="headerlink" href="#internal-working" title="Permalink to this headline">¶</a></h1>
+<p>In the <strong>Usage</strong> section, we discussed the architecture and how to use the tool. Let’s extend the discussion
+with a complete note of how the tool works internally.</p>
+<p>We shall start our discussion with the schema diagram of the tool.</p>
+<img alt="_images/schema.png" src="_images/schema.png" />
+<p>As you can see above, there are four tables:</p>
+<ol class="arabic simple">
+<li><p>Query.</p></li>
+<li><p>Query users.</p></li>
+<li><p>Query Filters.</p></li>
+<li><p>List commits.</p></li>
+</ol>
+<p><strong>Query</strong> has the data regarding the <code class="docutils literal notranslate"><span class="pre">hash</span></code>, <code class="docutils literal notranslate"><span class="pre">created</span> <span class="pre">time</span></code> etc. The username’s of the wikimedians that the user provided during the query creation will be stored in <strong>Query users</strong> table. All the filters assosiated to the query will be stored in <strong>Query Filters</strong> table.</p>
+<p>Whenever a request of creating a query hits the server, initially a class named <code class="docutils literal notranslate"><span class="pre">AddQueryUser</span></code> view is triggered. The view creates a Query with a hash and adds the provided username’s data to the query. This also creates a default set of filters and rturns a redirect to <code class="docutils literal notranslate"><span class="pre">/&lt;hash&gt;</span></code> URL.</p>
+<p>The URL triggers <code class="docutils literal notranslate"><span class="pre">DisplayResult</span></code> view. This view performs external API requests, fetches the details and store the fetched data in the databases. It also formats the data and returns the data to the browser as an HTTP response.
+Let’s dig deep to the working of <code class="docutils literal notranslate"><span class="pre">DisplayResult</span></code> view.</p>
+<p>This view uses <code class="docutils literal notranslate"><span class="pre">asyncio</span></code> and <code class="docutils literal notranslate"><span class="pre">aiohttp</span></code> to perform API requests in a parallel manner. There are few constraints with the existing Phabricator and Gerrit APIs. Both of them can not return the count of contributions made by a particular user. They will return the contributions made by the user in the form of a list of JSON objects. The good thing about <code class="docutils literal notranslate"><span class="pre">Gerrit</span></code> is it returns contributions of all the users with a single API request. But in case of phabricator, it will paginate the results with a max of 100 contributions in each page Fo example, if a user performed 1000 different actions in phabricator. then
+10 API requests are to be made to get all the actions performed. Another constraint is that all the API requests are to be made sequentially. The API requests can not be parallel because each page has to be requested with a reference(except the first one). The reference to a page <strong>n</strong> will be provided in page <strong>n-1</strong>.
+Suppose if you have to get the commits of the user in 7th page, you have to request the 6th page first to get the reference to the 7th page. To get the 6th page you have to request the 5th page and so on.</p>
+<p>So, even if I want to get some page <strong>n</strong> you have to get all the details from <strong>1 to n</strong>.</p>
+<p>In this tool, all the contributions of the user from Gerrit are being fetched. But in the case of phabricator, two kinds of tasks are taken into count:</p>
+<ol class="arabic simple">
+<li><p>Tasks owned by the user.</p></li>
+<li><p>Tasks assigned to the user.</p></li>
+</ol>
+<p><strong>DisplayResult</strong> view gets all the data required to perform the external API requests and call another function <code class="docutils literal notranslate"><span class="pre">getDetails</span></code>. This function takes the data and formats it according to the requirement. It also creates a new <strong>asyncio event loop</strong>.
+This loop is given with three different co-routines. (If you are not familiar with event loops and co-routines, they are used to perform threading programmatically, you can get more information about them <a class="reference external" href="https://docs.python.org/3/library/asyncio.html">here</a>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">async</span> <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">urls</span><span class="p">,</span> <span class="n">request_data</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">gerrit_response</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">,</span> <span class="n">phid</span><span class="p">):</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_gerrit_data</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span> <span class="n">gerrit_response</span><span class="p">))))</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_task_authors</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">request_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">,</span> <span class="n">phid</span><span class="p">))))</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_task_assigner</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">request_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">))))</span>
+        <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The above code adds three tasks to the event loop. Each of the task fetches APIs and get information.</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code>: fetch contributions user from gerrit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code>: fetch tasks owned by a user in phabricator.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code>: fetch tasks assigned to a user in phabricator.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code> perform a single API request and gets all the details of the users.
+<code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code> gets the data but, as discussed above, phabricator APIs are paginated. So, these two co-routines has to
+request the data again and again, till there are no more pages left behind to request.</p>
+<p>These are parallel because, let’s assume there are two tasks <strong>task1</strong> and <strong>task2</strong>, initially, the loop started executing <strong>task1</strong>. If <strong>task1</strong> performs any API request, it has to wait till the response is received to proceed further. So, whenever the <strong>task1</strong>
+performs an API request, <strong>asyncio</strong> stores the state of <strong>task1</strong> and start executing <strong>task2</strong>. When the response to the <strong>task1</strong> is received, it stores the current task and executes the <strong>task1</strong> further.</p>
+<p>Once the entire data are received, it is formatted and stored in the table <code class="docutils literal notranslate"><span class="pre">List</span> <span class="pre">Commits</span></code>. Apart from storing them in databases, the commits that meet the requirement of all the Query filters are taken and response is returned to the user.
+For the sake of performance, the contributions of at the max. of past one year are being requested.</p>
+<p>Whenever the filters of a query are changed, if the filter “status of commit” is only changed, then there is no need to request external APIs, as all the commits are available here. So, databases are queried and the contributions that match to the current filters are returned.
+If the timestamps are changed, then the external APIs are requested again and the details are fetched.</p>
+<p>The view <code class="docutils literal notranslate"><span class="pre">GetUserCommits</span></code> returns all the commits of a user on the particular date.</p>
+<p><strong>sequence daigram:</strong></p>
+<img alt="_images/sequence.jpg" src="_images/sequence.jpg" />
+<p>If you want to know more about the tool, you can refer the API documentation from <a class="reference external" href="https://documenter.getpostman.com/view/6222710/SVYurxMj?version=latest">here</a>.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Wikimeida Foundation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

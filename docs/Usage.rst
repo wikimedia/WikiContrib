@@ -98,7 +98,7 @@ Once a user creates a query with the username’s of a set of wikimedians and at
 There are four main different types of update's possible:
 
 1. Initially a **CSV file** can be provided, another **CSV file** can be provided while updating the query.
-2. Initially a **CSV file** can be provided a set of **username’s of wikimedians** can be provided manually, while updating the query.
+2. Initially a **CSV file** can be provided, a set of **username’s of wikimedians** can be provided manually while updating the query.
 3. Initially a **set of username’s** of wikimedians are provided manually, a **CSV file** can be provided while updating the query.
 4. Initially a **set of username’s** of wikimedians are provided manually, another set of **username’s of wikimedians** are provided manually while updating the query.
 

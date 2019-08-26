@@ -5,12 +5,13 @@ Contributing
 Reporting bugs
 ==============
 
-If you find any bugs or issues in using the app. Feel free to report the issue `here <https://github.com/rammanoj/Contraband/>`_.
+If you find any bugs or issues while using the app. Feel free to report them `here <https://github.com/rammanoj/Contraband/>`_.
 
 If you are reporting a new issue, please provide these detials:
 
 1. Title (Descibe the entire issue in a single sentence).
-2. Description (Write more about the issue and the ways to reproduce it).
+2. Description (Write more about the issue).
+3. How to reproduce the issue?
 3. Provide some screen shots (if possible).
 
 
