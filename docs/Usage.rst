@@ -8,25 +8,23 @@ As specified, WikiContrib is used in visualizing the contributions of the wikime
 Intro to Queries
 ================
 
-Each time you search for the contributions of a single or a group of users, a query is initiated. Each query has a unique **hash** and the **usernames of users** (you provided while creating the query) associated with it. Each query has a lifetime of 30 days i.e the query expires in 30 days from the creation time. Each query also has a group of filters associated with it. There are three filters in a query:
+A Query is initiated whenever a user searches for the contributions of a single or a group of wikimedians. A query has a lifetime of 30 days i.e the query expires in 30 days from the creation time. Each query is uniquely identified by a **64-bit** hash. Each query has a **group of filters** associated with it. There are three filters in a query:
 
 1. Status of the commit.
 2. From time.
 3. Time Range.
 
+**Status of the commit:** This is used in filtering the commits based on their status like **merged**, **Abandoned** etc. The user can even provide multiple statuses once. Suppose the user add “Merged” and “Open” to the status filter. It will search for the commits that are merged and open in both the platforms.
 
-**Status of the commit:** This is used in filtering the commits based on their current status like **merged**, **Abandoned** etc. You can even 
-provide multiple status once. Suppose you add "Merged" and "Open" to the status filter. It will search for the commits which are merged and open in both the platforms.
+**From time:** The user can get all the commits from a specified time (i.e month and year).
 
-**From time:** You can get all the commits from a specified time (i.e month and year).
-
-**Time Range:** From the specified **From time**, you need to give a range of time to which you want to fetch the details (i.e last one year, last one month or last 6 months etc).
+**Time Range:** From the specified **From time**, the user needs to give a range of time to which he/she want to fetch the details (i.e last one year, last one month or last 6 months etc).
 
 
 Query Creation
 ==============
 
-To create a query, you need to add the data to the query. You can add the data in two different ways:
+To create a query, the user needs to add the data (username’s of Gerrit and Phabricator) to the query. The user can add the data in two different ways:
 
 1. Entering username's manually.
 2. Adding username's in bulk.
@@ -39,70 +37,53 @@ To create a query, you need to add the data to the query. You can add the data i
 
 .. image:: ./home.png
 
-When ever you go to the home page, you can observe a table with following entities(as shown in the above image):
+Whenever the user goes to the home page, the above page will be displayed. In the above above, the table has three columns. They are:
 
 1. Fullname
 2. Gerrit Username
 3. Phabricator Username.
 
-You need to fill the above three details of the user whom you want to view the contributions of. ``Gerrit Username`` is used to fetch the data 
-from Gerrit APIs and similarly, ``Phabricator Username`` is used for Phabricator APIs. But the details fetched from both the APIs are to be displayed
- with a common name so ``Fullname`` of the user is also considered. Commits fetched from two different platforms are associated with a common username called ``Fullname``.
- ``Fullname`` is also used in searching the users, we will discuss the searching in the latter part of this tutorial.
+The user needs to fill the above three details of the corresponding wikimedian whom the user wants to view the contributions of. ``Gerrit Username`` is used to fetch the data from **Gerrit APIs** and similarly, ``Phabricator Username`` is used for **Phabricator APIs**. The details fetched from both the APIs are associated with a common name i.e ``Fullname`` of the user. Fullname is also used in searching the users, we will discuss the searching later part of the doc.
 
-There is an option provided to add usernames of another user. By clicking on **Button 2**, another empty row is added to the DOM. Similarly, you can add any number of rows and fill the usernames into them. One of the cool things of the tool is
-the username's you entered will be cached in the device. So, even if you refresh the page or close the page the details you entered will not be lost! You can fill few username's at some time, close the page and
-re-open it at some other time and add few other username's.
-
-You can also clear the cached data. Clicking the **Button 3** clears all the data you entered to the tool. Be careful before you click the button, you will lose all the cached data once you click it.
-
+There is an option provided to add usernames of multiple wikimedians. By clicking on **Button 2**, another empty row is added to the DOM. Similarly, the user can add any number of rows and fill the usernames into them. One of the cool things of the tool is the username’s, the user entered will be cached to the device. So, even if the user refresh the page or close the page, the details will not be lost! the user can fill a few username’s at some time, close the page and re-open it at some other time and add few other username’s. The user can also clear the cached data. Clicking the **Button 3** clears all the data he/she entered to the tool.
 
 **Adding Username's in Bulk:**
 
-Entering username's of ten's of users is easy. But what if you want to know the details of hundreds of users? It will take a lot of time and work to fill them manually to the tool.
-So, there is also an option provided to upload all the username's in a CSV file. You can find a toggle bar with text **Bulk Add** (in the above image). On clicking it, you will be provided with an option to upload a CSV file.
-If you are uploading a CSV file, you need to fill the data in the file in a particular format.
+Entering username’s of ten’s of users is easy. But what if the user wants to know the contributions of hundreds of **wikimedians**? It will take a lot of time and work to fill them manually to the tool. So, there is also an option to upload all the username’s in a CSV file. On clicking the toggle bar with text “Bulk Add”, the user will be provided with an option to upload a CSV file. If the user is uploading a CSV file, he/she need to fill the data in the file in a particular format.
 
 The CSV format is:
 
 .. image:: ./csv.png
 
 
-**Once the data is provided,** (either entered manually or using a CSV file). You can click the search icon there (i.e **Button 1**), with the data you provided. This initiates a request to the server and starts making API requests to 
-Gerrit and Phabricator. Once all the required details are fetched, it redirects to a URL ``/some_random_hash_code``. Now you can see the graphs of the user contributions along with a calendar that displays the contributions. 
+**Once the data is provided,** (either entered manually or using a CSV file). The user can click the search button (i.e **Button 1**). This initiates a request to the server and starts making API requests to Gerrit and Phabricator. Once all the required details are fetched, it redirects to a URL ``/query_hash_code``. Now the user can see the graphs of user contributions vs time along with a calendar that displays the contributions.
 
+**Note:** ``query_hash_code`` is the hash-code generated by the query, the query can be accessed at any point of time using the has code.
 
-**Note:** ``some_random_hash_code`` is the hash-code generated by the query, you can access the query at any point of time using this hash code.
-
-
-User contribuion calendar looks like:
+**User contribuion calendar looks like:**
 
 .. image:: ./calendar.png
 
-
-If you click on a specific date in the above calendar, you can see all the commits made by the user along with the ``platform`` and ``status of the commit``.
+If the user click on a specific date in the above calendar, all the commits made by the wikimedian along with the ``platform`` and ``status of the commit`` will be displayed.
 
 **Button 4** is the Info button, hovering it gives a popup with an intro paragraph about the tool.
-
 
 Viewing / Updating filters
 ==========================
 
-You can view the results by following the above process of creating query, there are also few filters displayed along with the resut. You can update the current filters, it performs an API request and fetches the results of the user according to the filters you provided.
+The user can view the results by following the above process of creating a query, there are also few filters displayed along with the result. The filters can be updated. Updating the current filters performs an API request and fetches the contributions of the wikimedian according to the filters the user provided.
 
-There is also an option to reset the filters to the default ones. Filters are assosiated to the Query rather than users of the query so if you 
-chanage the filters it will apply to all the users. The contributions of all the users are fetched according to the filters you changed!
+There is also an option to reset the filters to the default ones. Filters are associated with the Query. The contributions of all the wikimedians are fetched according to the filters the user changed!
 
-Presently, you can see all the contributions of the user for past one year.
-
+**Note:** Presently, the user can see all the contributions of any wikimedian for past one year (at maximum).
 
 Viewing results
 ===============
 
 Once the contributions of the user are fetched, there are these things displayed:
-1. Graph of user contributions in Gerrit.
-2. Graph of user contributions in Phabricator.
-3. A simple calender that displays all the user contributions for the time span you provide (similar to github).
+1. Graph of user contributions in **Gerrit**.
+2. Graph of user contributions in **Phabricator**.
+3. A simple calender that displays all the user contributions for the time span you provide (similar to **github**).
 
 At a time, the contributions of a single user are displayed. There are arrows provided to get the details of the next and previous user to the current user.
 There is also an input box provided. If you want to get the contributions of a specific user, you can search the ``fullname`` of the user in the search box.
@@ -112,16 +93,14 @@ It displays the recommendations of top 50 matching users.
 Updating Quries
 ===============
 
-Once you create a query with a set of username's and if you want to add another username at later point of time, instead of creating a new query for the single username, you can update the query and 
-add the corresponding usernames.
+Once a user creates a query with the username’s of a set of wikimedians and at a later point of time, if he/she wants to know the contributions of another wikimedian, instead of creating a new query for a single wikimedian, he/she can update the query and add the corresponding usernames.
 
 There are four main different types of update's possible:
 
-1. Initially you provided CSV file, now you want to upload another CSV file.
-2. Initially you provided CSV file, now you want to provide the details manually in the tool.
-3. Initially you provided the details manually in the tool, now you want to a CSV file.
-4. Initially you provided the details manually in the tool, now you want to edit the manually entered details.
-
+1. Initially a **CSV file** can be provided, another **CSV file** can be provided while updating the query.
+2. Initially a **CSV file** can be provided a set of **username’s of wikimedians** can be provided manually, while updating the query.
+3. Initially a **set of username’s** of wikimedians are provided manually, a **CSV file** can be provided while updating the query.
+4. Initially a **set of username’s** of wikimedians are provided manually, another set of **username’s of wikimedians** are provided manually while updating the query.
 
 Deleting Queries
 ================
