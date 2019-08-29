@@ -1,5 +1,5 @@
 @import 'fonts.css';
-@import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
+@import url(https://tools-static.wmflabs.org/fontcdn/css?family=Lato);
 
 h1.accounts, h2.accounts, h4.accounts {
   color: #54595d;
