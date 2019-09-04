@@ -28,7 +28,7 @@ import { Line } from 'react-chartjs-2';
 import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
-import { production } from './App';
+import { production, production_text } from './App';
 import { NavBar } from './components/nav'
 
 /** 
@@ -516,7 +516,7 @@ class QueryResult extends React.Component {
                                 as={Link}
                                 to={
                                   production
-                                    ? '/contrabandapp/query/' +
+                                    ? production_text + '/query/' +
                                     this.state.query +
                                     '/update/'
                                     : '/query/' + this.state.query + '/update/'
