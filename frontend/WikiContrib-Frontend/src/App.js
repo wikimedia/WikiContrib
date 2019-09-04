@@ -11,14 +11,11 @@ import UserContribution from './contribution';
 */
 
 export const production = false;
+export const production_text = '/wikicontrib';
 
 class App extends Component {
-  state = {
-    text: '/contrabandapp',
-  };
   render() {
-    let { text: t } = this.state;
-    let domain = production ? t : '';
+    let domain = production ? production_text : '';
     return (
       <BrowserRouter>
         <Switch>

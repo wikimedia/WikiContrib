@@ -20,7 +20,7 @@ import {
   Loader,
   Header,
 } from 'semantic-ui-react';
-import { production } from './App';
+import { production, production_text } from './App';
 import { NavBar } from './components/nav';
 
 var emptyObj = {
@@ -39,9 +39,11 @@ export class Query extends Component {
     super(props);
     let type;
     if (production) {
-      type = this.props.location.pathname === '/contrabandapp/' ? true : false;
+      type = (this.props.location.pathname === production_text + '/' ||
+        this.props.location.pathname === production_text) ? true : false;
     } else {
-      type = this.props.location.pathname === '/' ? true : false;
+      type = (this.props.location.pathname === '/' ||
+        this.props.location.pathname === '') ? true : false;
     }
     this.state = {
       step: 1,
@@ -335,7 +337,7 @@ export class Query extends Component {
         hash = this.props.match.params.hash;
       }
       this.setState({
-        redirect: production ? 'contrabandapp/' + hash : hash,
+        redirect: production ? "wikicontrib" + "/" + hash : hash,
         loading: false,
         loadData: response,
       });

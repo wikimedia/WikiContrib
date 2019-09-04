@@ -13,7 +13,7 @@
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.87.2"
   },
-  "homepage": "/contrabandapp",
+  "homepage": "/wikicontrib",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
