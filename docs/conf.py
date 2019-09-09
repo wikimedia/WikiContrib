@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'WikiContrib'
-copyright = '2019, Wikimeida Foundation'
+copyright = '2019, Wikimedia Foundation'
 author = 'Rammanoj potla'
 
 # The full version, including alpha/beta/rc tags

@@ -56,6 +56,7 @@ const chartOptions = {
         },
         ticks: {
           fontSize: 15,
+          stepSize: 1
         },
         display: true,
       },

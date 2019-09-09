@@ -1,5 +1,5 @@
 @import 'fonts.css';
-@import url('https://tools-static.wmflabs.org/fontcdn/css?family=Lato');
+@import 'https://tools-static.wmflabs.org/fontcdn/css?family=Lato:400,700,400italic,700italic&subset=latin';
 
 h1.accounts,
 h2.accounts,

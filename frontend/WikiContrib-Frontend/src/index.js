@@ -2,8 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import 'semantic-ui-css/semantic.min.css';
+import { production } from './App';
 import * as serviceWorker from './serviceWorker';
+if (production) {
+  require('./dist/semantic.min.css');
+} else {
+  require('semantic-ui-css/semantic.min.css');
+}
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
