@@ -90,7 +90,7 @@ There is also an input box provided. If you want to get the contributions of a s
 It displays the recommendations of top 50 matching users.
 
 
-Updating Quries
+Updating Queries
 ===============
 
 Once a user creates a query with the username’s of a set of wikimedians and at a later point of time, if he/she wants to know the contributions of another wikimedian, instead of creating a new query for a single wikimedian, he/she can update the query and add the corresponding usernames.
