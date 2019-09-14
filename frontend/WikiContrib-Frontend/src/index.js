@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { production } from './App';
 import * as serviceWorker from './serviceWorker';
-if (production) {
+
+if (process.env.NODE_ENV === 'production') {
   require('./dist/semantic.min.css');
 } else {
   require('semantic-ui-css/semantic.min.css');
