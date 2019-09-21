@@ -10,7 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os, environ
+import os
+import environ
 
 env = environ.Env()
 environ.Env.read_env()
@@ -23,14 +24,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'aquo6@!a_0&r1n$=%t2$299*k$q3-(por8kc$^egvf=awgu*nm'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = ['tools.wmflabs.org']
 
-BASE_URL = 'http://tools.wmflabs.org/contraband/'
+BASE_URL = env('BASE_URL_REMOTE')
 
 
 # Application definition
@@ -85,12 +86,12 @@ WSGI_APPLICATION = 'contraband.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DB_NAME'),
+        'ENGINE': env('ENGINE_REMOTE'),
+        'NAME': env('DB_NAME_REMOTE'),
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'tools.db.svc.eqiad.wmflabs',
-        'PORT': '3306',
+        'HOST': env('HOST'),
+        'PORT': env('PORT'),
     }
 }
 

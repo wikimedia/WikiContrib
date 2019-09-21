@@ -6,12 +6,13 @@ The present doc deals about installing and running `backend`. If you go inside `
 
 # Steps to setup server locally
 
-1. Create a virtual environment.
-2. Install the required packages to run the tool.
-3. Create the phabricator account and generate a Conduit API token.
-4. Run the migrations.
-5. Create super user
-3. Run the local server.
+1. Create a virtual environment
+2. Install the required packages to run the tool
+3. Create the phabricator account and generate a Conduit API token
+4. Set up environment variables
+5. Run the migrations
+6. Create super user
+7. Run the local server
 
 
 ## Creating a virtual environment:
@@ -65,13 +66,17 @@ django-admin --version
 The output is something like: `2.2.2`.
 
 
-## Create the phabricator account and generate a Conduit API token:
+## Create a Phabricator account and generate a Conduit API token:
 
 Before running the development server, you need to provide an API key to fetch the details from the phabricator. So create a phabricator account from [here](https://phabricator.wikimedia.org/auth/start/?next=%2F). Use **Log In or Register** through Mediawiki(If you don't have a Mediawiki account, you can create it from [here](https://www.mediawiki.org/w/index.php?title=Special:CreateAccount)).
 
 Once you login to the phabricator. You can generate a Conduit API token from `https://phabricator.wikimedia.org/settings/user/{Your username}/page/apitokens/` (fill your username in the link).
 
 Copy the API token, and paste it in the variable named `API_TOKEN` in the file `backend/Contraband/contraband/settings.py`
+
+## Set up environment variables
+Copy contents of `backend/Contraband/contraband/.env.example` to a new file `backend/Contraband/contraband/.env`. Update it! Most likely you will be making changes only to `DB_NAME`, `DB_USER`, `DB_PASSWORD` and `PHAB_KEY` variables.
+
 
 ## Run the migrations:
 
