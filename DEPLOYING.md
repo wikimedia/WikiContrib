@@ -33,40 +33,14 @@ So, you need to include a ```homepage``` in package.json file. Open your package
 
 This can be a bit complicated task (to understand). In the previous section we only configured urls of the resources like css, js, images, icons etc to load from URL ```/project``` instead of ```/``` in production. But you might also have many routes and redirects declared in your app (using ```react-router-dom```). You need to update all the routes else, your app just returns a 404 page in prodcution.
 
-In the page where you declared all the routes add a variable named **production**
-Eg:
-```js
-export const production = false;
-
-class App extends Component {
-  state = {
-    text: '/tool_name',
-  };
-  render() {
-    let { text: t } = this.state;
-    let domain = production ? t : '';
-    return (
-      <BrowserRouter>
-        <Switch>
-          <Route exact path={domain + '/:hash/'} component={QueryResult} />
-          <Route component={NotFound} />
-        </Switch>
-      </BrowserRouter>
-    );
-  }
-}
-
-export default App;
-```
+In the page containing routes, distinguish between `development` and `production` environment via `process.env.NODE_ENV`.
 
 In the similar way to the example above, configure all the routes required. You also need to change the redirects. Suppose I have a redirect in some other file. You can change it using:
 
 ```js
-import {production} from "./App"
-
  <Redirect
     to={{
-      pathname: production ? "/tool_name/some_other_url" : "/some_other_url"
+      pathname: process.env.NODE_ENV === 'production' ? "/tool_name/some_other_url" : "/some_other_url"
     }}
 />
 ```

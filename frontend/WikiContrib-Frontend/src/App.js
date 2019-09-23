@@ -10,12 +10,11 @@ import UserContribution from './contribution';
     All the Routers are declared here.
 */
 
-export const production = false;
-export const production_text = '/wikicontrib';
+export const tool_name = '/wikicontrib';
 
 class App extends Component {
   render() {
-    let domain = production ? production_text : '';
+    let domain = process.env.NODE_ENV === 'production' ? tool_name : '';
     return (
       <BrowserRouter>
         <Switch>
