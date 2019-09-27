@@ -121,9 +121,9 @@ class DisplayUser extends React.Component {
                     )}
                 </h1>
                 <h2 className="accounts">
-                  {full_months[st.getMonth() - 1] + " " + st.getFullYear()}
+                  {full_months[st.getMonth()] + " " + st.getFullYear()}
                   -
-                  {full_months[et.getMonth()] + " " + et.getFullYear()}
+                  {full_months[et.getMonth() - 1] + " " + et.getFullYear()}
                 </h2>
               </span>
             </React.Fragment>
@@ -248,6 +248,31 @@ class QueryResult extends React.Component {
         data.datasets[0].data[index] += 1;
       }
     });
+
+    /*
+    * Sort data array based on the start date such that
+    * the data in the `Phabricator` and `Gerrit` graph
+    * flows left to right i.e., from a past month to the
+    * selected month.
+    */
+
+    let data_len = data.datasets.length,
+      start_time = this.state.current_filters.start_time,
+      m_index = new Date(start_time).getMonth(),
+      lbl_a = months.slice(0, m_index),
+      lbl_b = months.slice(m_index);
+
+    data.labels = lbl_b.concat(lbl_a);
+
+    for (var i = 0; i < data_len; i++) {
+      if(data.datasets[i]) {
+        let set_a = data.datasets[i].data,
+          set_b = set_a.splice(m_index);
+
+        data.datasets[i].data = set_b.concat(set_a);
+      }
+    }
+
     return data;
   };
 
