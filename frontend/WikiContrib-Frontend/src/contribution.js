@@ -193,7 +193,7 @@ class UserContribution extends React.Component {
         items = [];
       while (numb_months != 0) {
         if ((numb_months - 1) % breakpoint === 0) {
-          items.push(
+          items.unshift(
             <GenerateMonth
               month={months[start_month]}
               key={numb_months}
@@ -202,10 +202,10 @@ class UserContribution extends React.Component {
               set={this.props.set}
             />
           );
-          render_months.push(<div className="flex-row">{items}</div>);
+          render_months.unshift(<div className="flex-row">{items}</div>);
           items = [];
         } else {
-          items.push(
+          items.unshift(
             <GenerateMonth
               month={months[start_month]}
               key={numb_months}
