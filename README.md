@@ -28,7 +28,7 @@ In default, the tool searches for all the contributions of the user in the past 
 Initially, clone the repo with the command
 
 ```commandline
-git clone https://github.com/rammanoj/WikiContrib.git
+git clone https://github.com/wikimedia/WikiContrib.git
 ```
 
 The tool has two different components i.e Backend and Frontend Each of them has their own installation instructions.
