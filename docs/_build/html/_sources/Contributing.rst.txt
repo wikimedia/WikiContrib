@@ -5,7 +5,7 @@ Contributing
 Reporting bugs
 ==============
 
-If you find any bugs or issues while using the app. Feel free to report them `here <https://github.com/wikimedia/Contraband/>`_.
+If you find any bugs or issues while using the app. Feel free to report them `here <https://github.com/wikimedia/WikiContrib/>`_.
 
 If you are reporting a new issue, please provide these detials:
 
@@ -18,7 +18,7 @@ If you are reporting a new issue, please provide these detials:
 Contributing to the repo
 ========================
 
-Thanks for choosing the project to contribute. You can install the repo locally through the installation instructions provided in "Installation" section. You can find the list of issues in tool `here <https://github.com/wikimedia/Contraband/issues>`_.
+Thanks for choosing the project to contribute. You can install the repo locally through the installation instructions provided in "Installation" section. You can find the list of issues in tool `here <https://github.com/wikimedia/WikiContrib/issues>`_.
 You can choose an issue and fix it. Keep your master branch updated and pull all the changes before making a PR.
 
 **Note:** If you are updating the backend after you make some change, you can check if all the tests are passing using the command:
