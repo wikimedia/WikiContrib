@@ -4,7 +4,7 @@ Installation
 
 Initially, clone the repo with the command.
 
-``git clone https://github.com/rammanoj/Contraband.git``
+``git clone https://github.com/wikimedia/WikiContrib.git``
 
 The tool has two different components(Backend and Frontend). Each of them has their own installation instructions.
 

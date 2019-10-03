@@ -28,12 +28,12 @@ In default, the tool searches for all the contributions of the user in the past 
 Initially, clone the repo with the command
 
 ```commandline
-git clone https://github.com/rammanoj/WikiContrib.git
+git clone https://github.com/wikimedia/WikiContrib.git
 ```
 
 The tool has two different components i.e Backend and Frontend Each of them has their own installation instructions.
 
-[Backend installation file](https://github.com/rammanoj/WikiContrib/blob/master/backend/Contraband/Install.md) | [Frontend installation file](https://github.com/rammanoj/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install.md)
+[Backend installation file](https://github.com/wikimedia/WikiContrib/blob/master/backend/Contraband/Install.md) | [Frontend installation file](https://github.com/wikimedia/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install.md)
 
 **Note:** You can find the instrucutions of how to host the react apps on toolforge [here](DEPLOYING.md).
 
@@ -45,4 +45,4 @@ Official Documentation: https://wikicontrib.readthedocs.io/
 
 ## License
 
-[MIT](https://github.com/rammanoj/WikiContrib/blob/master/LICENSE)
+[MIT](https://github.com/wikimedia/WikiContrib/blob/master/LICENSE)
