@@ -37,4 +37,4 @@ Now type the following command in the same directory.
 npm start
 ```
 
-This starts a development server in a URL alike `http://localhost:3000/`. Hurray! you have successfully hosted the fronend in local environment.
+This starts a development server in a URL alike `http://localhost:3000/`. Hurray! you have successfully hosted the frontend in local environment.
