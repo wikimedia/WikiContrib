@@ -39,7 +39,7 @@ export const months = [
 ];
 export const full_months = [
   'January',
-  'Feberuary',
+  'February',
   'March',
   'April',
   'May',
