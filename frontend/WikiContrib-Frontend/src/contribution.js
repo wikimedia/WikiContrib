@@ -183,7 +183,7 @@ class UserContribution extends React.Component {
               : approx_days == 180
                 ? 6
                 : 12;
-      let start_month = new Date(this.props.end_time).getMonth() - 1;
+      let start_month = new Date(this.props.end_time).getUTCMonth() - 1;
       let year = new Date(this.props.end_time).getFullYear();
       if (start_month == -1) {
         start_month = 11;

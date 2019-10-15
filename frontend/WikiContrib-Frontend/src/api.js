@@ -137,17 +137,19 @@ export const format_status = arr => {
 
 export const get_timestamp = (date1, date2) => {
   let days = Math.abs((date2 - date1) / 86400000);
-  let day = 30;
+
   if (days >= 365) {
-    day = 365;
+    days = 365;
   } else if (days >= 180 && days < 365) {
-    day = 180;
+    days = 180;
   } else if (days >= 89 && days < 180) {
-    day = 90;
+    days = 90;
   } else if (days >= 60 && days < 90) {
-    day = 60;
+    days = 60;
+  } else {
+    days = 30;
   }
-  return day;
+  return days;
 };
 
 export const UserActivityBreakPoint = () => {
