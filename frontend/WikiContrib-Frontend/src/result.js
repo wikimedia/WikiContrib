@@ -21,7 +21,7 @@ import {
   format_status,
   full_months,
   get_timestamp,
-  filterDetailApi
+  filterDetailApi,
 } from './api';
 import UserSearch from './components/dropdown';
 import { Line } from 'react-chartjs-2';
@@ -29,11 +29,11 @@ import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
 import { tool_name } from './App';
-import { NavBar } from './components/nav'
+import { NavBar } from './components/nav';
 
-/** 
-* Styles to the Line Graphs.
-*/
+/**
+ * Styles to the Line Graphs.
+ */
 const chartOptions = {
   legend: {
     position: 'top',
@@ -57,7 +57,11 @@ const chartOptions = {
         ticks: {
           fontSize: 15,
           beginAtZero: true,
-          callback: function (value) { if (Number.isInteger(value)) { return value; } }
+          callback: function(value) {
+            if (Number.isInteger(value)) {
+              return value;
+            }
+          },
         },
         display: true,
       },
@@ -65,14 +69,10 @@ const chartOptions = {
   },
 };
 
-/** 
-* Display Fullname, Phabricator Username and Gerrit Username of the user.
-*/
+/**
+ * Display Fullname, Phabricator Username and Gerrit Username of the user.
+ */
 class DisplayUser extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render = () => {
     let { start_time: st, end_time: et } = this.props.filters;
     st = new Date(st);
@@ -87,56 +87,57 @@ class DisplayUser extends React.Component {
             </Placeholder>
           </React.Fragment>
         ) : (
-            <React.Fragment>
-              <Header className="name">{this.props.username}'s Activity</Header>
-              <span>
-                <h1 className="accounts">
-                  Gerrit:{' '}
-                  {this.props.gerrit_username !== '' ? (
-                    <a
-                      target="_blank"
-                      href={
-                        'https://gerrit.wikimedia.org/r/#/q/' +
-                        this.props.gerrit_username
-                      }
-                    >
-                      {this.props.gerrit_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}{' '}
-                  | Phabricator:{' '}
-                  {this.props.phabricator_username !== '' ? (
-                    <a
-                      target="_blank"
-                      href={
-                        'https://phabricator.wikimedia.org/p/' +
-                        this.props.phabricator_username +
-                        '/'
-                      }
-                    >
-                      {this.props.phabricator_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}
-                </h1>
-                <h2 className="accounts">
-                  {full_months[st.getMonth()] + " " + st.getFullYear()}
-                  -
-                  {full_months[et.getMonth() - 1] + " " + et.getFullYear()}
-                </h2>
-              </span>
-            </React.Fragment>
-          )}
+          <React.Fragment>
+            <Header className="name">{this.props.username}'s Activity</Header>
+            <span>
+              <h1 className="accounts">
+                Gerrit:{' '}
+                {this.props.gerrit_username !== '' ? (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={
+                      'https://gerrit.wikimedia.org/r/#/q/' +
+                      this.props.gerrit_username
+                    }
+                  >
+                    {this.props.gerrit_username}
+                  </a>
+                ) : (
+                  'None'
+                )}{' '}
+                | Phabricator:{' '}
+                {this.props.phabricator_username !== '' ? (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={
+                      'https://phabricator.wikimedia.org/p/' +
+                      this.props.phabricator_username +
+                      '/'
+                    }
+                  >
+                    {this.props.phabricator_username}
+                  </a>
+                ) : (
+                  'None'
+                )}
+              </h1>
+              <h2 className="accounts">
+                {full_months[st.getMonth()] + ' ' + st.getFullYear()}-
+                {full_months[et.getMonth() - 1] + ' ' + et.getFullYear()}
+              </h2>
+            </span>
+          </React.Fragment>
+        )}
       </div>
-    )
-  }
+    );
+  };
 }
 
-/** 
-* Display the User Contribution Statistics and User Activity
-*/
+/**
+ * Display the User Contribution Statistics and User Activity
+ */
 class QueryResult extends React.Component {
   constructor(props) {
     super(props);
@@ -251,11 +252,11 @@ class QueryResult extends React.Component {
     });
 
     /*
-    * Sort data array based on the start date such that
-    * the data in the `Phabricator` and `Gerrit` graph
-    * flows left to right i.e., from a past month to the
-    * selected month.
-    */
+     * Sort data array based on the start date such that
+     * the data in the `Phabricator` and `Gerrit` graph
+     * flows left to right i.e., from a past month to the
+     * selected month.
+     */
 
     let data_len = data.datasets.length,
       start_time = this.state.current_filters.start_time,
@@ -266,7 +267,7 @@ class QueryResult extends React.Component {
     data.labels = lbl_b.concat(lbl_a);
 
     for (var i = 0; i < data_len; i++) {
-      if(data.datasets[i]) {
+      if (data.datasets[i]) {
         let set_a = data.datasets[i].data,
           set_b = set_a.splice(m_index);
 
@@ -358,7 +359,7 @@ class QueryResult extends React.Component {
      * Callback function to feed the fetched data(on updating filters) to the state.
      * @param {Object} response Updated data and filters.
      */
-    if (response.error != 1) {
+    if (response.error !== 1) {
       this.setState({
         data: response.result,
         current_filters: this.state.update_filters,
@@ -395,7 +396,12 @@ class QueryResult extends React.Component {
      * Fetch API on searching for a user
      * @param {Object} obj Username of the user whose details are to be fetched.
      */
-    this.setState({ value: obj.value, loading: true, notFound: false, activity: undefined });
+    this.setState({
+      value: obj.value,
+      loading: true,
+      notFound: false,
+      activity: undefined,
+    });
     let uri =
       fetchDetails.replace('<hash>', this.state.query) + '?user=' + obj.value;
     fetchAsynchronous(uri, 'GET', {}, {}, this.callback);
@@ -440,15 +446,8 @@ class QueryResult extends React.Component {
     } else {
       month -= 1;
     }
-    console.log(full_months[month] + ", " + year)
-    return full_months[month] + ", " + year;
-    // full_months[new Date(uf.end_time).getMonth() == 0 ?
-    //   11 : new Date(uf.end_time).getMonth() - 1] +
-    //   ', ' +
-    //   new Date(uf.end_time).getMonth() === 0 ? new Date(uf.end_time).getFullYear() - 1 :
-    //   new Date(uf.end_time).getFullYear()
-
-  }
+    return full_months[month] + ', ' + year;
+  };
 
   render = () => {
     document.body.style.backgroundColor = '#f8f9fa';
@@ -472,8 +471,8 @@ class QueryResult extends React.Component {
             }
           />
         ) : (
-            ''
-          )}
+          ''
+        )}
 
         {this.state.next !== null ? (
           <div className="right_arrow">
@@ -492,8 +491,8 @@ class QueryResult extends React.Component {
             />
           </div>
         ) : (
-            ''
-          )}
+          ''
+        )}
         <NavBar />
         <Grid>
           <Grid.Row>
@@ -505,57 +504,72 @@ class QueryResult extends React.Component {
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
+                  <Grid>
+                    <Grid.Row>
+                      <Grid.Column computer={14} tablet={12} mobile={16}>
+                        <UserSearch
+                          set={this.onUserSearch}
+                          hash={this.state.query}
+                          value={this.state.value}
+                        />
+                      </Grid.Column>
 
-                    <Grid>
-                      <Grid.Row>
-                        <Grid.Column computer={14} tablet={12} mobile={16}>
-                          <UserSearch
-                            set={this.onUserSearch}
-                            hash={this.state.query}
-                            value={this.state.value}
-                          />
-                        </Grid.Column>
-
-                        <Grid.Column computer={1} tablet={2} mobile={8} style={{ marginTop: window.innerWidth >= 768 ? '8vh' : '', textAlign: 'right' }}>
-                          <Popup
-                            content="View Filters"
-                            position="top center"
-                            trigger={
-                              <Button
-                                icon="options"
-                                className="filters"
-                                onClick={() =>
-                                  this.setState({
-                                    view_filters: !this.state.view_filters,
-                                  })
-                                }
-                              />
-                            }
-                          />
-                        </Grid.Column>
-                        <Grid.Column computer={1} tablet={2} mobile={8} style={{ marginTop: window.innerWidth >= 768 ? '8vh' : '' }}>
-                          <Popup
-                            content="Update"
-                            position="top center"
-                            trigger={
-                              <Button
-                                className="update_query"
-                                icon="write"
-                                as={Link}
-                                to={
-                                  process.env.NODE_ENV === 'production'
-                                    ? tool_name + '/query/' +
+                      <Grid.Column
+                        computer={1}
+                        tablet={2}
+                        mobile={8}
+                        style={{
+                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
+                          textAlign: 'right',
+                        }}
+                      >
+                        <Popup
+                          content="View Filters"
+                          position="top center"
+                          trigger={
+                            <Button
+                              icon="options"
+                              className="filters"
+                              onClick={() =>
+                                this.setState({
+                                  view_filters: !this.state.view_filters,
+                                })
+                              }
+                            />
+                          }
+                        />
+                      </Grid.Column>
+                      <Grid.Column
+                        computer={1}
+                        tablet={2}
+                        mobile={8}
+                        style={{
+                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
+                        }}
+                      >
+                        <Popup
+                          content="Update"
+                          position="top center"
+                          trigger={
+                            <Button
+                              className="update_query"
+                              icon="write"
+                              as={Link}
+                              to={
+                                process.env.NODE_ENV === 'production'
+                                  ? tool_name +
+                                    '/query/' +
                                     this.state.query +
                                     '/update/'
-                                    : '/query/' + this.state.query + '/update/'
-                                }
-                              />
-                            }
-                          />
-                        </Grid.Column>
-                      </Grid.Row>
-                    </Grid>
-                  )}
+                                  : '/query/' + this.state.query + '/update/'
+                              }
+                            />
+                          }
+                        />
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid>
+                )}
                 <Transition
                   animation="fade down"
                   duration={300}
@@ -598,15 +612,13 @@ class QueryResult extends React.Component {
                             search
                             selection
                             icon={false}
-                            value={
-                              this.func()
-                            }
+                            value={this.func()}
                             options={get_dates()}
                             onChange={(e, obj) => {
                               let date = obj.value.split(',');
                               date[1] = date[1].substr(1);
                               date[0] = full_months.indexOf(date[0]) + 2;
-                              if (date[0] == 13) {
+                              if (date[0] === 13) {
                                 date[1] = parseInt(date[1]) + 1;
                                 date[0] = 1;
                               }
@@ -618,15 +630,15 @@ class QueryResult extends React.Component {
                                 new Date(uf.start_time)
                               );
                               let incr =
-                                days == 30
+                                days === 30
                                   ? 1
-                                  : days == 60
-                                    ? 2
-                                    : days == 90
-                                      ? 3
-                                      : days == 180
-                                        ? 6
-                                        : 12;
+                                  : days === 60
+                                  ? 2
+                                  : days === 90
+                                  ? 3
+                                  : days === 180
+                                  ? 6
+                                  : 12;
 
                               let updated_val = new Date(filters.end_time);
                               let start_time = new Date(
@@ -667,12 +679,12 @@ class QueryResult extends React.Component {
                                 value <= 31
                                   ? 1
                                   : value <= 61
-                                    ? 2
-                                    : value <= 92
-                                      ? 3
-                                      : value <= 183
-                                        ? 6
-                                        : 12;
+                                  ? 2
+                                  : value <= 92
+                                  ? 3
+                                  : value <= 183
+                                  ? 6
+                                  : 12;
                               date = new Date(
                                 date.getFullYear(),
                                 date.getMonth() - incr,
@@ -713,108 +725,108 @@ class QueryResult extends React.Component {
           {this.state.notFound ? (
             <NotFound />
           ) : (
-              <React.Fragment>
-                <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={8}>
-                    <DisplayUser
+            <React.Fragment>
+              <Grid.Row>
+                <Grid.Column width={2} />
+                <Grid.Column width={8}>
+                  <DisplayUser
+                    loading={this.state.loading}
+                    username={this.state.current}
+                    gerrit_username={this.state.gerrit_username}
+                    phabricator_username={this.state.phab_username}
+                    filters={this.state.current_filters}
+                  />
+                </Grid.Column>
+                <Grid.Column width={2} />
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column computer={2} mobile={1} tablet={1} />
+                <Grid.Column computer={12} tablet={14} mobile={14}>
+                  <Grid>
+                    <Grid.Row>
+                      <Grid.Column computer={8} mobile={16} tablet={8}>
+                        {this.state.loading ? (
+                          <Card className="graph_load">
+                            <Card.Content>
+                              <Placeholder fluid className="image_load">
+                                <Placeholder.Line />
+                              </Placeholder>
+                            </Card.Content>
+                          </Card>
+                        ) : (
+                          <Card className="chart_container">
+                            <span style={{ textAlign: 'center' }}>
+                              <Header className="chart"> PHABRICATOR </Header>
+                              <Line
+                                ref="chart"
+                                data={this.getGraphData('phabricator')}
+                                options={chartOptions}
+                              />
+                            </span>
+                          </Card>
+                        )}
+                      </Grid.Column>
+                      <Grid.Column computer={8} mobile={16} tablet={8}>
+                        {this.state.loading ? (
+                          <Card className="graph_load">
+                            <Card.Content>
+                              <Placeholder fluid className="image_load">
+                                <Placeholder.Line />
+                              </Placeholder>
+                            </Card.Content>
+                          </Card>
+                        ) : (
+                          <Card className="chart_container">
+                            <span style={{ textAlign: 'center' }}>
+                              <Header className="chart"> GERRIT </Header>
+                              <Line
+                                ref="chart"
+                                data={this.getGraphData('gerrit')}
+                                options={chartOptions}
+                              />
+                            </span>
+                          </Card>
+                        )}
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid>
+                </Grid.Column>
+                <Grid.Column computer={2} mobile={1} tablet={1} />
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={2} />
+                <Grid.Column width={12}>
+                  <Card className="chart_container">
+                    <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
+                    <UserContribution
+                      start_time={cf.start_time}
+                      end_time={cf.end_time}
+                      user={this.state.current}
+                      data={this.state.data}
+                      set={this.set}
                       loading={this.state.loading}
+                    />
+                  </Card>
+                </Grid.Column>
+                <Grid.Column width={2} />
+              </Grid.Row>
+              {this.state.activity !== undefined ? (
+                <Grid.Row>
+                  <Grid.Column width={3} />
+                  <Grid.Column width={9}>
+                    <Activity
+                      date={this.state.activity}
+                      hash={this.state.query}
                       username={this.state.current}
-                      gerrit_username={this.state.gerrit_username}
-                      phabricator_username={this.state.phab_username}
-                      filters={this.state.current_filters}
                     />
                   </Grid.Column>
-                  <Grid.Column width={2} />
+                  <Grid.Column width={3} />
                 </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
-                  <Grid.Column computer={12} tablet={14} mobile={14}>
-                    <Grid>
-                      <Grid.Row>
-                        <Grid.Column computer={8} mobile={16} tablet={8}>
-                          {this.state.loading ? (
-                            <Card className="graph_load">
-                              <Card.Content>
-                                <Placeholder fluid className="image_load">
-                                  <Placeholder.Line />
-                                </Placeholder>
-                              </Card.Content>
-                            </Card>
-                          ) : (
-                              <Card className="chart_container">
-                                <span style={{ textAlign: 'center' }}>
-                                  <Header className="chart"> PHABRICATOR </Header>
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('phabricator')}
-                                    options={chartOptions}
-                                  />
-                                </span>
-                              </Card>
-                            )}
-                        </Grid.Column>
-                        <Grid.Column computer={8} mobile={16} tablet={8}>
-                          {this.state.loading ? (
-                            <Card className="graph_load">
-                              <Card.Content>
-                                <Placeholder fluid className="image_load">
-                                  <Placeholder.Line />
-                                </Placeholder>
-                              </Card.Content>
-                            </Card>
-                          ) : (
-                              <Card className="chart_container">
-                                <span style={{ textAlign: 'center' }}>
-                                  <Header className="chart"> GERRIT </Header>
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('gerrit')}
-                                    options={chartOptions}
-                                  />
-                                </span>
-                              </Card>
-                            )}
-                        </Grid.Column>
-                      </Grid.Row>
-                    </Grid>
-                  </Grid.Column>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
-                    <Card className="chart_container">
-                      <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
-                      <UserContribution
-                        start_time={cf.start_time}
-                        end_time={cf.end_time}
-                        user={this.state.current}
-                        data={this.state.data}
-                        set={this.set}
-                        loading={this.state.loading}
-                      />
-                    </Card>
-                  </Grid.Column>
-                  <Grid.Column width={2} />
-                </Grid.Row>
-                {this.state.activity !== undefined ? (
-                  <Grid.Row>
-                    <Grid.Column width={3} />
-                    <Grid.Column width={9}>
-                      <Activity
-                        date={this.state.activity}
-                        hash={this.state.query}
-                        username={this.state.current}
-                      />
-                    </Grid.Column>
-                    <Grid.Column width={3} />
-                  </Grid.Row>
-                ) : (
-                    ''
-                  )}
-              </React.Fragment>
-            )}
+              ) : (
+                ''
+              )}
+            </React.Fragment>
+          )}
         </Grid>
       </React.Fragment>
     );
