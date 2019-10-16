@@ -10,7 +10,7 @@ class NotFound extends React.Component {
       {'add_spacing' in this.props ? <div style={{ marginTop: '10em' }} /> : ''}
 
       <div className="notFound">
-        <img src={emoji} />
+        <img src={emoji} alt="404 Not Found" />
         <h1>OOps!!</h1>
         <h1>404</h1>
         <h3>

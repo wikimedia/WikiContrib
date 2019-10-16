@@ -15,10 +15,6 @@ const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
  * Generate a Single Day in the User Contribution Activity.
  */
 class GenerateDay extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render = () => {
     let color = 'rgb(227, 231, 229)';
     let data = 0;
@@ -26,7 +22,7 @@ class GenerateDay extends React.Component {
       data = this.props.data[this.props.year][months.indexOf(this.props.month)][
         this.props.date
       ];
-      if (data == undefined) {
+      if (data === undefined) {
         data = 0;
       }
     } catch (TypeError) {
@@ -60,10 +56,6 @@ class GenerateDay extends React.Component {
  * Generate a Month given in the time span.
  */
 class GenerateMonth extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   getDays = (year, month) => {
     /**
      * Caluclate the number of days of a month in an year.
@@ -89,7 +81,7 @@ class GenerateMonth extends React.Component {
     for (let i = 1; i <= days; i++) {
       let item = [];
 
-      while (i % 8 != 0 && i <= days) {
+      while (i % 8 !== 0 && i <= days) {
         item.push(
           <GenerateDay
             key={i}
@@ -102,7 +94,7 @@ class GenerateMonth extends React.Component {
         );
         i++;
       }
-      if (days != ((8 * items.length) + item.length)) {
+      if (days !== 8 * items.length + item.length) {
         item.push(
           <GenerateDay
             key={i}
@@ -122,24 +114,17 @@ class GenerateMonth extends React.Component {
     }
     return (
       <div style={{ textAlign: 'center' }}>
-        <span className="contribution_text">
-          {this.props.month}
-        </span>
+        <span className="contribution_text">{this.props.month}</span>
         <div className="flex-row">{items}</div>
       </div>
     );
   };
 }
 
-
 /**
  * Display User contributions on each and every day of selected time span.
  */
 class UserContribution extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   format = () => {
     /**
      * Format the received data to the proper format.
@@ -174,24 +159,24 @@ class UserContribution extends React.Component {
         new Date(this.props.end_time)
       );
       let numb_months =
-        approx_days == 30
+        approx_days === 30
           ? 1
-          : approx_days == 60
+          : approx_days === 60
             ? 2
-            : approx_days == 90
+            : approx_days === 90
               ? 3
-              : approx_days == 180
+              : approx_days === 180
                 ? 6
                 : 12;
       let start_month = new Date(this.props.end_time).getUTCMonth() - 1;
       let year = new Date(this.props.end_time).getFullYear();
-      if (start_month == -1) {
+      if (start_month === -1) {
         start_month = 11;
         year -= 1;
       }
       let breakpoint = UserActivityBreakPoint(),
         items = [];
-      while (numb_months != 0) {
+      while (numb_months !== 0) {
         if ((numb_months - 1) % breakpoint === 0) {
           items.unshift(
             <GenerateMonth
@@ -202,7 +187,11 @@ class UserContribution extends React.Component {
               set={this.props.set}
             />
           );
-          render_months.unshift(<div className="flex-row">{items}</div>);
+          render_months.unshift(
+            <div className="flex-row" key={render_months.length}>
+              {items}
+            </div>
+          );
           items = [];
         } else {
           items.unshift(
@@ -232,8 +221,8 @@ class UserContribution extends React.Component {
             {this.props.data.length}
           </span>
         ) : (
-            ''
-          )}
+          ''
+        )}
         <div className="user_activity">
           {this.props.loading ? (
             <div>
@@ -251,57 +240,48 @@ class UserContribution extends React.Component {
               </Placeholder>
             </div>
           ) : (
-              <React.Fragment>
-                <div className="render_activity"
-                >
-                  {render_months}
+            <React.Fragment>
+              <div className="render_activity">{render_months}</div>
+              <div style={{ right: '5%', position: 'absolute' }}>
+                <div>
+                  <span className="contribution_text">Less</span>
+                  <div
+                    className="day"
+                    style={{
+                      padding: 6 + getPadding(),
+                      display: 'inline-block',
+                      background: contributionColors.none,
+                    }}
+                  />
+                  <div
+                    className="day"
+                    style={{
+                      padding: 6 + getPadding(),
+                      display: 'inline-block',
+                      background: contributionColors.level1,
+                    }}
+                  />
+                  <div
+                    className="day"
+                    style={{
+                      padding: 6 + getPadding(),
+                      display: 'inline-block',
+                      background: contributionColors.level2,
+                    }}
+                  />
+                  <div
+                    className="day"
+                    style={{
+                      padding: 6 + getPadding(),
+                      display: 'inline-block',
+                      background: contributionColors.level3,
+                    }}
+                  />
+                  <span className="contribution_text">More</span>
                 </div>
-                <div
-                  style={{ right: '5%', position: 'absolute' }}
-                >
-                  <div>
-                    <span className="contribution_text">
-                      Less
-                  </span>
-                    <div
-                      className="day"
-                      style={{
-                        padding: 6 + getPadding(),
-                        display: 'inline-block',
-                        background: contributionColors.none,
-                      }}
-                    />
-                    <div
-                      className="day"
-                      style={{
-                        padding: 6 + getPadding(),
-                        display: 'inline-block',
-                        background: contributionColors.level1,
-                      }}
-                    />
-                    <div
-                      className="day"
-                      style={{
-                        padding: 6 + getPadding(),
-                        display: 'inline-block',
-                        background: contributionColors.level2,
-                      }}
-                    />
-                    <div
-                      className="day"
-                      style={{
-                        padding: 6 + getPadding(),
-                        display: 'inline-block',
-                        background: contributionColors.level3,
-                      }}
-                    />
-                    <span className="contribution_text">
-                      More
-                  </span>
-                  </div>
-                </div>
-              </React.Fragment>
-            )}
+              </div>
+            </React.Fragment>
+          )}
         </div>
       </React.Fragment>
     );

@@ -27,11 +27,11 @@ class Dropdown extends React.Component {
                 style={{ marginTop: 3, marginRight: 2 }}
               />
             ) : (
-                <Icon name="search" style={{ marginTop: 3 }} />
-              )}
+              <Icon name="search" style={{ marginTop: 3 }} />
+            )}
             <input
               onKeyPress={e => {
-                if (e.which == 13) {
+                if (e.which === 13) {
                   this.props.onSearchChange();
                 }
               }}
@@ -67,34 +67,33 @@ class Dropdown extends React.Component {
                   {this.props.noResultsMessage}
                 </div>
               ) : (
-                  <React.Fragment>
-                    {this.props.options.length == 0 ? (
-                      <div className="message_dropdown">
-                        {this.props.noResultsMessage}
-                      </div>
-                    ) : (
-                        <React.Fragment>
-                          {this.props.options.map((obj, ind) => (
-                            <div
-                              className="list_dropdown"
-                              key={ind}
-                              onClick={() => {
-                                console.log('came here');
-                                this.setState({ value: obj });
-                                this.props.onChange(obj);
-                              }}
-                            >
-                              {obj}
-                            </div>
-                          ))}
-                        </React.Fragment>
-                      )}
-                  </React.Fragment>
-                )}
+                <React.Fragment>
+                  {this.props.options.length === 0 ? (
+                    <div className="message_dropdown">
+                      {this.props.noResultsMessage}
+                    </div>
+                  ) : (
+                    <React.Fragment>
+                      {this.props.options.map((obj, ind) => (
+                        <div
+                          className="list_dropdown"
+                          key={ind}
+                          onClick={() => {
+                            this.setState({ value: obj });
+                            this.props.onChange(obj);
+                          }}
+                        >
+                          {obj}
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  )}
+                </React.Fragment>
+              )}
             </div>
           ) : (
-              ''
-            )}
+            ''
+          )}
         </div>
       </div>
     );
