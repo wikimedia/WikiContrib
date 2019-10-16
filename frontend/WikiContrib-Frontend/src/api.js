@@ -89,7 +89,7 @@ export const get_dates = () => {
 
   for (let i = current_year; i >= BASE_YEAR; i--) {
     for (let j = 11; j >= 0; j--) {
-      if (i == current_year && j > current_month) {
+      if (i === current_year && j > current_month) {
         continue;
       }
       rv.push({
@@ -127,7 +127,7 @@ export const format_status = arr => {
       rv.push({ key: i, value: i, text: 'PHABRICATOR: ' + i });
     }
 
-    if (i == 'open') {
+    if (i === 'open') {
       rv.push({ key: 'g-open', value: 'g-open', text: 'GERRIT: ' + i });
       rv.push({ key: 'p-open', value: 'p-open', text: 'PHABRICATOR: ' + i });
     }
@@ -184,7 +184,7 @@ export const getPadding = () => {
   }
 };
 
-
-export const info_content = "The tool provides user activity from two platforms (Phabricator and \
-                Gerrit) and display it. It fetches the contributions of the user in specified time span and \
-                visualize the data in form of graphs";
+export const info_content =
+  'The tool provides user activity from two platforms (Phabricator and' +
+  'Gerrit) and display it. It fetches the contributions of the user in' +
+  'specified time span and visualize the data in form of graphs';
