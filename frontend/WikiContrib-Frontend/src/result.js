@@ -87,49 +87,50 @@ class DisplayUser extends React.Component {
             </Placeholder>
           </React.Fragment>
         ) : (
-          <React.Fragment>
-            <Header className="name">{this.props.username}'s Activity</Header>
-            <span>
-              <h1 className="accounts">
-                Gerrit:{' '}
-                {this.props.gerrit_username !== '' ? (
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={
-                      'https://gerrit.wikimedia.org/r/#/q/' +
-                      this.props.gerrit_username
-                    }
-                  >
-                    {this.props.gerrit_username}
-                  </a>
-                ) : (
-                  'None'
-                )}{' '}
-                | Phabricator:{' '}
-                {this.props.phabricator_username !== '' ? (
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={
-                      'https://phabricator.wikimedia.org/p/' +
-                      this.props.phabricator_username +
-                      '/'
-                    }
-                  >
-                    {this.props.phabricator_username}
-                  </a>
-                ) : (
-                  'None'
-                )}
-              </h1>
-              <h2 className="accounts">
-                {full_months[st.getMonth()] + ' ' + st.getFullYear()}-
-                {full_months[et.getMonth() - 1] + ' ' + et.getFullYear()}
-              </h2>
-            </span>
-          </React.Fragment>
-        )}
+            <React.Fragment>
+              <Header className="name">{this.props.username}'s Activity</Header>
+              <span>
+                <h1 className="accounts">
+                  Gerrit:{' '}
+                  {this.props.gerrit_username !== '' ? (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={
+                        'https://gerrit.wikimedia.org/r/#/q/' +
+                        this.props.gerrit_username
+                      }
+                    >
+                      {this.props.gerrit_username}
+                    </a>
+                  ) : (
+                      'None'
+                    )}{' '}
+                  | Phabricator:{' '}
+                  {this.props.phabricator_username !== '' ? (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={
+                        'https://phabricator.wikimedia.org/p/' +
+                        this.props.phabricator_username +
+                        '/'
+                      }
+                    >
+                      {this.props.phabricator_username}
+                    </a>
+                  ) : (
+                      'None'
+                    )}
+                </h1>
+                <h2 className="accounts">
+                  {full_months[st.getUTCMonth()] + " " + st.getFullYear()}
+                  -
+                  {full_months[et.getUTCMonth() - 1] + " " + et.getFullYear()}
+                </h2>
+              </span>
+            </React.Fragment>
+          )}
       </div>
     );
   };
@@ -260,7 +261,7 @@ class QueryResult extends React.Component {
 
     let data_len = data.datasets.length,
       start_time = this.state.current_filters.start_time,
-      m_index = new Date(start_time).getMonth(),
+      m_index = new Date(start_time).getUTCMonth(),
       lbl_a = months.slice(0, m_index),
       lbl_b = months.slice(m_index);
 
@@ -438,7 +439,7 @@ class QueryResult extends React.Component {
 
   func = () => {
     let { update_filters: uf } = this.state;
-    let month = new Date(uf.end_time).getMonth();
+    let month = new Date(uf.end_time).getUTCMonth();
     let year = new Date(uf.end_time).getFullYear();
     if (month === 0) {
       month = 11;
@@ -446,8 +447,8 @@ class QueryResult extends React.Component {
     } else {
       month -= 1;
     }
-    return full_months[month] + ', ' + year;
-  };
+    return full_months[month] + ", " + year;
+  }
 
   render = () => {
     document.body.style.backgroundColor = '#f8f9fa';
@@ -643,10 +644,10 @@ class QueryResult extends React.Component {
                               let updated_val = new Date(filters.end_time);
                               let start_time = new Date(
                                 updated_val.getFullYear(),
-                                updated_val.getMonth() - incr,
+                                updated_val.getUTCMonth() - incr,
                                 1
                               );
-                              let month = start_time.getMonth() + 1;
+                              let month = start_time.getUTCMonth() + 1;
                               filters.start_time =
                                 start_time.getFullYear() + '-' + month + '-01';
                               this.setState({
@@ -687,10 +688,10 @@ class QueryResult extends React.Component {
                                   : 12;
                               date = new Date(
                                 date.getFullYear(),
-                                date.getMonth() - incr,
+                                date.getUTCMonth() - incr,
                                 1
                               );
-                              let month = date.getMonth() + 1;
+                              let month = date.getUTCMonth() + 1;
                               let filters = Object.assign({}, uf);
                               filters.start_time =
                                 date.getFullYear() + '-' + month + '-' + 1;
