@@ -20,22 +20,27 @@ class App extends Component {
         <Switch>
           {/* 404 handler */}
           <Route exact path={domain + '/404/'} component={NotFound} />
-          {/* 404 handler */}
+
+          {/* Display user Contribuions */}
           <Route
             exact
             path={domain + '/contribution/'}
             component={UserContribution}
           />
+
           {/* Create a new Query */}
           <Route exact path={domain + '/'} component={Query} />
+
           {/* Update a Query */}
           <Route
             exact
             path={domain + '/query/:hash/update/'}
             component={Query}
           />
+
           {/* Result to the query */}
           <Route exact path={domain + '/:hash/'} component={QueryResult} />
+
           {/* 404 Handler */}
           <Route component={NotFound} />
         </Switch>
