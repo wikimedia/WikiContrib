@@ -134,33 +134,6 @@ class TestViews(TestCase):
         path = 'uploads/' + query.hash_code + ".csv"
         remove(path)
 
-    def test_query_filter_update(self):
-        """
-        :Summary: Test QueryFilterView View (i.e Query Filter Retrieve / Update View).
-        """
-        hash = create_hash()
-        query = Query.objects.create(hash_code=hash, file=False)
-        for i in create_data['users']:
-            i['query'] = query
-            QueryUser.objects.create(**i)
-
-        # Add filters to the hash.
-        start_time = timezone.now().date().replace(day=1)
-        commits = ','.join(COMMIT_STATUS)
-        qf =QueryFilter.objects.create(
-            query=query,
-            start_time=start_time - timedelta(days=365),
-            end_time=start_time,
-            status=commits
-        )
-
-        # Update filers
-        url = filter_url.replace("<hash>", query.hash_code)
-        client = APIClient()
-        response = client.patch(url, filter_data, format='json')
-        self.assertEqual(response.status_code, 200)
-
-
 class TestModels(TestCase):
     """
     :Summary: Perform Modal Testing.

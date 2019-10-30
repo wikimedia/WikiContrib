@@ -149,7 +149,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
-API_TOKEN = env('PHAB_KEY')
+API_TOKEN = 'api-lxljpvb4ytoxwf5udndyhynz7ipm'
 CORS_ORIGIN_ALLOW_ALL = True
 
 try:
@@ -158,5 +158,7 @@ except ImportError:
     pass
 
 
-COMMIT_STATUS = ['merged', 'open', 'abandoned', 'declined', 'resolved', 'stalled', 'invalid',
-                 'closed', 'pending', 'reviewed', 'p-open', 'g-open']
+# COMMIT_STATUS = ['merged', 'open', 'abandoned', 'declined', 'resolved', 'stalled', 'invalid',
+                 # 'closed', 'pending', 'reviewed', 'p-open', 'g-open']
+
+COMMIT_STATUS = ['merged', 'open', 'resolved', 'p-open', 'g-open']
