@@ -2,8 +2,8 @@
  All the Global Constants are declared here.
 */
 
-// const BASE_API_URI = 'https://tools.wmflabs.org/contraband/';
-const BASE_API_URI = "http://127.0.0.1:8000/";
+const BASE_API_URI = 'https://tools.wmflabs.org/contraband/';
+// const BASE_API_URI = "http://127.0.0.1:8000/";
 
 // method: POST
 export const QueryCreateApi = BASE_API_URI + 'query/add/user/';
