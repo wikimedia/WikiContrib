@@ -514,6 +514,7 @@ class QueryResult extends React.Component {
                           value={this.state.value}
                         />
                       </Grid.Column>
+
                       <Grid.Column
                         computer={1}
                         tablet={2}

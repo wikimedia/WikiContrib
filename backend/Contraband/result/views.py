@@ -376,5 +376,3 @@ class GetUsers(APIView):
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         return Response({'users': users})
-
-

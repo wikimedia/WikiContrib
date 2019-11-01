@@ -312,3 +312,35 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             "message": "Successfully deleted the Query",
             "error": 0
         })
+
+
+class QueryFilterView(RetrieveUpdateDestroyAPIView):
+    """
+    :Summary: View, Update Filters to the Query.
+    """
+    serializer_class = QueryFilterSerializer
+    http_method_names = ['get', 'patch']
+
+    def get_object(self):
+        return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
+
+    def get(self, request, *args, **kwargs):
+        """
+        :Summary: GET request to view the query filters.
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: Query filters of the given query.
+        """
+        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        if QueryFilter.objects.filter(query=query).exists():
+            return super(QueryFilterView, self).get(request, *args, **kwargs)
+        else:
+            return Response({
+                "project": "",
+                "status": "",
+                "start_time": None,
+                "end_time": None
+            })
+
+    
