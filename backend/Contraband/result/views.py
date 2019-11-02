@@ -10,12 +10,13 @@ from aiohttp import ClientSession
 import time
 from query.models import Query
 from django.shortcuts import get_object_or_404
-from pandas import read_csv
+from pandas import read_csv, isnull
 from datetime import datetime
 from .models import ListCommit
 from .serializers import UserCommitSerializer
 from pytz import utc
 from contraband.settings import API_TOKEN
+from .helper import get_prev_user, get_next_user
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
@@ -192,6 +193,13 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
     :param users: List of previous, current and next users Fullname's
     :return: Response Object with query, contributions of user, query filters etc.
     """
+
+    if isinstance(username, float):
+        username = ''
+
+    if isinstance(gerrit_username, float):
+        gerrit_username = ''
+
     loop = asyncio.new_event_loop()
     phab_response, gerrit_response = [], []
     asyncio.set_event_loop(loop)
@@ -252,31 +260,43 @@ class DisplayResult(APIView):
                     if 'user' in request.GET:
                         user = file[file['fullname'] == request.GET['user']]
                         if user.empty:
-                            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+                            return Response({'message': 'User not found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
                         else:
-                            username, gerrit_username = user.iloc[0, :]['Phabricator'], user.iloc[0, :]['Gerrit']
-                            if user.index[0] != 0:
-                                prev_user = file.iloc[user.index[0]-1, :]['fullname']
-                            else:
-                                prev_user = None
-
-                            if user.index[0] != len(file) - 1:
-                                next_user = file.iloc[user.index[0]+1, :]['fullname']
-                            else:
-                                next_user = None
+                            ind = user.index[0]
+                            user = user.iloc[0, :]
+                            username, gerrit_username = user['Phabricator'], user['Gerrit']
+                            next_user = get_next_user(file, int(ind))
+                            prev_user = get_prev_user(file, int(ind))
                     else:
-                        user = file.head(1)
-                        username, gerrit_username = user['Phabricator'][0], user['Gerrit'][0]
-                        prev_user = None
-                        next_user = file.iloc[1, :]['fullname']
+                        user = file.head(1).iloc[0, :]
+                        ind = 0
+                        temp = True
+                        while isnull(user['fullname']) or (isnull(user['Gerrit']) and isnull(user['Phabricator'])):
+                            ind += 1
+                            if ind >= len(file):
+                                temp = False
+                                break
+                            user = file.iloc[ind, :]
 
+                        if not temp:
+                            return Response({
+                                'message': 'Full name and both Gerrit and Phabricator username cannot be left blank. It is missing for all user(s) in the CSV file!',
+                                'error': 1
+                            }, status=status.HTTP_404_NOT_FOUND)
+
+                        user = file.iloc[ind, :]
+                        username, gerrit_username = user['Phabricator'], user['Gerrit']
+                        prev_user = None
+                        next_user = get_next_user(file, ind)
                 except KeyError:
-                    return Response({'message': 'CSV file is not in specified format!!', 'error': 1},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return Response({
+                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; to check the format.(while uploading it)',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
 
-            paginate = [prev_user, user.iloc[0, :]['fullname'], next_user]
+            paginate = [prev_user, user['fullname'], next_user]
         else:
             users = list(query.queryuser_set.all())
             if 'user' in request.GET:
@@ -367,10 +387,12 @@ class GetUsers(APIView):
             try:
                 try:
                     file = read_csv(query.csv_file)
-                    users = file.iloc[:, 0].values.tolist()
+                    users = file[(file['fullname'] == file['fullname']) &
+                                 ((file['Phabricator'] == file['Phabricator']) | (file['Gerrit'] == file['Gerrit']))]
+                    users = users.iloc[:, 0].values.tolist()
                 except KeyError:
                     return Response({
-                        'message': 'CSV file is not is specified format!',
+                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; icon to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:

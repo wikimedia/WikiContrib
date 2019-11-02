@@ -22,6 +22,7 @@ import {
 } from 'semantic-ui-react';
 import { tool_name } from './App';
 import { NavBar } from './components/nav';
+import { thisExpression } from '@babel/types';
 
 var emptyObj = {
   fullname: '',
@@ -248,15 +249,22 @@ export class Query extends Component {
     /**
      * fetch the API to create / update Query.
      */
-    localStorage.removeItem('users');
-    localStorage.removeItem('res_users');
-    localStorage.removeItem('res_query');
+    let usernameEmptyAtRow = false,
+      fullnameEmptyAtRow = false;
     let nonemptyRowExist = () => {
       let rv = false;
-      for (let i in this.state.rows) {
+      for (let i = this.state.rows.length - 1; i >= 0; i--) {
+        if (this.state.rows[i].fullname.length === 0) {
+          fullnameEmptyAtRow = parseInt(i);
+        }
+        if (
+          this.state.rows[i].gerrit_username.length === 0 &&
+          this.state.rows[i].phabricator_username.length === 0
+        ) {
+          usernameEmptyAtRow = parseInt(i);
+        }
         if (JSON.stringify(this.state.rows[i]) !== JSON.stringify(emptyObj)) {
           rv = true;
-          break;
         }
       }
       return rv;
@@ -281,7 +289,34 @@ export class Query extends Component {
           type: 1,
         },
       });
+    } else if (this.state.file === false && fullnameEmptyAtRow !== false) {
+      fullnameEmptyAtRow += 1;
+      this.setState({
+        message: {
+          message:
+            'Full name cannot be left blank; it is missing in row ' +
+            fullnameEmptyAtRow,
+          update: !this.state.message.update,
+          trigger: true,
+          type: 1,
+        },
+      });
+    } else if (this.state.file === false && usernameEmptyAtRow !== false) {
+      usernameEmptyAtRow = usernameEmptyAtRow + 1;
+      this.setState({
+        message: {
+          message:
+            'Both Gerrit and Phabricator fields cannot be left blank. Provide username for one of these accounts in row ' +
+            usernameEmptyAtRow,
+          update: !this.state.message.update,
+          trigger: true,
+          type: 1,
+        },
+      });
     } else {
+      localStorage.removeItem('users');
+      localStorage.removeItem('res_users');
+      localStorage.removeItem('res_query');
       this.setState({ loading: true, notfound: false });
       let uri = this.state.operation
         ? QueryCreateApi
