@@ -376,3 +376,32 @@ class GetUsers(APIView):
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         return Response({'users': users})
+
+def UserUpdateTimeStamp(data):
+    """
+    :param data: Hash Code of the Query.
+    :return: contributions of the user on updating Query Filter timestamp.
+    """
+    data['query'] = get_object_or_404(Query, hash_code=data['query'])
+    if data['query'].file:
+        try:
+            file = read_csv(data['query'].csv_file)
+            user = file[file['fullname'] == data['username']]
+            if user.empty:
+                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
+
+        except FileNotFoundError:
+            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        user = data['query'].queryuser_set.filter(fullname=data['username'])
+        if not user.exists():
+            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+        username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
+
+    createdStart = data['query'].queryfilter.start_time.strftime('%s')
+    createdEnd = data['query'].queryfilter.end_time.strftime('%s')
+    phid = [False]
+    return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
+                      createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])

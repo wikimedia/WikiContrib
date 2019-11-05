@@ -16,6 +16,7 @@ from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerial
 from contraband.settings import BASE_DIR, DEBUG
 from os import rename, remove
 from contraband.settings import COMMIT_STATUS
+from result.views import UserUpdateStatus, UserUpdateTimeStamp
 
 
 def create_hash():
@@ -342,5 +343,44 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
                 "start_time": None,
                 "end_time": None
             })
+
+    def patch(self, request, *args, **kwargs):
+        """
+        :Summary: PATCH request to Update the query filters.
+        :param request: request Object.
+        :param args: arguments passed to the function.
+        :param kwargs: Key, values passed to the function.
+        :return: response of UserUpdateStatus() (or) UserUpdateTimeStamp() function
+         depending upon the filters user updated.
+        """
+
+        rv = {
+            "username": request.data['username'],
+            "query": self.get_object().query.hash_code
+        }
+        if QueryFilter.objects.filter(query__hash_code=self.kwargs['hash']).exists():
+            commit_status = self.get_object().status
+            commit_start = self.get_object().start_time
+            commit_end = self.get_object().end_time
+            if 'username' not in request.data:
+                return Response({'message': 'Fill the form completely', 'error': 1},
+                                status=status.HTTP_400_BAD_REQUEST)
+            data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
+
+            if data['status'] != commit_status:
+                if commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()\
+                        or commit_end != datetime.strptime(data['end_time'], "%Y-%m-%d").date():
+                    return UserUpdateTimeStamp(rv)
+                else:
+                    return UserUpdateStatus(rv)
+            else:
+                # User has changed the timestamp, perform the request again.
+                return UserUpdateTimeStamp(rv)
+        else:
+            kwargs = request.data.copy()
+            kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+            QueryFilter.objects.create(**kwargs)
+            return UserUpdateTimeStamp(rv)
+
 
     
