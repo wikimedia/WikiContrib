@@ -3,7 +3,9 @@
 # dependencies
 /node_modules
 /.pnp
+/semantic
 .pnp.js
+semantic.json
 
 # testing
 /coverage
