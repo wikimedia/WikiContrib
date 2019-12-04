@@ -1,6 +1,5 @@
 from django.db import models
 from contraband.settings import BASE_URL
-from django.utils.crypto import get_random_string
 from django.utils import timezone
 from contraband.settings import DEBUG
 
@@ -9,7 +8,7 @@ class Query(models.Model):
     """
     :Summary: Store details of Query.
     """
-    hash_code = models.CharField(default=get_random_string(64), unique=True, max_length=64)
+    hash_code = models.CharField(unique=True, max_length=64)
     file = models.BooleanField(default=False)
     csv_file = models.FileField(upload_to='uploads/', null=True, blank=True)
     created_on = models.DateTimeField(default=timezone.now)
