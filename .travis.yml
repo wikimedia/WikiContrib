@@ -23,6 +23,8 @@ matrix:
         on:
           branch: master
     - language: node_js
+      node_js:
+        - 4.2.6
       addons:
         ssh_known_hosts: "login.tools.wmflabs.org"
       script:
