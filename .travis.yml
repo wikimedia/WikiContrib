@@ -15,20 +15,20 @@ matrix:
       script:
         - python manage.py migrate --noinput
         - python manage.py collectstatic  --noinput
-        # - python manage.py test
         - echo "Temporarily tests are disabled"
       addons:
-        ssh_known_hosts: "login.tools.wmflabs.org"
+        ssh_known_hosts: "${DEPLOY_HOST}"
       before_deploy:
         - cd ../../
-        - openssl aes-256-cbc -K $encrypted_9ed13ed18199_key -iv $encrypted_9ed13ed18199_iv -in deploy_rsa.enc -out deploy_rsa -d
+        - openssl aes-256-cbc -K $encrypted_382dfcbe1831_key -iv $encrypted_382dfcbe1831_iv
+          -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - eval "$(ssh-agent -s)"
-        - chmod 600 deploy_rsa
-        - ssh-add deploy_rsa
+        - chmod 600 /tmp/deploy_rsa
+        - ssh-add /tmp/deploy_rsa
         - echo -e "Host $SERVER_IP_ADDRESS\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       deploy:
         provider: script
-        script: bash scripts/deploy_backend.sh
+        script: bash deploy/deploy_backend.sh
         on:
           branch: master
     - language: node_js
@@ -39,18 +39,31 @@ matrix:
       install:
         - echo "npm install currently disabled"
       addons:
-        ssh_known_hosts: "login.tools.wmflabs.org"
+        ssh_known_hosts: "${DEPLOY_HOST}"
       script:
         - echo "npm test temporarily disabled"
       before_deploy:
         - cd ../../
-        - openssl aes-256-cbc -K $encrypted_9ed13ed18199_key -iv $encrypted_9ed13ed18199_iv -in deploy_rsa.enc -out deploy_rsa -d
+        - openssl aes-256-cbc -K $encrypted_382dfcbe1831_key -iv $encrypted_382dfcbe1831_iv
+          -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - eval "$(ssh-agent -s)"
-        - chmod 600 deploy_rsa
-        - ssh-add deploy_rsa
+        - chmod 600 /tmp/deploy_rsa
+        - ssh-add /tmp/deploy_rsa
         - echo -e "Host $SERVER_IP_ADDRESS\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - chmod 600 deploy/pre_deploy_frontend.sh
+        - bash deploy/pre_deploy_frontend.sh
       deploy:
         provider: script
-        script: bash scripts/deploy_frontend.sh
+        script: bash deploy/deploy_frontend.sh
         on:
           branch: master
+env:
+  global:
+    - secure: JOtiHMRYT3yeemEb1D5mFRpme9TpASRg5RkyG6lFDI3fuvoD/36+zNCJ+1fj7Jp0cIpnz1gbYQ+VA1M9peithCCVZxnaK9soL1x8OBwpq2bXAdaRc+yhzvCN/sADhZABHbxoT/SK1kb2Dq1g6F0UdFgE4me+EE5ORtck3Lc8fwU2wuNxBwInHDUGWa+ul8cpEdKxJuJVggfc289Az+ebsXOUYPyTjDBCYafEcpG4SE2qeCLHMapn3w8IPPx45kMnvZj6bzOHWNN+57Q35z4Slce2/CG0DoVZ0yeIRMYsibTidPqLd72kYB9lMXNnS5Gx++AB3Sp3hMRLr8JnyyPg7t9WbF3hzwtRxtYi7U8sqn/JCqM+3290FcDtpMCDIXyLC9iluuycOAl/yYFKRp6JAOUVNR6dxMnnx4ujtLGFPDBQfrpyZXxTnGTyupDwoIA1o8zPTtdLcroVPBSL6StsASBYBQoZZkJpxdLO+1Bq/Fe9N8ng4dV8xo6NJnVp2TohD+WhxqX3B7Dq67MvMzh3e2TWz1WROFCAeImt2KdIhU5rGVzcqFJcO3oKYiiYd+qTGxxdUIIiPGcLT4ZZdJ6JLA8DD2RchpSwCt/jtuAV/5EfCx23kHrEE5kBNIbZ5YGAQEN3/Xck99+h2rlF4CuxMA/2GPL8GToHMNgYk446NEU=
+    - secure: BH+R4yRugMbf9cH95KJmN+97KziTpFBKTKgAZhSFKcxuKYlFtv0WmdFGG1dzeOy4eESK4RaeBIn9Xi+mibdO1S5g5ZKCF9hJsVMSDyd/Dqou3Wj8PnB9KsX/1pPw6i61ZRB2j1wAUUMTksQ8dg2V0CLs5N7UlBb374tm8W0JDBFajdqf1kSwFAC44z+xZMzR6bnLW2srpTMOuThU5Hp4zOq7K7K3icfS6cGz/vKzhEkqsP/3ZwOE4HuvzirbWCbqpK+hM8LqNMxxHRyuL4dJEHLoiRrbXGv1hmqG0hO4vvRs/ozD3Y8P4KPpP9zrPzeReRQZlamiNe3sABDbCDFFUUe8n6DhLwxHw6CqxUnyIk3lbrJsBTCZ5PPq2RGVnbC6OBXXbhlgK/eo7tzkzwUXBQbdebu97vez+m8UZ4/W/AJ2YffIGPGfGxMxk/qCqNhSprrJLUf+JZFhlpwcWa6MV5xRuHXg9XFE7YUTBeO50842UU594TGpg6VCcjZ2hcXXZss3D0FFUyEPpgR3dyjRuKuEpYMvFTrFXw7NU64QQOlynzKsjkAZGWb4cxkchuEjDi7sKhVlfSm/s6ULqeD1El24A+MGFn/WufMJFkTuL2AYQXLfM6TOux0M029HDAgHo7jpehyiTOL+nDqZjM8L2P/tMvKq5Mttoa0TNdaduSo=
+    - secure: rp5dQ5U9ibj/dzoI0ozOPjSODNxHl4KguIq2V/fbys4sUuazL9GvzEiXxH4Q+WLHa2lTzpWrM2ewWuTR9KlQuMY5kg9zQOhTkwpUkFdNawUEI6Z+vFAgyAl8kvgiOJVnPM1312k9Vr34hBrq3BYMdzCudk+Ouuw6NnXo/ZdY31kA8WOQ5yMXzkC4Y7BWxDMxCr+wm1+AEU6VARztIgZ0JINWUq6I/rLjmRPlQcKBHbjihw1Ly02iX0a/yY27N0qcV75nOvJ8rIN5H9LFZllisawlFSnakkXGlzsBmF4KsCcCVeRs0Yn4epJbTZ8cpRNj4L182mdhu3miIn9M9iuyXRdYaS/qmyUk8gOyD7xp3Rrv+shx4HGwjGgr82HbCx91Wk2AKGYnDZI4iYw6g9ilK8i/UGLZS06e/OJSKedknwPwp6tPDv04wGqqxTuUZr4DJRc+5qHEVhv081rV1RQqmR7f9Riu0mZrJIwWcScyVjcGk0NtFwY1/DVCGerYwrZY2l0k7AzF4UveOVuShn8whO2vR/qG/vgXaQJjvVovaEGtxq9TnWalvX7d64p0zaTswLXtqJW+SkoxrnCu1d8h+lBTCjwmFJGGm74JHNpEe2SH/hyPZDtOaxEFKkRKep5G7zY17jRLsozBIuIqMvWnOWSkCnMHgozjFMWYf7C0RXE=
+    - secure: njGL+4ZDofWr1i/dUNrE7H4Z4fpvXqTjVzeZucbWwmzDWXm49HtHxT+0tbkNCfEHBIvO5Y5qx91nWohH/wMwJ4MOZtrxI4bTbonxHrNhvZ0LYEssA0v7sSlQcirU/YGYfQx0wBupB+204ytyAQ583AtRCUir6ql9mtw5fhfmTUOTJS7yAfOvBX1x5WWgG4Sb/2a1yRmsvcAVZq1YsOkuOdiNQMpFMYG1ZiA9NxwC0eJrVirC7bbxz/kD9gQvnZ9+ATaFpyZD5iF2XNnmIDnV/FDAbmetSaeV892+VCBqMWXbs86cD5otw9U+AbvnH4WzKbncJJKdwrc+50Ejpdslf5fw853yZc4+JEz7A4algTwIVkqTCZeN+gw6iW1wc1Su73hrKshCO/KT7yTb5o9mIlgrGkkX7aIQSynVkjFxu3456i8B1MM5LNXuZh19N5UOjk2L2EprxBPsBmX+VMGeYUMx142C7vV4s7iriPlBAxufTNDp4Y2bfGKvaOlcIOzcS9173loR51nl+2+ZNOpaBETTUT4StL/jcseRKD/S8FKALM4DiqNXAZEG4Q6YRJzvhehnmdpqvyVG8LbEh9Kj/NzsAjtsFafT+3VxUYE6TOzeSGfM4B9QRy5LoicZHV8889HIzOW5wnX0GKnHG/NASoMnurIdYRThI/Sn8TXTpX4=
+    - secure: J3gN6Z7UFK+EE1SHtBu6UjhFXLx9RUpTXNXpgvN1QA4Q6d8+P2Vs7di7EJOE74fKCF/itLlDPs3pJoQ5J4KZDR7Ygr8uVJBskgm/sTlBaaLBdhPCGQbnlfeXSZ+ZHqUilzkCqHWHA3nnC1iBw7x527jb4Hi7iTtLElg/3B0nczpy/82TVVroDaBHBUdg0xepvmaq1MZ129aMN+d0PgD1EBlhuZvFqz99Y8F6eS62tQ2+DumC8xm+Ir9D79okzjd76WNSVXzqK8avMCuDWVthJIHaVEQpj91Ys3cn8puDZLLFFIqGUjmaE5Kv5qJVLl9/ab7P1LOHwLDU2WBepOy2uanezfGEp1mGHf8M6DFUlYPLmbzBNz1iWKX8uiAMnwqca6QqqEQl9YHEy/lUYFhuKzT1pHqt7glIeKB2WH7r1whMPglPhrU5VwaGJGeu6fxj0Nlg985CZtBQt0S26PPWydJ6KI1LStXj4PMunfWQbsOFazcq/IlJ8tJ+N9i53pJtjwvOpY67es9sQp8oDaVVfkn+6Pk1qrJQHeNtHwgFoCQYqeFpPyVb/nPTFG6xEyt3MxQlX/9NLCcNJSKcClnw2LWSrFmlX2ZmKlrw9xv4y+CkCiGSkiBwT5iWri6QMimEWTPjkOuwnA8wlbz7vPdhv4t6QT3tTTfnkhadYBWjars=
+    - secure: h5vaxrH2+HDADmvNprf+9EEoU5U1mA3/R4vuv2+utFO2cxXvk3g7AQ22ewIvzuKfF6o2P2c0OkKW23JdDpbZu8Tz8Z8mIUy7BmRMF9Nf1st5bT/WQrMBbz7zqPDVXkFaYe2fUJ5r42SWMguQLeM9xH2aQvfaB71qwUqvoQ1hg1pdVwXaX099wMWdW8d4B/6AOE55GfJZRK3m6ZSdiRG0xlT1XABM1VWmkeRzx5TyiouB5TPCuMJZ8ehHIJkKxBmqTjctccdF+V3ELQuTDw6Lz/jJSWIUTinETlhFL76smy0d6I/jWswVI2VjYK4+Zva2CK9mPxMhZD8+O5ozvLXd23BAp84giYNGvk0biflyLHgCZpgLOkUww8v/b0/XsG8pKuc5LUqg2opIXWFcG7Xyb52BW3dx0aLcwC3Jg9UpG/fRyGnM3aKeRZqf2xwWdRB10YtbjnVkx3q/XanxS0yHuyjEfPAG0EtNKgG7TCPnYxqttCTbrXUvyAW5R07n7bdxoPKiGng4EjP1x9Qwfb1Co2iwFjK/QVnqbcoDhWyaUkX3/eJCNmk6AA0Sy/4xGcv7IC3QRF0/nDRSE6b9W8IyxLeFx3U3pVuWsWf7uULxhcxGodbh3HGTnRZS5j58WpBzC+8xzxt84vvpIsk0Bf6cZnpr7C48nF2jLkbsjvUk1QU=
+    - secure: ZPKVIKan5lhkZjJxerXBwJfcSWjHRLRxUY0U5NfTOYyBlnvm2NrRbMEBydESiGARvEMlx3YssyDykwDGYk8oKWFzCf2DwqPPQWN70HLtESe3vK5FOTS7dFnuw2WT9Qnu8/qgOXuzwSGu2YwIR6zH7uenhlcAZfyl77pj7CM15Ij1rh/mdO2MkhvUERl7EzZzWQ0T34B8nJDVY3dfu5xzF7vJttZ+OzQ5535LBe+8fTCn7yNPz1adv9m7/7LSQUta1aehJheQiSHnl78Kk52XP2AobGA2BcuT1w8i7YSzDK9jpdtQVTdMc2FOxnAy3pLJ7ATj8/yALBiWBCfpXuiC9GI7FfHf3b9TM8VzTFC2Us0J0Tv+0POx7nAW8UlFv26zY1GYcUV29QRR2mfVbpnaZ4QNJDUuVV+Jl7WOXCbdwwNNrjzz1aZlks7afVwET8PxTMHjDULHBlZ3/lIF65zszP7/Ddc68VswkC6/ipcfEiRXBkj0F9LL2i2hsbDlTg2lLeKonNwjy4VmtIaviiljf0mEKi/7LRPhFvsrzVoTVZIyUnQaHqAZ4Up0dFWXaHqp6NU5tdhbaMlx/9zr+VjI2pesizi6rlpt7v8aQLs1TqP5NVHPvzzxXsCy/8oab3PlaNDUjiuLbp6tgwxkWdBlLrZvb0HmkhfWmqUbaPYQ2P4=
+    - secure: T7fTQfeUclij4UgmYSy95zoeZs2uWRzULgVAnulTsqhFhoc7EP+mhyFzAIFXAnJvRiRLomh1apJjPD4hSKYTOl3KZ2AU+m922rcIlaCtYu+2ou/A5PODGrCRbIJ5R+4IkWJ7ZOPzOERfkWJNGVoDvypf6AiQXNojB6crc473WEEGeTwrUTJy51f1kJ4/SpX5oUHZplnuKgb6KYWcf99m7Gk4QFgC1oLBRDD4udG4sQ/lD1s0ZsH7xwLw8S6jlH96pTlAjkPelo30SSa7rZByqLy1V7BR6jpcJhG1e88gy6ebie41kMAo/cgY1eqjrr+K8aDn64qwSZWjzBpNXsxk5CwqbSpY5raymp3Wl/b+Yq76mzZpgEMM+qaNznTa4lK0L5uMGGlPCguC7sjNQ++350b0vt1Hzfv/6PFXdLeLBttCdtOzI+SSUJixAAAaYZKM/k6GcNtML4OxtSaZoKeWNBAvDp31D2D8ZTQmkbrUD4SvuRq9dybUhIqREP036H5jqZyIg+R1U6gylR0NApQeey6ReB5JIRxyvuhqxJoWxxUkbfhAj9l/tEOBXRGW2ReTpyCTg8WVae3rND8CCcynXCtsGvCatcurbU1Pao/JFqI+R60XVjBy6G9Gu5z7Xv05TPxaolRoN5oWHTFVQRNFw3EKUqdV76fsJiNXlTy2R9k=

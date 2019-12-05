@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-ssh -o "StrictHostKeyChecking=no" -i /tmp/deploy_rsa -A rampotla@login.tools.wmflabs.org << EOT
-become WikiContrib
+ssh -o "StrictHostKeyChecking=no" -i /tmp/deploy_rsa -A ${DEPLOY_USERNAME}@${DEPLOY_HOST} << EOT
+become ${DEPLOY_FRONTEND}
 rm -rf ~/public_html/
-mkdir ~/public_html/
-cd ~/public_html/
-git clone https://github.com/wikimedia/WikiContrib/
-cd WikiContrib/frontend/WikiContrib-Frontend/
-npm run build
-cp -a ./build/. ../../../
-cd ../../../
-rm -rf WikiContrib
+git clone https://${GIT_REPO}
+mv ${GIT_REPO_NAME}/ public_html/
+echo "Cloned the repo, restarting the webservice...."
+webservice lighttpd restart
+EOT
