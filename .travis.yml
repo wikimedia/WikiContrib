@@ -21,14 +21,15 @@ matrix:
         ssh_known_hosts: "login.tools.wmflabs.org"
       before_deploy:
         - cd ../../
-        - openssl aes-256-cbc -K $encrypted_9ed13ed18199_key -iv $encrypted_9ed13ed18199_iv -in deploy_rsa.enc -out deploy_rsa -d
+        - openssl aes-256-cbc -K $encrypted_382dfcbe1831_key -iv $encrypted_382dfcbe1831_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - eval "$(ssh-agent -s)"
-        - chmod 600 deploy_rsa
-        - ssh-add deploy_rsa
+        - chmod 600 /tmp/deploy_rsa
+        - ssh-add /tmp/deploy_rsa
         - echo -e "Host $SERVER_IP_ADDRESS\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - ls
       deploy:
         provider: script
-        script: bash scripts/deploy_backend.sh
+        script: bash deploy/deploy_backend.sh
         on:
           branch: master
     - language: node_js
@@ -44,13 +45,14 @@ matrix:
         - echo "npm test temporarily disabled"
       before_deploy:
         - cd ../../
-        - openssl aes-256-cbc -K $encrypted_9ed13ed18199_key -iv $encrypted_9ed13ed18199_iv -in deploy_rsa.enc -out deploy_rsa -d
+        - openssl aes-256-cbc -K $encrypted_382dfcbe1831_key -iv $encrypted_382dfcbe1831_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - eval "$(ssh-agent -s)"
-        - chmod 600 deploy_rsa
-        - ssh-add deploy_rsa
+        - chmod 600 /tmp/deploy_rsa
+        - ssh-add /tmp/deploy_rsa
         - echo -e "Host $SERVER_IP_ADDRESS\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - ls
       deploy:
         provider: script
-        script: bash scripts/deploy_frontend.sh
+        script: bash deploy/deploy_frontend.sh
         on:
           branch: master

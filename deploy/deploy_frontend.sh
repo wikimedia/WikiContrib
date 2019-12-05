@@ -10,3 +10,4 @@ npm run build
 cp -a ./build/. ../../../
 cd ../../../
 rm -rf WikiContrib
+EOT

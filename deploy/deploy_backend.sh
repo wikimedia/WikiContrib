@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-ssh -o "StrictHostKeyChecking=no" -i /tmp/deploy_rsa -A rampotla@login.tools.wmflabs.org << EOT
+ssh -o "StrictHostKeyChecking=no" -i deploy_rsa -A rampotla@login.tools.wmflabs.org << EOT
 become contraband
 source ~/www/python/venv/bin/activate
 echo "Activated the environment\n"
@@ -21,5 +21,4 @@ webservice --backend=kubernetes python3.5 restart
 cd ../
 rm -rf WikiContrib src/contraband/.env.example
 deactivate
-exit
-exit
+EOT
