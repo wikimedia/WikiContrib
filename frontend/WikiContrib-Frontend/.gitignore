@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 /semantic
+src/dist
 .pnp.js
 semantic.json
 
