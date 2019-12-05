@@ -3,10 +3,10 @@ matrix:
     - language: python
       python:
         - 3.5.2
+      before_install:
+        - cd backend/Contraband
       install:
         - pip install -r requirements.txt
-      before_script:
-        - cd backend/Contraband
       script:
         - python manage.py test
       addons:
