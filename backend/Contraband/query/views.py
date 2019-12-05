@@ -96,7 +96,7 @@ class AddQueryUser(CreateAPIView):
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
                         filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=filter_time.month+1)
+                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
                         QueryFilter.objects.create(
                             query=query_obj,
                             start_time=filter_time - timedelta(days=365),
@@ -115,7 +115,7 @@ class AddQueryUser(CreateAPIView):
                                BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv")
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=filter_time.month+1)
+                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
                         query_obj.save()
                         QueryFilter.objects.create(
                             query=query_obj,
@@ -135,7 +135,7 @@ class AddQueryUser(CreateAPIView):
                         # Add the Query
                         query = super(AddQueryUser, self).post(request, *args, **kwargs)
                         filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=filter_time.month+1)
+                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
                         QueryFilter.objects.create(
                             query=get_object_or_404(Query, hash_code=query.data['hash_code']),
                             start_time=filter_time - timedelta(days=365),
