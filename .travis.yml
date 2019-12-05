@@ -5,9 +5,8 @@ matrix:
         - 3.5.2
       before_install:
         - cd backend/Contraband
-        - mv contraband/.env.example contraband/.env
       install:
-        - pip3 install -r requirements.txt
+        - pip install -r requirements.txt
       script:
         - python manage.py test
       addons:
@@ -24,13 +23,8 @@ matrix:
         on:
           branch: master
     - language: node_js
-<<<<<<< Updated upstream
       node_js:
         - 4.2.6
-=======
-      before_install:
-        - cd frontend/Contraband-Frontend
->>>>>>> Stashed changes
       addons:
         ssh_known_hosts: "login.tools.wmflabs.org"
       script:
