@@ -33,7 +33,7 @@ git clone https://github.com/wikimedia/WikiContrib.git
 
 The tool has two different components i.e Backend and Frontend Each of them has their own installation instructions.
 
-[Backend installation file](https://github.com/wikimedia/WikiContrib/blob/master/backend/Contraband/Install.md) | [Frontend installation file](https://github.com/wikimedia/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install.md)
+[Backend installation file](https://github.com/wikimedia/WikiContrib/blob/master/backend/WikiContrib/Install.md) | [Frontend installation file](https://github.com/wikimedia/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install.md)
 
 **Note:** You can find the instrucutions of how to host the react apps on toolforge [here](DEPLOYING.md).
 
