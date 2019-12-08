@@ -116,6 +116,7 @@ h4.accounts {
   transition: 0.3s;
   font-size: 1.5rem;
   color: #000;
+  outline: none;
 }
 
 .user_input:focus {
