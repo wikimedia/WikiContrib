@@ -30,7 +30,7 @@ sudo apt-get install python3
 Now you need to install pip3, it manages the python packages
 
 ```commandline
-sudo apt-gt update
+sudo apt-get update
 sudo apt-get install -y python3-pip
 ```
 
