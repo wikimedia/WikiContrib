@@ -186,7 +186,5 @@ export const getPadding = () => {
   }
 };
 
-export const info_content =
-  'The tool provides user activity from two platforms (Phabricator and' +
-  'Gerrit) and display it. It fetches the contributions of the user in' +
-  'specified time span and visualize the data in form of graphs';
+export const info_content = 
+  "WikiContrib tool provides a visualization within a specified time range of users' contributions to Wikimedia projects on Phabricator and Gerrit."
