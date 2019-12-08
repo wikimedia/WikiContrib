@@ -599,7 +599,7 @@ h4.accounts {
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
 }
 
-.ui.card.commits_load:hover {
+.ui.card.commits_load:not(.loading_card):hover {
   box-shadow: none !important;
   border: 1px solid #C3C4C4;
 }

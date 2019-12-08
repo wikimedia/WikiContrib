@@ -53,14 +53,14 @@ class Activity extends React.Component {
       <React.Fragment>
         {this.state.loading ? (
           <React.Fragment>
-            <Card className="commits_load">
+            <Card className="commits_load loading_card">
               <Placeholder fluid>
                 <Placeholder.Line />
                 <Placeholder.Line />
                 <Placeholder.Line />
               </Placeholder>
             </Card>
-            <Card className="commits_load">
+            <Card className="commits_load loading_card">
               <Placeholder fluid>
                 <Placeholder.Line />
                 <Placeholder.Line />
