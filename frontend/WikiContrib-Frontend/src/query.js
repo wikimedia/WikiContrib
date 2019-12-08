@@ -283,7 +283,7 @@ export class Query extends Component {
     } else if (this.state.file === false && !nonemptyRowExist()) {
       this.setState({
         message: {
-          message: 'Please provide the data regarding users.',
+          message: 'To visualize contributions, please provide user(s) information above.',
           update: !this.state.message.update,
           trigger: true,
           type: 1,
