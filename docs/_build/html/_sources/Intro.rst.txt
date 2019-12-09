@@ -9,4 +9,4 @@ Currently, it fetches the contributions from
 
 It visualizes the data in form of graphs and user contribution calendar. The tool can also be used by anyone to view the contributions of any contributor in the Wikimedia Foundation.
 
-**Note:** The tool was called **WikiContrib** during development. After the initial development phase, the tool was renamed to **WikiContrib**. 
+**Note:** The tool was called **Contraband** during development. After the initial development phase, the tool was renamed to **WikiContrib**. 
