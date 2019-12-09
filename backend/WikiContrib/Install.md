@@ -1,8 +1,8 @@
-Now, if you type command `ls`, you can see a directory named **Contraband**. Go inside the directory using the command `cd Contraband.` There will be two directories in it:
+Now, if you type command `ls`, you can see a directory named **WikiContrib**. Go inside the directory using the command `cd WikiContrib.` There will be two directories in it:
 1. backend
 2. frontend
 
-The present doc deals about installing and running `backend`. If you go inside `backend` directory( use command `cd backend`). You can find another directory named `Contraband`. It is the main project directory.
+The present doc deals about installing and running `backend`. If you go inside `backend` directory( use command `cd backend`). You can find another directory named `WikiContrib`. It is the main project directory.
 
 # Steps to setup server locally
 
@@ -41,19 +41,19 @@ pip3 install virtualenv
 
 you have successfully installed `virtualenv`. Noe let's create a virtual environment.
  ```commandline
-virtualenv -p $(which python3) WMContraband
+virtualenv -p $(which python3) WMWikiContrib
 ```
 
-The above command creates a virtual environment named `VMContraband`. It creates a directory named `WMContraband` in the current directory. It is recommended to create  virtual environment in `backend` directory. You have successfully created the virtual environment. But you need to activate it now
+The above command creates a virtual environment named `VMWikiContrib`. It creates a directory named `WMWikiContrib` in the current directory. It is recommended to create  virtual environment in `backend` directory. You have successfully created the virtual environment. But you need to activate it now
 
-To activate the virtual environment, type the following command (in the same directory where `WMContraband` is located):
+To activate the virtual environment, type the following command (in the same directory where `WMWikiContrib` is located):
 ```commandline
-source WMContraband/bin/activate
+source WMWikiContrib/bin/activate
 ```
 
 ## Install the required packages to run the tool: 
 
-Now go inside the `Contraband` directory (inside `backend`). Install all the packages that are required to run the project using the command.
+Now go inside the `WikiContrib` directory (inside `backend`). Install all the packages that are required to run the project using the command.
 ```commandline
 pip install -r requirements.txt
 ``` 
@@ -72,10 +72,10 @@ Before running the development server, you need to provide an API key to fetch t
 
 Once you login to the phabricator. You can generate a Conduit API token from `https://phabricator.wikimedia.org/settings/user/{Your username}/page/apitokens/` (fill your username in the link).
 
-Copy the API token, and paste it in the variable named `API_TOKEN` in the file `backend/Contraband/contraband/settings.py`
+Copy the API token, and paste it in the variable named `API_TOKEN` in the file `backend/WikiContrib/WikiContrib/settings.py`
 
 ## Set up environment variables
-Copy contents of `backend/Contraband/contraband/.env.example` to a new file `backend/Contraband/contraband/.env`. Update it! Most likely you will be making changes only to `DB_NAME`, `DB_USER`, `DB_PASSWORD` and `PHAB_KEY` variables.
+Copy contents of `backend/WikiContrib/WikiContrib/.env.example` to a new file `backend/WikiContrib/WikiContrib/.env`. Update it! Most likely you will be making changes only to `DB_NAME`, `DB_USER`, `DB_PASSWORD` and `PHAB_KEY` variables.
 
 
 ## Run the migrations:
