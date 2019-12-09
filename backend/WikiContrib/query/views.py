@@ -252,7 +252,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     if DEBUG:
                         response['location'] = '/result/' + self.get_object().hash_code + '/'
                     else:
-                        response['location'] = '/WikiContrib/result/' + self.get_object().hash_code + '/'
+                        response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
                     return response
                 else:
                     return Response({
@@ -291,7 +291,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                 if DEBUG:
                     response['location'] = '/result/' + self.get_object().hash_code + '/'
                 else:
-                    response['location'] = '/WikiContrib/result/' + self.get_object().hash_code + '/'
+                    response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
                 return response
 
         except KeyError:
