@@ -15,7 +15,7 @@ from datetime import datetime
 from .models import ListCommit
 from .serializers import UserCommitSerializer
 from pytz import utc
-from contraband.settings import API_TOKEN
+from WikiContrib.settings import API_TOKEN
 from .helper import get_prev_user, get_next_user
 
 

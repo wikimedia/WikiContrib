@@ -1,9 +1,9 @@
 static_cdn/
 query/migrations/__pycache__/
 result/migrations/__pycache__/
-contraband/.env
+WikiContrib/.env
 query/__pycache__/
-contraband/__pycache__/
+WikiContrib/__pycache__/
 result/__pycache__/
 uploads/
 query/management/__pycache__/

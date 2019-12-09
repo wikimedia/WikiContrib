@@ -1,5 +1,5 @@
 """
-Django settings for contraband project
+Django settings for WikiContrib project
 
 """
 
@@ -17,11 +17,8 @@ ALLOWED_HOSTS = []
 BASE_URL = env('BASE_URL_LOCAL')
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "travis_db",
-        "USER": "travis",
-        "PASSWORD": "",
-        "HOST": "127.0.0.1",
+    'default': {
+        'ENGINE': env('ENGINE_LOCAL'),
+        'NAME': os.path.join(BASE_DIR, env('DB_NAME_LOCAL')),
     }
 }

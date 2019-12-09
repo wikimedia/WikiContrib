@@ -1,4 +1,4 @@
-"""contraband URL Configuration
+"""WikiContrib URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
@@ -17,7 +17,7 @@ from  .admin import admin_site
 from django.urls import path
 from django.conf.urls import include
 from django.conf.urls.static import static
-from contraband import settings
+from WikiContrib import settings
 
 urlpatterns = [
     path('admin/', admin_site.urls),

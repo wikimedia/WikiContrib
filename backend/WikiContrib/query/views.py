@@ -13,9 +13,9 @@ from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
-from contraband.settings import BASE_DIR, DEBUG
+from WikiContrib.settings import BASE_DIR, DEBUG
 from os import rename, remove
-from contraband.settings import COMMIT_STATUS
+from WikiContrib.settings import COMMIT_STATUS
 from result.views import UserUpdateStatus, UserUpdateTimeStamp
 
 

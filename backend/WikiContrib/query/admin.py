@@ -1,4 +1,4 @@
-from contraband.admin import admin_site as admin
+from WikiContrib.admin import admin_site as admin
 from .models import Query, QueryFilter, QueryUser
 
 admin.register(Query)

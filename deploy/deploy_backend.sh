@@ -5,11 +5,11 @@ source ~/www/python/venv/bin/activate
 echo "Activated the environment"
 cd ~/www/python/
 git clone https://github.com/wikimedia/WikiContrib/
-mv src/contraband/.env WikiContrib/backend/Contraband/contraband/.env
+mv src/WikiContrib/.env WikiContrib/backend/WikiContrib/WikiContrib/.env
 cd src/
-rm -rf contraband/ Install.md manage.py query/ result/ test_data/ requirements.txt db.sqlite3
-cp -r ../WikiContrib/backend/Contraband/* .
-cd contraband
+rm -rf WikiContrib/ Install.md manage.py query/ result/ test_data/ requirements.txt db.sqlite3
+cp -r ../WikiContrib/backend/WikiContrib/* .
+cd WikiContrib
 mv local_settings.py local_settings_sample.py
 cd ../
 echo "Performed the shell operations"
@@ -18,6 +18,6 @@ python manage.py migrate
 echo "Ran updated migrations"
 webservice --backend=kubernetes python3.5 restart
 cd ../
-rm -rf WikiContrib src/contraband/.env.example
+rm -rf WikiContrib src/WikiContrib/.env.example
 echo "Updated backend"
 EOT

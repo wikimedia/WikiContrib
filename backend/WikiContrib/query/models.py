@@ -1,7 +1,7 @@
 from django.db import models
-from contraband.settings import BASE_URL
+from WikiContrib.settings import BASE_URL
 from django.utils import timezone
-from contraband.settings import DEBUG
+from WikiContrib.settings import DEBUG
 
 
 class Query(models.Model):

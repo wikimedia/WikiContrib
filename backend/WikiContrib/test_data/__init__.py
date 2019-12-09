@@ -1,4 +1,4 @@
-from contraband.settings import BASE_URL
+from WikiContrib.settings import BASE_URL
 
 """
 This file contains the sample data to run tests.
