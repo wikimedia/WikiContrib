@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse, resolve
 from .views import DisplayResult, GetUserCommits, GetUsers
 from rest_framework.test import APIClient
-from contraband.settings import COMMIT_STATUS, BASE_URL
+from WikiContrib.settings import COMMIT_STATUS, BASE_URL
 from query.models import Query, QueryFilter, QueryUser
 from django.utils import timezone
 from query.views import create_hash

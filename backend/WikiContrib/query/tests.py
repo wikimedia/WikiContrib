@@ -10,7 +10,7 @@ from test_data import query_create_url as create_url, query_create_csv as create
 from rest_framework.test import APIRequestFactory, APIClient
 from .models import Query, QueryUser, QueryFilter
 from os import remove
-from contraband.settings import COMMIT_STATUS, BASE_URL
+from WikiContrib.settings import COMMIT_STATUS, BASE_URL
 
 
 class TestUrls(TestCase):

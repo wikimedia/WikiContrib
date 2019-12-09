@@ -5,10 +5,10 @@ matrix:
     - 3.5.2
     services: mysql
     before_install:
-    - cd backend/Contraband
-    - mv contraband/.env.example contraband/.env
-    - mv contraband/local_settings.py contraband/local_settings_sample.py
-    - mv contraband/local_settings_travis.py contraband/local_settings.py
+    - cd backend/WikiContrib
+    - mv WikiContrib/.env.example WikiContrib/.env
+    - mv WikiContrib/local_settings.py WikiContrib/local_settings_sample.py
+    - mv WikiContrib/local_settings_travis.py WikiContrib/local_settings.py
     - mysql -e 'create database travis_db;'
     install:
     - pip3 install -r requirements.txt
