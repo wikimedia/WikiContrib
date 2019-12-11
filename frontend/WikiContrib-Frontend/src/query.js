@@ -78,10 +78,18 @@ export class Query extends Component {
       progress: !type,
       original_users: [],
       bulk: false,
+      bulkTooltipShown: false,
+      // whether the bulk info has been shown for the first time
+      bulkShown: false,
       visible: false,
       loadData: false,
       notfound: false,
     };
+  }
+
+  componentDidUpdate() {
+      if (!this.state.bulkTooltipShown && (this.state.bulk))
+        setTimeout(() => this.setState({ bulkTooltipShown: true }), 10000)
   }
 
   componentDidMount = () => {
@@ -465,18 +473,36 @@ export class Query extends Component {
                             <React.Fragment>
                               <div style={{ marginBottom: 10 }}>
                                 <Popup
-                                  content={
-                                    <div>
-                                      <h4>Add CSV</h4> Add the usernames in CSV
-                                      file and upload it.
-                                      <br />
-                                      <b>CSV file format:</b>
-                                      <img src={format} alt="CSV File format" />
-                                    </div>
-                                  }
+                                  content={(
+                                    this.state.bulkTooltipShown ? (
+                                      <div>
+                                        <h4>Add CSV</h4> Add the usernames in CSV
+                                        file and upload it.
+                                        <br />
+                                        <b>CSV file format:</b>
+                                        <img src={format} alt="CSV File format" />
+                                      </div>
+                                    ) : 'CSV info here'
+                                  )}
                                   on="click"
                                   pinned
-                                  position="bottom center"
+                                  open={this.state.bulkTooltipShown ? this.state.bulkShown : true}
+                                  onOpen={() => this.setState({ bulkShown: true })}
+                                  onClose={(event) => {
+                                    // in case of bulkTooltipShown being false (currently open)
+                                    // the event fired when click would be onClose
+                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i')) 
+                                      // if tooltip already finished, close normally
+                                      this.setState({ bulkShown: false, bulkTooltipShown: true }) 
+                                    else
+                                      // if tooltip not finished, 
+                                      // we will not close
+                                      // but set tooltip to be finished and show the info normally
+                                      // (a click here means open the CSV info)
+                                      this.setState({ bulkTooltipShown: true, bulkShown: true })
+                                  }}
+                                  // tooltip is top
+                                  position={this.state.bulkTooltipShown ? "bottom center" : "top center"}
                                   trigger={
                                     <Icon
                                       name="info circle"
