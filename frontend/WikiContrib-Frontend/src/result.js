@@ -75,8 +75,8 @@ const chartOptions = {
 class DisplayUser extends React.Component {
   render = () => {
     let { start_time: st, end_time: et } = this.props.filters;
-    st = new Date(st);
-    et = new Date(et);
+    st = new Date(st); let st_m = st.getUTCMonth();
+    et = new Date(et); let et_m = et.getUTCMonth();
     return (
       <div>
         {this.props.loading ? (
@@ -124,9 +124,9 @@ class DisplayUser extends React.Component {
                     )}
                 </h1>
                 <h2 className="accounts">
-                  {full_months[st.getUTCMonth()] + " " + st.getFullYear()}
+                  {full_months[st_m] + " " + st.getFullYear()}
                   -
-                  {full_months[(et.getUTCMonth() + 11) % 12] + " " + et.getFullYear()}
+                  {full_months[(et_m + 11) % 12] + " " + (et_m - 1 > 0 ? et.getFullYear() : et.getFullYear() - 1)}
                 </h2>
               </span>
             </React.Fragment>
