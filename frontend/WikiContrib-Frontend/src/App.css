@@ -117,8 +117,6 @@ h4.accounts {
   font-size: 1.5rem;
   color: #000;
   outline: none;
-  -moz-outline: none;
-  -webkit-outline: none;
 }
 
 .user_input:focus {
