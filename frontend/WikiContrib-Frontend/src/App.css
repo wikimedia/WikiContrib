@@ -121,6 +121,12 @@ h4.accounts {
 
 .user_input:focus {
   background: #f5f5f5;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.user_input:hover {
+  -webkit-appearance: none;
 }
 
 #messages {
