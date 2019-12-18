@@ -624,3 +624,24 @@ h4.accounts {
   color: #222 !important;
   margin-right: -15px !important;
 }
+
+.card {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.platform {
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+}
