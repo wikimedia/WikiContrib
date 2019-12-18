@@ -1,7 +1,7 @@
 import React from 'react';
 import { fetchAsynchronous } from './fetch';
 import { commits_by_date } from './../api';
-import { Card, Placeholder, Header, Button, Popup } from 'semantic-ui-react';
+import { Card, Placeholder, Header, Popup } from 'semantic-ui-react';
 import gerritPlatformIcon from '../img/gerritPlatformIcon.png';
 import phabricatorPlatformIcon from '../img/phabricatorPlatformIcon.png';
 import abandonedStatusIcon from '../img/abandonedStatusIcon.png';
@@ -65,22 +65,22 @@ class Activity extends React.Component {
   cardIconsPaths = (platform, status) => {
     let platformPath;
     let statusPath;
-    if (platform.toLowerCase() == "gerrit") {
+    if (platform.toLowerCase() === "gerrit") {
       platformPath = gerritPlatformIcon;
-      if (status.toLowerCase() == "abandoned") {
+      if (status.toLowerCase() === "abandoned") {
         statusPath = abandonedStatusIcon;
-      } else if (status.toLowerCase() == "open") {
+      } else if (status.toLowerCase() === "open") {
         statusPath = openStatusIcon;
       } else {
         statusPath = mergedStatusIcon;
       }
     } else {
       platformPath = phabricatorPlatformIcon;
-      if (status.toLowerCase() == "resolved") {
+      if (status.toLowerCase() === "resolved") {
         statusPath = resolvedStatusIcon;
-      } else if (status.toLowerCase() == "invalid") {
+      } else if (status.toLowerCase() === "invalid") {
         statusPath = invalidStatusIcon;
-      } else if (status.toLowerCase() == "stalled") {
+      } else if (status.toLowerCase() === "stalled") {
         statusPath = stalledStatusIcon;
       } else {
         statusPath = rejectedStatusIcon;
@@ -136,11 +136,11 @@ class Activity extends React.Component {
                           content={this.normalizeWord(obj.platform)}
                           position="top center"
                           trigger={
-                            <a href={obj.platform.toLowerCase() == "phabricator" ? ("https://phabricator.wikimedia.org/"
+                            <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
                           ) : (
                             "https://gerrit.wikimedia.org/r/#/q/"
                           )
-                        }><img height="40px" src={this.cardIconsPaths(obj.platform, obj.status).platform}></img></a>
+                        }><img height="40px" src={this.cardIconsPaths(obj.platform, obj.status).platform} alt={obj.platform}></img></a>
                           }
                         />
                       </div>
@@ -160,7 +160,7 @@ class Activity extends React.Component {
                           content={this.normalizeWord(obj.status)}
                           position="top center"
                           trigger={
-                            <img height="40px" src={this.cardIconsPaths(obj.platform, obj.status).status}></img>
+                            <img height="40px" src={this.cardIconsPaths(obj.platform, obj.status).status} alt={obj.status}></img>
                           }
                           />
                       </div>
