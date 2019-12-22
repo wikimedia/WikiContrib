@@ -4,13 +4,6 @@ import { commits_by_date } from './../api';
 import { Card, Placeholder, Header, Popup } from 'semantic-ui-react';
 import gerritPlatformIcon from '../img/gerritPlatformIcon.png';
 import phabricatorPlatformIcon from '../img/phabricatorPlatformIcon.png';
-import abandonedStatusIcon from '../img/abandonedStatusIcon.png';
-import openStatusIcon from '../img/openStatusIcon.png';
-import mergedStatusIcon from '../img/mergedStatusIcon.png';
-import resolvedStatusIcon from '../img/resolvedStatusIcon.png';
-import invalidStatusIcon from '../img/invalidStatusIcon.png';
-import stalledStatusIcon from '../img/stalledStatusIcon.png';
-import rejectedStatusIcon from '../img/rejectedStatusIcon.png';
 /**
  * Show all the user Commits on a specific day
  */
@@ -57,39 +50,18 @@ class Activity extends React.Component {
   };
 
   /**
-   * Select corresponding platform and status icon.
+   * Select corresponding platform icon.
    * @param {string} platform The platform of the activity.
-   * @param {string} status The status of the contribution.
-   * @return {Array} The paths of the corresponding platform icon and status.
+   * @return The paths of the corresponding platform icon.
    */
-  cardIconsPaths = (platform, status) => {
+  choosePlatformIcon = (platform) => {
     let platformPath;
-    let statusPath;
     if (platform.toLowerCase() === "gerrit") {
       platformPath = gerritPlatformIcon;
-      if (status.toLowerCase() === "abandoned") {
-        statusPath = abandonedStatusIcon;
-      } else if (status.toLowerCase() === "open") {
-        statusPath = openStatusIcon;
-      } else {
-        statusPath = mergedStatusIcon;
-      }
     } else {
       platformPath = phabricatorPlatformIcon;
-      if (status.toLowerCase() === "resolved") {
-        statusPath = resolvedStatusIcon;
-      } else if (status.toLowerCase() === "invalid") {
-        statusPath = invalidStatusIcon;
-      } else if (status.toLowerCase() === "stalled") {
-        statusPath = stalledStatusIcon;
-      } else {
-        statusPath = rejectedStatusIcon;
-      }
     }
-    return {
-      platform: platformPath,
-      status: statusPath
-    };
+    return platformPath;
   };
 
   /**
@@ -131,38 +103,34 @@ class Activity extends React.Component {
                   <Card className="commits_load" key={index}>
                     <Card.Content>
                     <div class="card">
-                      <div class="platform">
-                        <Popup
-                          content={this.normalizeWord(obj.platform)}
-                          position="top center"
-                          trigger={
-                            <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
-                          ) : (
-                            "https://gerrit.wikimedia.org/r/#/q/"
-                          )
-                        }><img height="40px" src={this.cardIconsPaths(obj.platform, obj.status).platform} alt={obj.platform}></img></a>
-                          }
-                        />
-                      </div>
-                      <div class="title">
-                      {obj.platform === 'Phabricator' ? (
-                        <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                          <h3>{obj.heading}</h3>
-                        </a>
-                      ) : (
-                        <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                          <h3>{obj.heading}</h3>
-                        </a>
-                      )}
+                      <div class="wraper">
+                        <div class="platform">
+                          <Popup
+                            content={this.normalizeWord(obj.platform)}
+                            position="top center"
+                            trigger={
+                              <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
+                            ) : (
+                              "https://gerrit.wikimedia.org/r/#/q/"
+                            )
+                          }><img alt={obj.platform} height="30px" src={this.choosePlatformIcon(obj.platform)}></img></a>
+                            }
+                          />
+                        </div>
+                        <div class="title">
+                          {obj.platform === 'Phabricator' ? (
+                            <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                              <h3>{obj.heading}</h3>
+                              </a>
+                            ) : (
+                              <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                              <h3>{obj.heading}</h3>
+                              </a>
+                            )}
+                          </div>
                       </div>
                       <div class="status">
-                        <Popup
-                          content={this.normalizeWord(obj.status)}
-                          position="top center"
-                          trigger={
-                            <img height="40px" src={this.cardIconsPaths(obj.platform, obj.status).status} alt={obj.status}></img>
-                          }
-                          />
+                        <h4>{this.normalizeWord(obj.status)}</h4>
                       </div>
                     </div>
                     </Card.Content>
