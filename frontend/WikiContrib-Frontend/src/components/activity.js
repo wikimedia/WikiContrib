@@ -130,7 +130,9 @@ class Activity extends React.Component {
                           </div>
                       </div>
                       <div class="status">
-                        <h4>{this.normalizeWord(obj.status)}</h4>
+                        <span style={{ display: 'inline', float: 'left' }}>
+                          <b>Status:</b> {this.normalizeWord(obj.status)}
+                        </span>
                       </div>
                     </div>
                     </Card.Content>
