@@ -102,9 +102,9 @@ class Activity extends React.Component {
                 {this.state.data.map((obj, index) => (
                   <Card className="commits_load" key={index}>
                     <Card.Content>
-                    <div class="card">
-                      <div class="wraper">
-                        <div class="platform">
+                    <div className="card">
+                      <div className="wraper">
+                        <div className="platform">
                           <Popup
                             content={this.normalizeWord(obj.platform)}
                             position="top center"
@@ -117,7 +117,7 @@ class Activity extends React.Component {
                             }
                           />
                         </div>
-                        <div class="title">
+                        <div className="title">
                           {obj.platform === 'Phabricator' ? (
                             <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
                               <h3>{obj.heading}</h3>
@@ -129,7 +129,7 @@ class Activity extends React.Component {
                             )}
                           </div>
                       </div>
-                      <div class="status">
+                      <div className="status">
                         <span style={{ display: 'inline', float: 'left' }}>
                           <b>Status:</b> {this.normalizeWord(obj.status)}
                         </span>
