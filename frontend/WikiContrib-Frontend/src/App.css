@@ -122,11 +122,11 @@ h4.accounts {
 .user_input:focus {
   background: #f5f5f5;
   outline: none;
-  -webkit-appearance: none;
+-webkit-appearance: none;
 }
 
 .user_input:hover {
-  -webkit-appearance: none;
+-webkit-appearance: none;
 }
 
 #messages {
@@ -608,6 +608,7 @@ h4.accounts {
 
 .ui.card.commits_load:not(.loading_card):hover {
   box-shadow: none !important;
+  padding: 2% !important;
   border: 1px solid #C3C4C4;
 }
 
@@ -623,4 +624,39 @@ h4.accounts {
   background: #eaecf0 !important;
   color: #222 !important;
   margin-right: -15px !important;
+}
+
+.card{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.wraper {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.platform {
+  margin-right: 3% !important;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.title {
+  flex-basis: content;
+  display: flex;
+  text-align: left;
+  vertical-align: middle;
+  align-items: center;
+}
+
+.status {
+  margin-left: 3% !important;
+  display: inline-flex;
+  white-space: nowrap;
+  flex-direction: row-reverse;
+  align-items: center;
 }

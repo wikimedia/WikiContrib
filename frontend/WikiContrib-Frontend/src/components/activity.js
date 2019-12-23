@@ -1,8 +1,9 @@
 import React from 'react';
 import { fetchAsynchronous } from './fetch';
 import { commits_by_date } from './../api';
-import { Card, Placeholder, Header } from 'semantic-ui-react';
-
+import { Card, Placeholder, Header, Popup } from 'semantic-ui-react';
+import gerritPlatformIcon from '../img/gerritPlatformIcon.png';
+import phabricatorPlatformIcon from '../img/phabricatorPlatformIcon.png';
 /**
  * Show all the user Commits on a specific day
  */
@@ -48,6 +49,31 @@ class Activity extends React.Component {
     });
   };
 
+  /**
+   * Select corresponding platform icon.
+   * @param {string} platform The platform of the activity.
+   * @return The paths of the corresponding platform icon.
+   */
+  choosePlatformIcon = (platform) => {
+    let platformPath;
+    if (platform.toLowerCase() === "gerrit") {
+      platformPath = gerritPlatformIcon;
+    } else {
+      platformPath = phabricatorPlatformIcon;
+    }
+    return platformPath;
+  };
+
+  /**
+   * Stylize given word, capitalizing the first letter.
+   * @param {string} originalWord The word you want to normalize.
+   * @return {string} The same word with first letter capitalized.
+   */
+  normalizeWord = (originalWord) => {
+    originalWord = originalWord.toLowerCase();
+    return originalWord.slice(0,1).toUpperCase() + originalWord.slice(1);
+  };
+
   render = () => {
     return (
       <React.Fragment>
@@ -72,39 +98,43 @@ class Activity extends React.Component {
           <React.Fragment>
             {this.state.data.length !== 0 ? (
               <React.Fragment>
-                <h4>User Activity on {this.props.date}</h4>
+                <h4>{this.props.username}'s activity on {this.props.date}</h4>
                 {this.state.data.map((obj, index) => (
                   <Card className="commits_load" key={index}>
                     <Card.Content>
-                      {obj.platform === 'Phabricator' ? (
-                        <a
-                          href={
-                            'https://phabricator.wikimedia.org/' + obj.redirect
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <h3>{obj.heading}</h3>
-                        </a>
-                      ) : (
-                        <a
-                          href={
-                            'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <h3>{obj.heading}</h3>
-                        </a>
-                      )}
-                      <div>
+                    <div class="card">
+                      <div class="wraper">
+                        <div class="platform">
+                          <Popup
+                            content={this.normalizeWord(obj.platform)}
+                            position="top center"
+                            trigger={
+                              <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
+                            ) : (
+                              "https://gerrit.wikimedia.org/r/#/q/"
+                            )
+                          }><img alt={obj.platform} height="30px" src={this.choosePlatformIcon(obj.platform)}></img></a>
+                            }
+                          />
+                        </div>
+                        <div class="title">
+                          {obj.platform === 'Phabricator' ? (
+                            <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                              <h3>{obj.heading}</h3>
+                              </a>
+                            ) : (
+                              <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                              <h3>{obj.heading}</h3>
+                              </a>
+                            )}
+                          </div>
+                      </div>
+                      <div class="status">
                         <span style={{ display: 'inline', float: 'left' }}>
-                          <b>PLATFORM:</b> {obj.platform}
-                        </span>
-                        <span style={{ display: 'inline', float: 'right' }}>
-                          <b>STATUS:</b> {obj.status}
+                          <b>Status:</b> {this.normalizeWord(obj.status)}
                         </span>
                       </div>
+                    </div>
                     </Card.Content>
                   </Card>
                 ))}
