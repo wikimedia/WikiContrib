@@ -22,7 +22,6 @@ import {
 } from 'semantic-ui-react';
 import { tool_name } from './App';
 import { NavBar } from './components/nav';
-import { thisExpression } from '@babel/types';
 
 var emptyObj = {
   fullname: '',
@@ -491,11 +490,11 @@ export class Query extends Component {
                                   onClose={(event) => {
                                     // in case of bulkTooltipShown being false (currently open)
                                     // the event fired when click would be onClose
-                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i')) 
+                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
                                       // if tooltip already finished, close normally
-                                      this.setState({ bulkShown: false, bulkTooltipShown: true }) 
+                                      this.setState({ bulkShown: false, bulkTooltipShown: true })
                                     else
-                                      // if tooltip not finished, 
+                                      // if tooltip not finished,
                                       // we will not close
                                       // but set tooltip to be finished and show the info normally
                                       // (a click here means open the CSV info)
