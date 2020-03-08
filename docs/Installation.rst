@@ -6,7 +6,7 @@ Initially, clone the repo with the command.
 
 ``git clone https://github.com/wikimedia/WikiContrib.git``
 
-The tool has two different components(Backend and Frontend). Each of them has their own installation instructions.
+The tool has two different components(Backend and Frontend). Each of them has its installation instructions.
 
 Backend
 =======
@@ -30,9 +30,9 @@ If you go inside ``backend`` directory( use command ``cd backend``). You can fin
 
 **Creating a virtual environment:**
 
-Virtual environment isolates the entire project. The packages used by different projects will be different and few packages used in a project might not be compatible with another one. So, using virtual environment sets up packages individually to each project.
+A virtual environment isolates the entire project. The packages used by different projects will be different and few packages used in a project might not be compatible with another one. So, using a virtual environment sets up packages individually for each project.
 
-One way to create virtual environment in python is using `virtualenv tool <https://pypi.org/project/virtualenv/>`_
+One way to create a virtual environment in python is by using `virtualenv tool <https://pypi.org/project/virtualenv/>`_
 
 First Install python3, type the following commands inside ``backend`` directory
 
@@ -48,11 +48,11 @@ Let's Install virtualenv package.
 
 ``pip3 install virtualenv``
 
-you have successfully installed ``virtualenv``. Noe let's create a virtual environment.
+you have successfully installed ``virtualenv``. Now let's create a virtual environment.
 
 ``virtualenv -p $(which python3) WMWikiContrib``
 
-The above command creates a virtual environment named ``VMWikiContrib``. It creates a directory named ``WMWikiContrib`` in the current directory. It is recommended to create  virtual environment in ``backend`` directory. You have successfully created the virtual environment. But you need to activate it now.
+The above command creates a virtual environment named ``VMWikiContrib``. It creates a directory named ``WMWikiContrib`` in the current directory. It is recommended to create a virtual environment in ``backend`` directory. You have successfully created a virtual environment. But you need to activate it now.
 
 To activate the virtual environment, type the following command (in the same directory where ``WMWikiContrib`` is located):
 
@@ -87,11 +87,11 @@ Now, you need to run the migration files. Type the following command:
 
 **Create super user:**
 
-You have successfully created the schema now. Inorder to access the models you need to create a superuser. Use this command:
+You have successfully created the schema now. To access the models you need to create a superuser. Use this command:
 
 ``python manage.py createsuperuser``
 
-The above prompts for username, email and password. The command creates a user with the corresponding username and password. You can see the database tables or models using it.
+The above prompts for username, email, and password. The command creates a user with the corresponding username and password. You can see the database tables or models using it.
 
 
 **Run the local server:**
@@ -125,7 +125,7 @@ If you go inside ``frontend`` directory( use command ``cd frontend``). You can f
 
 ``sudo apt-get install npm``
 
-You have installed npm successfully. You can check the verison of npm with the command ``npm -v``
+You have installed npm successfully. You can check the version of npm with the command ``npm -v``
 
 **Install the requirements.**
 
@@ -141,7 +141,7 @@ Now type the following command in the same directory.
 
 ``npm start``
 
-This starts a development server in a URL alike ``http://localhost:3000/``. Hurray! you have successfully hosted the fronend in local environment.
+This starts a development server in a URL like ``http://localhost:3000/``. Hurray! you have successfully hosted the fronend in local environment.
 
 
 You have successfully completed hosting the backend and frontend locally. You can visit the "Contributing" section to know how to contribute to the tool.
