@@ -6,26 +6,23 @@ export const NavBar = () => (
   <Menu fluid secondary style={{ marginTop: -5 }}>
     <Menu.Menu position="right">
       <Menu.Item>
-        <a
+        <a className="a docs"
           target="_blank"
           href="https://wikicontrib.readthedocs.io/en/latest/"
           rel="noopener noreferrer"
         >
-          <Button className="docs">
             <span style={{ marginRight: 5 }}>Docs</span> <Icon name="book" />
-          </Button>
         </a>
       </Menu.Item>
       <Menu.Item>
         <Popup
-          trigger={<Button icon="info" size="large" className="info"></Button>}
+          trigger={<Button icon="info" tabIndex="0" aria-describedby="info_content" size="large" className="info"></Button>}
           position="bottom right"
           content={
-            <div style={{ textAlign: 'center' }}>
-              <span style={{ fontFamily: 'Charter', fontWeight: 'bold' }}>
+            <div id="info_content" style={{ textAlign: 'center' }}>
+              <h2 style={{ fontFamily: 'Charter', fontWeight: 'bold' }}>
                 WikiContrib
-              </span>
-              <br />
+              </h2>
               <p>{info_content}</p>
             </div>
           }
