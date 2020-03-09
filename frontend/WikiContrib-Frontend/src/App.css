@@ -712,3 +712,7 @@ h4.accounts {
   position: absolute;
   margin-left: 1em;
 }
+
+.ui.button.remove:focus,.ui.button.remove:hover {
+  outline: 2px solid #9ABDF6 !important;
+}
