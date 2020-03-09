@@ -491,11 +491,11 @@ export class Query extends Component {
                                   onClose={(event) => {
                                     // in case of bulkTooltipShown being false (currently open)
                                     // the event fired when click would be onClose
-                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i')) 
+                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
                                       // if tooltip already finished, close normally
-                                      this.setState({ bulkShown: false, bulkTooltipShown: true }) 
+                                      this.setState({ bulkShown: false, bulkTooltipShown: true })
                                     else
-                                      // if tooltip not finished, 
+                                      // if tooltip not finished,
                                       // we will not close
                                       // but set tooltip to be finished and show the info normally
                                       // (a click here means open the CSV info)
@@ -679,6 +679,8 @@ export class Query extends Component {
                                       <Table.Cell
                                         style={{ textAlign: 'center' }}
                                       >
+                                      <label>
+                                        <div className="input_label">Full Name</div>
                                         <input
                                           className="user_input"
                                           value={obj.fullname}
@@ -692,53 +694,65 @@ export class Query extends Component {
                                             )
                                           }
                                         />
+                                    </label>
                                       </Table.Cell>
                                       <Table.Cell
                                         style={{ textAlign: 'center' }}
                                       >
-                                        <input
-                                          className="user_input"
-                                          value={obj.gerrit_username}
-                                          name="gerrit_username"
-                                          placeholder="Gerrit Username"
-                                          onChange={e =>
-                                            this.handlChange(
-                                              e.target.name,
-                                              e.target.value,
-                                              index
-                                            )
-                                          }
-                                        />
+                                        <label>
+                                          <div className="input_label">Gerrit Username</div>
+                                          <input
+                                            className="user_input"
+                                            value={obj.gerrit_username}
+                                            name="gerrit_username"
+                                            placeholder="Gerrit Username"
+                                            onChange={e =>
+                                              this.handlChange(
+                                                e.target.name,
+                                                e.target.value,
+                                                index
+                                              )
+                                            }
+                                          />
+                                        </label>
                                       </Table.Cell>
                                       <Table.Cell
                                         style={{ textAlign: 'center' }}
                                       >
-                                        <input
-                                          className="user_input"
-                                          value={obj.phabricator_username}
-                                          name="phabricator_username"
-                                          placeholder="Phabricator Username"
-                                          onChange={e =>
-                                            this.handlChange(
-                                              e.target.name,
-                                              e.target.value,
-                                              index
-                                            )
-                                          }
-                                        />
+                                        <label>
+                                          <div className="input_label">Phabricator Username</div>
+                                          <input
+                                            className="user_input"
+                                            value={obj.phabricator_username}
+                                            name="phabricator_username"
+                                            placeholder="Phabricator Username"
+                                            onChange={e =>
+                                              this.handlChange(
+                                                e.target.name,
+                                                e.target.value,
+                                                index
+                                              )
+                                            }
+                                          />
+                                        </label>
                                       </Table.Cell>
                                       <Table.Cell
-                                        style={{ textAlign: 'center' }}
+                                        tabIndex="0" style={{ textAlign: 'center' }}
                                       >
+                                      <Button style={{backgroundColor:"inherit"}}
+                                        onClick={(e)=>{
+                                          this.removeRow(index);
+                                        }}>
                                         <Icon
                                           name="minus circle"
+                                          label="remove row"
                                           style={{
                                             cursor: 'pointer',
                                             color: '#fa5050',
                                             fontSize: '1rem',
                                           }}
-                                          onClick={() => this.removeRow(index)}
                                         />
+                                      </Button>
                                       </Table.Cell>
                                     </Table.Row>
                                   ))}
@@ -749,49 +763,55 @@ export class Query extends Component {
                           <br />
                           <Card.Content extra>
                             <div>
-                              <Checkbox
-                                toggle
-                                label="Bulk Add"
-                                onClick={() =>
-                                  this.setState({ bulk: !this.state.bulk })
-                                }
-                                checked={this.state.bulk}
-                              />
+                              <label>
+                                <Checkbox
+                                  toggle
+                                  onClick={() =>
+                                    this.setState({ bulk: !this.state.bulk })
+                                  }
+                                  checked={this.state.bulk}
+                                />
+                              <span className="checkbox_label">Bulk Add</span>
+                              </label>
                             </div>
                           </Card.Content>
                         </Card>
-                        <Button
-                          onClick={this.createQuery}
-                          className="continue"
-                          disabled={this.state.loading}
-                          loading={this.state.loading}
-                        >
-                          <Icon name="search" />
-                        </Button>
-                        <Button className="table_row_add" onClick={this.addrow}>
-                          <Icon name="user plus" />
-                        </Button>
-                        <Button
-                          icon
-                          className="reset"
-                          onClick={() => {
-                            localStorage.removeItem('users');
-                            this.setState({
-                              message: {
-                                message: 'Cleared the cache data!',
-                                trigger: true,
-                                type: 0,
-                                update: !this.state.message.update,
-                              },
-                              rows: [Object.assign({}, emptyObj)],
-                            });
-                          }}
-                        >
-                          <Icon
-                            name="trash alternate"
-                            style={{ paddingRight: 4 }}
-                          />
-                        </Button>
+                        <div className="reset_add_continue">
+                          <Button
+                            icon
+                            aria-label="reset"
+                            className="reset"
+                            onClick={() => {
+                              localStorage.removeItem('users');
+                              this.setState({
+                                message: {
+                                  message: 'Cleared the cache data!',
+                                  trigger: true,
+                                  type: 0,
+                                  update: !this.state.message.update,
+                                },
+                                rows: [Object.assign({}, emptyObj)],
+                              });
+                            }}
+                          >
+                            <Icon
+                              name="trash alternate"
+                              style={{ paddingRight: 4 }}
+                            />
+                          </Button>
+                          <Button className="table_row_add" aria-label="add more user" onClick={this.addrow}>
+                            <Icon name="user plus" />
+                          </Button>
+                          <Button
+                            onClick={this.createQuery}
+                            className="continue"
+                            disabled={this.state.loading}
+                            loading={this.state.loading}
+                            aria-label="search"
+                          >
+                            <Icon name="search" />
+                          </Button>
+                        </div>
                       </React.Fragment>
                     </Transition>
                   )}

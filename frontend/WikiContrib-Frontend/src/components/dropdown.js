@@ -27,9 +27,10 @@ class Dropdown extends React.Component {
                 style={{ marginTop: 3, marginRight: 2 }}
               />
             ) : (
-              <Icon name="search" style={{ marginTop: 3 }} />
+              <Icon name="search" id="search" label="search" style={{ marginTop: 3 }} />
             )}
             <input
+              aria-label="search"
               onKeyPress={e => {
                 if (e.which === 13) {
                   this.props.onSearchChange();
@@ -63,7 +64,7 @@ class Dropdown extends React.Component {
           {this.state.open ? (
             <div className="dropdown_max_len">
               {this.state.loading ? (
-                <div className="message_dropdown">
+                <div className="message_dropdown" id="message_dropdown">
                   {this.props.noResultsMessage}
                 </div>
               ) : (
