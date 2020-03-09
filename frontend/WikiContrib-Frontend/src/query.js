@@ -736,9 +736,10 @@ export class Query extends Component {
                                         </label>
                                       </Table.Cell>
                                       <Table.Cell
-                                        tabIndex="0" style={{ textAlign: 'center' }}
+                                       style={{ textAlign: 'center' }}
                                       >
-                                      <Button style={{backgroundColor:"inherit"}}
+                                      <Button className="remove" aria-label="remove user" style={{backgroundColor:"inherit"}}
+                                      tabIndex="0"
                                         onClick={(e)=>{
                                           this.removeRow(index);
                                         }}>

@@ -7,6 +7,7 @@ export const NavBar = () => (
     <Menu.Menu position="right">
       <Menu.Item>
         <a className="a docs"
+        aria-label="read the documentation"
           target="_blank"
           href="https://wikicontrib.readthedocs.io/en/latest/"
           rel="noopener noreferrer"
@@ -16,7 +17,7 @@ export const NavBar = () => (
       </Menu.Item>
       <Menu.Item>
         <Popup
-          trigger={<Button icon="info" tabIndex="0" aria-describedby="info_content" size="large" className="info"></Button>}
+          trigger={<Button icon="info" aria-label="about wikicontrib" tabIndex="0" size="large" className="info"></Button>}
           position="bottom right"
           content={
             <div id="info_content" style={{ textAlign: 'center' }}>
