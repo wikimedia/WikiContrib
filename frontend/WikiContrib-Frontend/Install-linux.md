@@ -2,7 +2,7 @@ Now, if you type command `ls`, you can see a directory named **WikiContrib**. Go
 1. backend
 2. frontend
 
-The present doc deals about installing and running `frontend`. If you go inside `frontend` directory( use command `cd frontend`). You can find another directory named `WikiContrib-Frontend`. It is the main project directory.
+The present doc deals with installing and running `frontend`. If you go inside `frontend` directory( use command `cd frontend`). You can find another directory named `WikiContrib-Frontend`. It is the main project directory.
 
 ## Steps to setup server locally
 
@@ -17,7 +17,7 @@ sudo apt-get update
 sudo apt-get install nodejs
 sudo apt-get install npm
 ```
-You have installed npm successfully. You can check the verison of npm with the command `npm -v`
+You have installed npm successfully. You can check the version of npm with the command `npm -v`
 
 ## Install the requirements.
 
@@ -37,4 +37,4 @@ Now type the following command in the same directory.
 npm start
 ```
 
-This starts a development server in a URL alike `http://localhost:3000/`. Hurray! you have successfully hosted the frontend in local environment.
+This starts a development server in a URL like `http://localhost:3000/`. Hurray! you have successfully hosted the frontend in your local environment.

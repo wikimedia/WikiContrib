@@ -2,7 +2,7 @@ Now, if you type command `ls`, you can see a directory named **WikiContrib**. Go
 1. backend
 2. frontend
 
-The present doc deals about installing and running `backend`. If you go inside `backend` directory( use command `cd backend`). You can find another directory named `WikiContrib`. It is the main project directory.
+The present doc deals with installing and running `backend`. If you go inside `backend` directory( use command `cd backend`). You can find another directory named `WikiContrib`. It is the main project directory.
 
 # Steps to setup server locally
 
@@ -17,12 +17,12 @@ The present doc deals about installing and running `backend`. If you go inside `
 
 ## Creating a virtual environment:
 
-Virtual environment isolates the entire project. The packages used by different projects will be different and few packages used in a project might not be compatible with another one. So, using virtual environment sets up packages individually to each project.
+Virtual environment isolates the entire project. The packages used by different projects will be different and few packages used in a project might not be compatible with another one. So, using a virtual environment sets up packages individually for each project.
 
 One way to create virtual environments in python is using [virtualenv tool](https://pypi.org/project/virtualenv/).
 
 
-First Install python3, type the following commands inside `backend` directory 
+First Install python3, type the following commands inside `backend` directory
 ```commandline
 sudo apt-get install python3
 ```
@@ -39,24 +39,24 @@ Let's Install virtualenv package.
 pip3 install virtualenv
 ```
 
-you have successfully installed `virtualenv`. Noe let's create a virtual environment.
+you have successfully installed `virtualenv`. Now let's create a virtual environment.
  ```commandline
 virtualenv -p $(which python3) WMWikiContrib
 ```
 
-The above command creates a virtual environment named `VMWikiContrib`. It creates a directory named `WMWikiContrib` in the current directory. It is recommended to create  virtual environment in `backend` directory. You have successfully created the virtual environment. But you need to activate it now
+The above command creates a virtual environment named `VMWikiContrib`. It creates a directory named `WMWikiContrib` in the current directory. It is recommended to create a virtual environment in `backend` directory. You have successfully created the virtual environment. But you need to activate it now
 
 To activate the virtual environment, type the following command (in the same directory where `WMWikiContrib` is located):
 ```commandline
 source WMWikiContrib/bin/activate
 ```
 
-## Install the required packages to run the tool: 
+## Install the required packages to run the tool:
 
 Now go inside the `WikiContrib` directory (inside `backend`). Install all the packages that are required to run the project using the command.
 ```commandline
 pip install -r requirements.txt
-``` 
+```
 
 To check if `Django` is successfully installed. Type the following command:
 ```commandline
@@ -86,7 +86,7 @@ python manage.py migrate
 ```
 
 ## Create super user:
-You have successfully created the schema now. Inorder to access the models you need to create a superuser. Use this command:
+You have successfully created the schema now. In order to access the models you need to create a superuser. Use this command:
 ```commandline
 python manage.py createsuperuser
 ```
@@ -102,4 +102,4 @@ python manage.py runserver
 
 Hurray!! Now you can access the API. You can get the API doc [here](https://documenter.getpostman.com/view/6222710/SVYurxMj?version=latest).
 
-To see the database tables, you can go to this url: `http://127.0.0.1:8000/admin/` and login with the above created credentials.
+To see the database tables, you can go to this url: `http://127.0.0.1:8000/admin/` and login with the super user credentials.
