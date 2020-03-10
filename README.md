@@ -27,7 +27,7 @@ There is also a feature to upload a list of usernames in a CSV format and view c
 1. Run `cd WikiContrib`
 2. To install docker-compose, run `pip install docker-compose`
 3. To start the front-end as well as back-end server, run `docker-compose up --build`.
-
+4. Frontend running at `localhost:3000` and backend running at `localhost:8000`
   ###### NOTE:
   - Use the `--build` flag only when running docker-compose for the first time. For repeated use, simply run `docker-compose up`
   - Inorder to make the frontend send requests to the local backend, you need to change the code in the file `frontend/WikiContrib-Frontend/src/api.js` and change the value of `BASE_API_URI` to `127.0.0.1:8000`
