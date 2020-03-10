@@ -6,6 +6,17 @@ The present doc deals with installing and running `frontend`. If you go inside `
 
 ## Steps to setup server locally
 
+## Using Docker 
+
+1. Install Docker in your system (https://docs.docker.com/install/)
+2. Get to the  Dockerfile directory : `cd frontend/WikiContrib-Frontend`  
+3. Run `docker build .` to build an image.
+4. Run `docker  run  -p 3000:3000  <image-id>` to run the container.
+
+
+## Manually
+
+
 1. Install npm
 2. Install the requirements.
 3. Start the development server.
