@@ -463,11 +463,11 @@ export class Query extends Component {
                     >
                       <React.Fragment>
                         <Header className="title">WikiContrib</Header>
-                        <h4 className="accounts">
+                        <h2 className="accounts">
                           Get the Contributions of your fellow Wikimedians,
                           showcase yourself! Visualize their contribs using
                           graphs over different time ranges.
-                        </h4>
+                        </h2>
                         <Card className="query_create">
                           {this.state.bulk ? (
                             <React.Fragment>
@@ -491,11 +491,11 @@ export class Query extends Component {
                                   onClose={(event) => {
                                     // in case of bulkTooltipShown being false (currently open)
                                     // the event fired when click would be onClose
-                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i')) 
+                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
                                       // if tooltip already finished, close normally
-                                      this.setState({ bulkShown: false, bulkTooltipShown: true }) 
+                                      this.setState({ bulkShown: false, bulkTooltipShown: true })
                                     else
-                                      // if tooltip not finished, 
+                                      // if tooltip not finished,
                                       // we will not close
                                       // but set tooltip to be finished and show the info normally
                                       // (a click here means open the CSV info)

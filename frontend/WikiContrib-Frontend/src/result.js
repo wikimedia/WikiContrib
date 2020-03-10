@@ -497,28 +497,24 @@ class QueryResult extends React.Component {
         <NavBar />
         <Grid>
           <Grid.Row>
-            <Grid.Column width={2} />
-            <Grid.Column width={12}>
               <div className="result">
                 {this.state.page_load ? (
                   <Placeholder fluid className="search_load">
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
-                  <Grid>
-                    <Grid.Row>
-                      <Grid.Column computer={14} tablet={12} mobile={16}>
+                  <div className="controls">
+                    <div className="search">
                         <UserSearch
                           set={this.onUserSearch}
                           hash={this.state.query}
                           value={this.state.value}
                         />
-                      </Grid.Column>
+                      </div>
 
-                      <Grid.Column
-                        computer={1}
-                        tablet={2}
-                        mobile={8}
+
+                      <div className="filter_and_update">
+                      <div className="filter"
                         style={{
                           marginTop: window.innerWidth >= 768 ? '8vh' : '',
                           textAlign: 'right',
@@ -539,11 +535,8 @@ class QueryResult extends React.Component {
                             />
                           }
                         />
-                      </Grid.Column>
-                      <Grid.Column
-                        computer={1}
-                        tablet={2}
-                        mobile={8}
+                      </div>
+                      <div className="update"
                         style={{
                           marginTop: window.innerWidth >= 768 ? '8vh' : '',
                         }}
@@ -567,9 +560,9 @@ class QueryResult extends React.Component {
                             />
                           }
                         />
-                      </Grid.Column>
-                    </Grid.Row>
-                  </Grid>
+                      </div>
+                    </div>
+                    </div>
                 )}
                 <Transition
                   animation="fade down"
@@ -720,8 +713,6 @@ class QueryResult extends React.Component {
                   </Card>
                 </Transition>
               </div>
-            </Grid.Column>
-            <Grid.Column width={2} />
           </Grid.Row>
           {this.state.notFound ? (
             <NotFound />

@@ -13,6 +13,10 @@ h4.accounts {
   font-size: 5rem;
 }
 
+h2.accounts {
+  font-size: 1.6rem;
+}
+
 .ui.header.chart {
   font-family: 'Lato ', sans-serif;
   font-size: 2rem;
@@ -386,7 +390,7 @@ h4.accounts {
 
 /* End of user activity */
 
-.ui.card.result {
+.result {
   width: 100%;
 }
 
@@ -440,10 +444,28 @@ h4.accounts {
   font-size: 3rem;
 }
 
+/* <--------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter_and_update {
+  display: flex;
+}
+
+.search {
+  width: 62%;
+}
+
+/* ----------/> */
+
 .ui.icon.button.filters {
-  left: 0px !important;
-  margin-left: -3rem;
-  float: left !important;
+  /* left: 0px !important; */
+  /* margin-left: 3rem; */
+  /* float: left !important; */
+  margin-right: 1.3em;
   background: #222 !important;
   color: white !important;
   padding: 17px !important;
@@ -460,9 +482,9 @@ h4.accounts {
 
 .ui.card.filter_view {
   background: #eaecf0;
-  width: 80%;
+  width: 58%;
   margin: 1rem;
-  margin-top: -1rem;
+  margin-left: 14%;
   padding: 1rem;
   font-family: 'Lato ', sans-serif;
   font-size: 1.1rem;
@@ -524,13 +546,13 @@ h4.accounts {
 .ui.icon.button.update_query {
   background: #222 !important;
   transition: 0.3s !important;
-  float: left !important;
+  /* float: left !important; */
   color: white;
   z-index: 1;
   font-size: 1.5rem;
   opacity: 1;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  margin-left: -50%;
+  /* margin-left: -50%; */
 }
 
 .ui.icon.button.update_query:hover {
@@ -659,4 +681,10 @@ h4.accounts {
   white-space: nowrap;
   flex-direction: row-reverse;
   align-items: center;
+}
+
+@media screen and (max-width: 450px){
+  .ui.header.title {
+    font-size: 4rem;
+  }
 }
