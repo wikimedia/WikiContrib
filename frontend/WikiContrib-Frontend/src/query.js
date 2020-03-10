@@ -461,7 +461,7 @@ export class Query extends Component {
                       animation="fade"
                     >
                       <React.Fragment>
-                        <Header className="title">WikiContrib</Header>
+                        <h1><Header className="title">WikiContrib</Header></h1>
                         <h4 className="accounts">
                           Get the Contributions of your fellow Wikimedians,
                           showcase yourself! Visualize their contribs using
