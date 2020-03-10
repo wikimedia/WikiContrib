@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  front-end:
+    build:
+      context: ./frontend/WikiContrib-Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+  backend-end:
+    build:
+      context: ./backend/WikiContrib
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
