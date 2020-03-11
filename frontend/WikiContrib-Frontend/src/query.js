@@ -22,7 +22,6 @@ import {
 } from 'semantic-ui-react';
 import { tool_name } from './App';
 import { NavBar } from './components/nav';
-import { thisExpression } from '@babel/types';
 
 var emptyObj = {
   fullname: '',

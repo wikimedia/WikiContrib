@@ -10,15 +10,15 @@ Technologies used: Django (Python), React (Javascript)
 
 ## Planned features
 WikiContrib is participating in [Outreachy](https://www.outreachy.org/) Round 20. Some of the features planned for the Outreachy project "Gather and analyze user contributions on wiki & Github" and for the future to enhance the project are:
-* Counting technical contributions made by a user on-wiki such as [modules](https://www.mediawiki.org/wiki/Lua_scripting) and [templates](https://www.mediawiki.org/wiki/Help:Templates), [user scripts & Gadgets](https://www.mediawiki.org/wiki/Gadget_kitchen), etc. 
+* Counting technical contributions made by a user on-wiki such as [modules](https://www.mediawiki.org/wiki/Lua_scripting) and [templates](https://www.mediawiki.org/wiki/Help:Templates), [user scripts & Gadgets](https://www.mediawiki.org/wiki/Gadget_kitchen), etc.
 * Counting technical contributions made to Github repositories under [Wikimedia](https://github.com/wikimedia) and other popular projects that are not necessarily under the Wikimedia account (e.g., [WikiEduDashboard](https://github.com/WikiEducationFoundation/WikiEduDashboard), [apps-android-commons](https://github.com/commons-app/apps-android-commons), etc.).
 * Anything else that can be measured as per the [Technical Contributors Map](https://www.mediawiki.org/wiki/Developer_Advocacy/Metrics#Technical_Contributors_Map).
 * Fetch the best user avatar and about information from the possible venues and display it alongside the contribution statistics.
 * New layouts for visualizing contributions.
 
 ## Using the tool
-To view a community members’ contributions, provide their full name, Gerrit username, and Phabricator username. By default, the tool searches for their contributions in the past year.  There are options to filter by timestamp and issue type (for example: merged, open, etc.) 
-There is also a feature to upload a list of usernames in a CSV format and view contributions for several community members altogether (this feature is still in experimental mode). 
+To view a community members’ contributions, provide their full name, Gerrit username, and Phabricator username. By default, the tool searches for their contributions in the past year.  There are options to filter by timestamp and issue type (for example: merged, open, etc.)
+There is also a feature to upload a list of usernames in a CSV format and view contributions for several community members altogether (this feature is still in experimental mode).
 
 ## Getting started
 * First, clone the repo `git clone https://github.com/wikimedia/WikiContrib.git`
@@ -29,7 +29,7 @@ There is also a feature to upload a list of usernames in a CSV format and view c
 ## Additional links
 * API documentation: https://documenter.getpostman.com/view/6222710/SVYurxMj
 * Full documentation on using and contributing to the tool: https://wikicontrib.readthedocs.io/
-* Steps for hosting are in `DEPLOYING.md` 
+* Steps for hosting are in `DEPLOYING.md`
 * For additional questions, come chat with the maintainers on Wikimedia Zulip: https://wikimedia.zulipchat.com/#narrow/stream/220258-gsoc20-outreachy20/topic/WikiContrib
 
 ## License
