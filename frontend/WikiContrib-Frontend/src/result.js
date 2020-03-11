@@ -88,9 +88,9 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <Header className="name">{this.props.username}'s Activity</Header>
+              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
               <span>
-                <h1 className="accounts">
+                <h3 className="accounts">
                   Gerrit:{' '}
                   {this.props.gerrit_username !== '' ? (
                     <a
@@ -122,12 +122,12 @@ class DisplayUser extends React.Component {
                   ) : (
                       'None'
                     )}
-                </h1>
-                <h2 className="accounts">
+                </h3>
+                <h3 className="accounts">
                   {full_months[st.getUTCMonth()] + " " + st.getFullYear()}
                   -
                   {full_months[et.getUTCMonth() - 1] + " " + et.getFullYear()}
-                </h2>
+                </h3>
               </span>
             </React.Fragment>
           )}
@@ -514,12 +514,7 @@ class QueryResult extends React.Component {
 
 
                       <div className="filter_and_update">
-                      <div className="filter"
-                        style={{
-                          marginTop: '8vh',
-                          textAlign: 'right',
-                        }}
-                      >
+                      <div className="filter">
                         <Popup
                           content="View Filters"
                           position="top center"
@@ -536,11 +531,7 @@ class QueryResult extends React.Component {
                           }
                         />
                       </div>
-                      <div className="update"
-                        style={{
-                          marginTop: '8vh',
-                        }}
-                      >
+                      <div className="update">
                         <Popup
                           content="Update"
                           position="top center"
@@ -720,7 +711,7 @@ class QueryResult extends React.Component {
             <React.Fragment>
               <Grid.Row>
                 <Grid.Column width={2} />
-                <Grid.Column width={8}>
+                <Grid.Column width={12}>
                   <DisplayUser
                     loading={this.state.loading}
                     username={this.state.current}
@@ -729,7 +720,6 @@ class QueryResult extends React.Component {
                     filters={this.state.current_filters}
                   />
                 </Grid.Column>
-                <Grid.Column width={2} />
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column computer={2} mobile={1} tablet={1} />
@@ -803,17 +793,13 @@ class QueryResult extends React.Component {
                 <Grid.Column width={2} />
               </Grid.Row>
               {this.state.activity !== undefined ? (
-                <Grid.Row>
-                  <Grid.Column width={3} />
-                  <Grid.Column width={9}>
+                  <div className="activity_wrapper">
                     <Activity
                       date={this.state.activity}
                       hash={this.state.query}
                       username={this.state.current}
                     />
-                  </Grid.Column>
-                  <Grid.Column width={3} />
-                </Grid.Row>
+                  </div>
               ) : (
                 ''
               )}
