@@ -23,11 +23,8 @@ There is also a feature to upload a list of usernames in a CSV format and view c
 ## Getting started
 * First, clone the repo `git clone https://github.com/wikimedia/WikiContrib.git`
 * This tool has two different components: Frontend & Backend. You will have to set up both for the tool to be fully functional, and the instructions do so are here:
-  * [Frontend installation steps - Linux](https://github.com/wikimedia/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install-linux.md)
-  * [Frontend installation steps - Windows](https://github.com/wikimedia/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install-windows.md)
-  * [Backend installation steps - Linux](https://github.com/wikimedia/WikiContrib/blob/master/backend/WikiContrib/Install-linux.md)
-  * [Backend installation steps - Windows](https://github.com/wikimedia/WikiContrib/blob/master/backend/WikiContrib/Install-windows.md)
-
+  * [Frontend installation steps](https://github.com/wikimedia/WikiContrib/tree/master/frontend/WikiContrib-Frontend/Install.md)
+  * [Backend installation steps](https://github.com/wikimedia/WikiContrib/blob/master/backend/WikiContrib/Install.md)
 
 ## Additional links
 * API documentation: https://documenter.getpostman.com/view/6222710/SVYurxMj
