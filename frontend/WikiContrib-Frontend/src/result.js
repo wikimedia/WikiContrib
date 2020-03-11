@@ -516,7 +516,7 @@ class QueryResult extends React.Component {
                       <div className="filter_and_update">
                       <div className="filter"
                         style={{
-                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
+                          marginTop: '8vh',
                           textAlign: 'right',
                         }}
                       >
@@ -538,7 +538,7 @@ class QueryResult extends React.Component {
                       </div>
                       <div className="update"
                         style={{
-                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
+                          marginTop: '8vh',
                         }}
                       >
                         <Popup
