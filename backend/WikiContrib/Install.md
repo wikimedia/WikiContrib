@@ -10,8 +10,10 @@ The present doc deals with installing and running `backend`. If you go inside `b
 
 1. Install Docker in your system (https://docs.docker.com/install/)
 2. Get to the  Dockerfile directory : `cd backend/WikiContrib`  
-3. Run `docker build .` to build an image.
-4. Run `docker  run -td  -p 8000:8000  <image-id>` to run the container.
+3. [Set up environment variables](#set-up-environment-variables)
+4. Run `docker build .` to build an image. This will return an `image-id`.
+5. Run `docker  run -td  -p 8000:8000  <image-id>` to run the container.
+
 
 
 ## Manually
