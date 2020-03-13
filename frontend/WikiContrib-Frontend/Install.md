@@ -24,15 +24,17 @@ sudo apt-get install npm
 
 **Windows**
 
-1. go to https://nodejs.org/en/download/, go to the line "Windows Installer (.msi)" and download
+1. Go to https://nodejs.org/en/download/, go to the line "Windows Installer (.msi)" and download
  the necessary installer for your system (either 32-bit or 64-bit depending on your system bits)
 
-2. go to the downloaded file, double click and follow the installer prompt to install nodejs
+2. Go to the downloaded file, double click and follow the installer prompt to install nodejs
 
 You can check the version of npm with the command `npm -v`
 
 
 ## Install the requirements.
+
+> Before installing the modules, just make sure that `node` version you are using is `<=12`, if using `gulp` version `<=3`. This combination of versions will throw an error during installaton. Either downgrade the `node` version or upgrade the `gulp` version.
 
 Now Inside the directory `WikiContrib-Frontend`, type the command
 
@@ -50,4 +52,13 @@ Now type the following command in the same directory.
 npm start
 ```
 
-This starts a development server in a URL like `http://localhost:3000/`. Hurray! you have successfully hosted the frontend in your local environment.
+This will starts the development server on `http://localhost:3000/`. 
+
+For custom port,
+
+```commandline
+PORT=${PORT} npm start
+```
+This starts the development server on `http://localhost:{PORT}`. 
+
+Hurray! you have successfully hosted the frontend in your local environment.
