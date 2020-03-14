@@ -201,13 +201,22 @@ export class Query extends Component {
   };
 
   addFile = file => {
+    console.log(file);
     /**
      * Add CSV file to the tool.
      * @param {file} file file added to upload.
      */
-    if (file.type === 'text/csv') {
+    if(file.type === 'text/csv' || file.type === "application/vnd.ms-excel" ||
+       file.type === "text/plain" ||
+       file.type === "text/x-csv" ||
+       file.type === "application/csv" ||
+       file.type === "application/x-csv" ||
+       file.type === "text/comma-separated-values" ||
+       file.type === "text/x-comma-separated-values" ||
+       file.type === "text/tab-separated-values") {
       this.setState({ file: file });
-    } else {
+    }
+     else {
       document.getElementsByClassName('drag_drop')[0].style.border =
         '1px dashed rgb(196, 194, 194)';
 
