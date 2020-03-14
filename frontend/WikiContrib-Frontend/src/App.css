@@ -245,7 +245,6 @@ h3.accounts  {
 }
 
 .ui.button.table_row_add {
-  float: right;
   background: #222 !important;
   color: white !important;
   padding: 17px !important;
@@ -262,13 +261,22 @@ h3.accounts  {
 
 .ui.button.table_row_add:hover,
 .ui.button.continue:hover,
-.ui.button.save_offline:hover {
+.ui.button.save_offline:hover,
+.ui.button.reset:hover,
+.ui.button.table_row_add:focus,
+.ui.button.continue:focus,
+.ui.button.save_offline:focus,
+.ui.button.reset:focus
+ {
   opacity: 0.8;
+  -webkit-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  -moz-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  outline: 2px solid white;
 }
 
 .ui.button.continue,
 .ui.button.save_offline {
-  float: right;
   background: #36c !important;
   color: white !important;
   padding: 17px !important;
@@ -286,8 +294,11 @@ h3.accounts  {
   width: 100% !important;
 }
 
-.ui.button.reset {
+.reset_add_continue {
   float: right;
+}
+
+.ui.button.reset {
   background: #d33 !important;
   color: white !important;
   padding: 17px !important;
@@ -490,8 +501,12 @@ h3.accounts  {
   opacity: 1;
 }
 
-.ui.icon.button.filters:hover {
+.ui.icon.button.filters:hover,.ui.icon.button.filters:focus {
   opacity: 0.8;
+  -webkit-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  -moz-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  outline: 2px solid white;
 }
 
 .ui.card.filter_view {
@@ -568,8 +583,12 @@ h3.accounts  {
   /* margin-left: -50%; */
 }
 
-.ui.icon.button.update_query:hover {
+.ui.icon.button.update_query:hover,.ui.icon.button.update_query:focus {
   opacity: 0.8;
+  -webkit-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  -moz-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
+  outline: 2px solid white;
 }
 
 .line.load_background {
@@ -647,18 +666,33 @@ h3.accounts  {
   border: 1px solid #C3C4C4;
 }
 
-.ui.button.docs {
+/* .ui.button.docs {
   background: #eaecf0 !important;
   color: #222 !important;
   padding-left: 10px !important;
   padding-right: 8px !important;
   margin-right: -25px;
-}
+} */
+
+  .a.docs {
+    background: #eaecf0;
+    color: #222;
+    padding-left: 10px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 10px;
+    border-radius: 4px;
+    margin-right: -25px;
+  }
 
 .ui.button.info {
   background: #eaecf0 !important;
   color: #222 !important;
   margin-right: -15px !important;
+}
+
+.ui.button.info:focus {
+  outline: 2px solid #9ABDF6;
 }
 
 .card{
@@ -695,6 +729,26 @@ h3.accounts  {
   white-space: nowrap;
   flex-direction: row-reverse;
   align-items: center;
+}
+
+.input_label {
+  text-align: left;
+  margin-top: 1.5em;
+  margin-bottom:0.5em;
+  padding-left: 1.4rem;
+  font-weight: bold;
+}
+
+.checkbox_label {
+  display: inline-block;
+  font-weight: bold;
+  color: black;
+  position: absolute;
+  margin-left: 1em;
+}
+
+.ui.button.remove:focus,.ui.button.remove:hover {
+  outline: 2px solid #9ABDF6 !important;
 }
 
 @media screen and (min-width: 900px) and (max-width: 1140px ){

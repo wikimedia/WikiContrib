@@ -462,6 +462,7 @@ class QueryResult extends React.Component {
             trigger={
               <div className="left_arrow">
                 <Button
+                  aria-label="previous user"
                   icon="arrow left"
                   className="page_button"
                   primary
@@ -483,6 +484,7 @@ class QueryResult extends React.Component {
               trigger={
                 <Button
                   primary
+                  aria-label="next user"
                   className="page_button"
                   icon="arrow right"
                   disabled={this.state.loading}
@@ -498,6 +500,7 @@ class QueryResult extends React.Component {
         <Grid>
           <Grid.Row>
               <div className="result">
+              <h1 className="result_page_heading">Query Result</h1>
                 {this.state.page_load ? (
                   <Placeholder fluid className="search_load">
                     <Placeholder.Line className="load_background" />
@@ -522,6 +525,7 @@ class QueryResult extends React.Component {
                             <Button
                               icon="options"
                               className="filters"
+                              aria-label="filters"
                               onClick={() =>
                                 this.setState({
                                   view_filters: !this.state.view_filters,
@@ -538,6 +542,7 @@ class QueryResult extends React.Component {
                           trigger={
                             <Button
                               className="update_query"
+                              aria-label="update query"
                               icon="write"
                               as={Link}
                               to={

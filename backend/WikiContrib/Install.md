@@ -6,6 +6,18 @@ The present doc deals with installing and running `backend`. If you go inside `b
 
 # Steps to setup server locally
 
+## Using Docker 
+
+1. Install Docker in your system (https://docs.docker.com/install/)
+2. Get to the  Dockerfile directory : `cd backend/WikiContrib`  
+3. [Set up environment variables](#set-up-environment-variables)
+4. Run `docker build .` to build an image. This will return an `image-id`.
+5. Run `docker  run -td  -p 8000:8000  <image-id>` to run the container.
+
+
+
+## Manually
+
 1. Create a virtual environment
 2. Install the required packages to run the tool
 3. Create the phabricator account and generate a Conduit API token
