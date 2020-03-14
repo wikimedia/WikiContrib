@@ -12,7 +12,7 @@ environ.Env.read_env()
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 # STATIC_URL = '/static/'
 BASE_URL = env('BASE_URL_LOCAL')
 
