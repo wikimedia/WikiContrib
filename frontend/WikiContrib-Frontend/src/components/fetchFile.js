@@ -15,7 +15,7 @@ const fetchFileAsynchronous = (
    * @param {String} request_url -> URL to be fetched.
    * @param {Object} callback_func -> Call the function on success.
    * @param {Object} upload_percent -> After processing each chunk add the progress.
-   * @param {Object} error_callback -> Call the function on error. 
+   * @param {Object} error_callback -> Call the function on error.
    */
   chunk = 0;
   chunks = 0;
