@@ -201,12 +201,12 @@ export class Query extends Component {
   };
 
   addFile = file => {
-    console.log(file);
     /**
      * Add CSV file to the tool.
      * @param {file} file file added to upload.
      */
-    if(file.type === 'text/csv' || file.type === "application/vnd.ms-excel" ||
+    if(file.type === 'text/csv' ||
+       file.type === "application/vnd.ms-excel" ||
        file.type === "text/plain" ||
        file.type === "text/x-csv" ||
        file.type === "application/csv" ||
