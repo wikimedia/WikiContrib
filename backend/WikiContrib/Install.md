@@ -93,7 +93,7 @@ you have successfully installed `virtualenv`. Now let's create a virtual environ
 virtualenv WMWikiContrib
 ```
 
-The above command creates a virtual environment named `VMWikiContrib`. It creates a directory named `WMWikiContrib` in the current directory. It is recommended to create a virtual environment in `backend` directory. You have successfully created a virtual environment, But you need to activate it now
+The above command creates a virtual environment named `WMWikiContrib`. It creates a directory named `WMWikiContrib` in the current directory. It is recommended to create a virtual environment in `backend` directory. You have successfully created a virtual environment, But you need to activate it now
 
 To activate the virtual environment, type the following command (in the same directory where `WMWikiContrib` is located):
 ```commandline
