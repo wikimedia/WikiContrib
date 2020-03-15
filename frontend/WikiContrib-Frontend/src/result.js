@@ -583,33 +583,6 @@ class QueryResult extends React.Component {
                 >
                   <Card className="filter_view">
                     <Grid>
-                      <Grid.Row>
-                        <Grid.Column computer={16} tablet={16} mobile={16}>
-                          <Header>Contribution Status</Header>
-                          <Dropdown
-                            style={{ marginTop: 10 }}
-                            fluid
-                            search
-                            multiple
-                            selection
-                            options={format_status(
-                              gerrit_status.concat(phab_status, 'open')
-                            )}
-                            value={uf.status}
-                            onChange={(e, obj) => {
-                              let value = obj.value;
-                              let filters = Object.assign({}, uf);
-                              filters.status = value;
-                              this.setState({
-                                update_filters: filters,
-                              });
-                            }}
-                            placeholder="Status of Commit"
-                            closeOnChange={true}
-                          />
-                        </Grid.Column>
-                      </Grid.Row>
-                      <Grid.Row>
                         <Grid.Column computer={8} tablet={16} mobile={16}>
                           <Header>From</Header>
                           <Dropdown
@@ -706,7 +679,7 @@ class QueryResult extends React.Component {
                             closeOnChange={true}
                           />
                         </Grid.Column>
-                      </Grid.Row>
+                      {/* </Grid.Row> */}
                     </Grid>
                     <div style={{ width: '100%' }}>
                       <Button
