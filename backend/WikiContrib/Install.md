@@ -185,10 +185,10 @@ Before running the development server, you need to provide an API key to fetch t
 
 Once you login to the phabricator. You can generate a Conduit API token from `https://phabricator.wikimedia.org/settings/user/{Your username}/page/apitokens/` (fill your username in the link).
 
-Copy the API token, and paste it in the variable named `API_TOKEN` in the file `backend/WikiContrib/WikiContrib/settings.py`
+Copy the API token.
 
 ## Set up environment variables
-Copy contents of `backend/WikiContrib/WikiContrib/.env.example` to a new file `backend/WikiContrib/WikiContrib/.env`. Update it! Most likely you will be making changes only to `DB_NAME`, `DB_USER`, `DB_PASSWORD` and `PHAB_KEY` variables.
+Copy contents of `backend/WikiContrib/WikiContrib/.env.example` to a new file `backend/WikiContrib/WikiContrib/.env`. Paste the Phabricator API token in the variable `PHAB_KEY` in the file you just created.
 
 
 ## Run the migrations:
