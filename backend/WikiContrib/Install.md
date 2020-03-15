@@ -65,6 +65,33 @@ To activate the virtual environment, type the following command (in the same dir
 source WMWikiContrib/bin/activate
 ```
 
+**Mac OS**
+
+It is recommended to install python3 with Homebrew. To install Homebrew, refer to the instructions on the [Homebrew website](https://brew.sh/).
+
+To install python3 with Homebrew, type the following commands inside `backend` directory
+```commandline
+brew install python3
+```
+Then follow the terminal output on-screen instructions regarding the packages which could not be symlinked into /usr/local.
+
+Let's Install virtualenv package.
+```commandline
+pip3 install virtualenv
+```
+
+you have successfully installed `virtualenv`. Now let's create a virtual environment.
+ ```commandline
+python3 -m venv WMWikiContrib
+```
+
+The above command creates a virtual environment named `VMWikiContrib`. It creates a directory named `WMWikiContrib` in the current directory. It is recommended to create a virtual environment in `backend` directory. You have successfully created the virtual environment. But you need to activate it now
+
+To activate the virtual environment, type the following command (in the same directory where `WMWikiContrib` is located):
+```commandline
+source WMWikiContrib/bin/activate
+```
+
 **Windows**
 
 First Install python 3 if you don't have it installed already
@@ -127,7 +154,21 @@ pip install -r requirements.txt
 
  Error 2 will probably say something like `error: Microsoft Visual C++ 14.0 is required. Get it with "Microsoft Visual C++ Build Tools": http://landinghub.visualstudio.com/visual-cpp-build-tools`. to fix this error, visit (https://visualstudio.microsoft.com/vs/older-downloads/), download "Microsoft Build Tools 2015 Update 3", run the downloaded file and follow the prompt to complete the installation. If the error persists, you can google about the error or talk about here (https://wikimedia.zulipchat.com/#narrow/stream/220258-gsoc20-outreachy20/topic/WikiContrib)
 
+**MacOS**
 
+```commandline
+pip install -r requirements.txt
+```
+You may be getting errors if you don't have MySQL installed on your OS. To fix them you can either:
+
+1. Install MySQL using Homebrew using the command
+```commandline
+brew install mysql
+```
+or 
+
+2. Comment out the line of code `mysqlclient==1.3.13` from the requirements.txt file in the backend/WikiContrib folder.
+Make sure not to push this change to the remote directory. The best way to to go about this is to go to the root ".git" folder of your project, open "info\exclude" file and add `requirements.txt` to it.
 
  To check if `Django` is successfully installed. Type the following command:
 ```commandline
