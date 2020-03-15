@@ -502,7 +502,7 @@ class QueryResult extends React.Component {
             <Grid.Column width={2} />
             <Grid.Column width={12}>
               <div className="result">
-              <h1 className="result_page_heading">Query Result</h1>
+                <h1 className="result_page_heading">Query Result</h1>
                 {this.state.page_load ? (
                   <Placeholder fluid className="search_load">
                     <Placeholder.Line className="load_background" />
@@ -583,103 +583,101 @@ class QueryResult extends React.Component {
                 >
                   <Card className="filter_view">
                     <Grid>
-                        <Grid.Column computer={8} tablet={16} mobile={16}>
-                          <Header>From</Header>
-                          <Dropdown
-                            style={{ marginTop: 10 }}
-                            fluid
-                            search
-                            selection
-                            icon={false}
-                            value={this.func()}
-                            options={get_dates()}
-                            onChange={(e, obj) => {
-                              let date = obj.value.split(',');
-                              date[1] = date[1].substr(1);
-                              date[0] = full_months.indexOf(date[0]) + 2;
-                              if (date[0] === 13) {
-                                date[1] = parseInt(date[1]) + 1;
-                                date[0] = 1;
-                              }
-                              let filters = Object.assign({}, uf);
-                              filters.end_time =
-                                date[1] + '-' + date[0] + '-01';
-                              let days = get_timestamp(
-                                new Date(uf.end_time),
-                                new Date(uf.start_time)
-                              );
-                              let incr =
-                                days === 30
-                                  ? 1
-                                  : days === 60
-                                  ? 2
-                                  : days === 90
-                                  ? 3
-                                  : days === 180
-                                  ? 6
-                                  : 12;
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>From</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
+                          value={this.func()}
+                          options={get_dates()}
+                          onChange={(e, obj) => {
+                            let date = obj.value.split(',');
+                            date[1] = date[1].substr(1);
+                            date[0] = full_months.indexOf(date[0]) + 2;
+                            if (date[0] === 13) {
+                              date[1] = parseInt(date[1]) + 1;
+                              date[0] = 1;
+                            }
+                            let filters = Object.assign({}, uf);
+                            filters.end_time = date[1] + '-' + date[0] + '-01';
+                            let days = get_timestamp(
+                              new Date(uf.end_time),
+                              new Date(uf.start_time)
+                            );
+                            let incr =
+                              days === 30
+                                ? 1
+                                : days === 60
+                                ? 2
+                                : days === 90
+                                ? 3
+                                : days === 180
+                                ? 6
+                                : 12;
 
-                              let updated_val = new Date(filters.end_time);
-                              let start_time = new Date(
-                                updated_val.getFullYear(),
-                                updated_val.getUTCMonth() - incr,
-                                1
-                              );
-                              let month = start_time.getUTCMonth() + 1;
-                              filters.start_time =
-                                start_time.getFullYear() + '-' + month + '-01';
-                              this.setState({
-                                update_filters: filters,
-                              });
-                            }}
-                            placeholder="Select Date"
-                            closeOnChange={true}
-                          />
-                        </Grid.Column>
-                        <Grid.Column computer={8} tablet={16} mobile={16}>
-                          <Header>Time Range</Header>
-                          <Dropdown
-                            style={{ marginTop: 10 }}
-                            fluid
-                            search
-                            selection
-                            icon={false}
-                            options={filter_2}
-                            value={get_timestamp(
-                              new Date(uf.start_time),
-                              new Date(uf.end_time)
-                            )}
-                            onChange={(e, obj) => {
-                              let date = new Date(
-                                this.state.update_filters.end_time
-                              );
-                              let value = obj.value;
-                              let incr =
-                                value <= 31
-                                  ? 1
-                                  : value <= 61
-                                  ? 2
-                                  : value <= 92
-                                  ? 3
-                                  : value <= 183
-                                  ? 6
-                                  : 12;
-                              date = new Date(
-                                date.getFullYear(),
-                                date.getUTCMonth() - incr,
-                                1
-                              );
-                              let month = date.getUTCMonth() + 1;
-                              let filters = Object.assign({}, uf);
-                              filters.start_time =
-                                date.getFullYear() + '-' + month + '-' + 1;
-                              this.setState({ update_filters: filters });
-                            }}
-                            placeholder="Get by date"
-                            closeOnChange={true}
-                          />
-                        </Grid.Column>
-                      {/* </Grid.Row> */}
+                            let updated_val = new Date(filters.end_time);
+                            let start_time = new Date(
+                              updated_val.getFullYear(),
+                              updated_val.getUTCMonth() - incr,
+                              1
+                            );
+                            let month = start_time.getUTCMonth() + 1;
+                            filters.start_time =
+                              start_time.getFullYear() + '-' + month + '-01';
+                            this.setState({
+                              update_filters: filters,
+                            });
+                          }}
+                          placeholder="Select Date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>Time Range</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
+                          options={filter_2}
+                          value={get_timestamp(
+                            new Date(uf.start_time),
+                            new Date(uf.end_time)
+                          )}
+                          onChange={(e, obj) => {
+                            let date = new Date(
+                              this.state.update_filters.end_time
+                            );
+                            let value = obj.value;
+                            let incr =
+                              value <= 31
+                                ? 1
+                                : value <= 61
+                                ? 2
+                                : value <= 92
+                                ? 3
+                                : value <= 183
+                                ? 6
+                                : 12;
+                            date = new Date(
+                              date.getFullYear(),
+                              date.getUTCMonth() - incr,
+                              1
+                            );
+                            let month = date.getUTCMonth() + 1;
+                            let filters = Object.assign({}, uf);
+                            filters.start_time =
+                              date.getFullYear() + '-' + month + '-' + 1;
+                            this.setState({ update_filters: filters });
+                          }}
+                          placeholder="Get by date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
                     </Grid>
                     <div style={{ width: '100%' }}>
                       <Button
