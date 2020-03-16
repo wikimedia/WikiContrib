@@ -462,11 +462,11 @@ export class Query extends Component {
                     >
                       <React.Fragment>
                         <h1><Header className="title">WikiContrib</Header></h1>
-                        <h4 className="accounts">
+                        <h2 className="accounts">
                           Get the Contributions of your fellow Wikimedians,
                           showcase yourself! Visualize their contribs using
                           graphs over different time ranges.
-                        </h4>
+                        </h2>
                         <Card className="query_create">
                           {this.state.bulk ? (
                             <React.Fragment>
