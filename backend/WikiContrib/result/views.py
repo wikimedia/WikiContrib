@@ -17,6 +17,10 @@ from .serializers import UserCommitSerializer
 from pytz import utc
 from WikiContrib.settings import API_TOKEN
 from .helper import get_prev_user, get_next_user
+import sys
+
+version = sys.hexversion
+version_3_3 = 50530288
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
@@ -121,7 +125,10 @@ def format_data(pd, gd, query, phid):
                 if pd[i]['phid'] not in temp:
                     temp.append(pd[i]['phid'])
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
-                    date_time = date_time.replace(hour=0, minute=0, second=0).strftime("%s")
+                    if(version >= version_3_3):
+                        date_time = int(date_time.replace(hour=0, minute=0, second=0).timestamp())
+                    else:
+                        date_time = date_time.replace(hour=0, minute=0, second=0).strftime("%s")
                     status = pd[i]['fields']['status']['name'].lower()
                     if status_name is True or status in status_name or (status == "open" and "p-open" in status_name):
                         rv = {
@@ -143,7 +150,10 @@ def format_data(pd, gd, query, phid):
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
                                                            "%Y-%m-%d"))
                 if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
-                    epouch = int(date_time.replace(hour=0, minute=0, second=0).strftime("%s"))
+                    if(version >= version_3_3):
+                        epouch = int(date_time.replace(hour=0, minute=0, second=0).timestamp())
+                    else:
+                        epouch = int(date_time.replace(hour=0, minute=0, second=0).strftime("%s"))
                     status = gd[i]['status'].lower()
                     if status_name is True or status in status_name or (status == "open" and "g-open" in status_name):
                         rv = {
@@ -335,9 +345,12 @@ class DisplayResult(APIView):
             username, gerrit_username = user.phabricator_username, user.gerrit_username
             paginate = [prev_user, user.fullname, next_user]
 
-        createdStart = query.queryfilter.start_time.strftime('%s')
-        createdEnd = query.queryfilter.end_time.strftime('%s')
-
+        if(version >= version_3_3):
+            createdStart = int(datetime.strptime(str(query.queryfilter.start_time),'%Y-%m-%d').timestamp())
+            createdEnd = int(datetime.strptime(str(query.queryfilter.end_time),'%Y-%m-%d').timestamp())
+        else:
+            createdStart = query.queryfilter.start_time.strftime('%s')
+            createdEnd = query.queryfilter.end_time.strftime('%s')
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                           createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
@@ -356,7 +369,10 @@ class GetUserCommits(ListAPIView):
             date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
             date = int((date - datetime(1970, 1, 1)).total_seconds())
         except KeyError:
-            date = datetime.now().date().strftime("%s")
+            if(version >= version_3_3):
+                date = int(datetime.now().date().timestamp())
+            else:
+                date = datetime.now().date().strftime("%s")
 
         self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
@@ -423,8 +439,12 @@ def UserUpdateTimeStamp(data):
             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
 
-    createdStart = data['query'].queryfilter.start_time.strftime('%s')
-    createdEnd = data['query'].queryfilter.end_time.strftime('%s')
+    if(version >= version_3_3):
+        createdStart = int(datetime.strptime(str(data['query'].queryfilter.start_time),'%Y-%m-%d').timestamp())
+        createdEnd = int(datetime.strptime(str(data['query'].queryfilter.end_time),'%Y-%m-%d').timestamp())
+    else:
+        createdStart = data['query'].queryfilter.start_time.strftime('%s')
+        createdEnd = data['query'].queryfilter.end_time.strftime('%s')
     phid = [False]
     return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                       createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
