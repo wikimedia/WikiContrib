@@ -99,7 +99,7 @@ class Activity extends React.Component {
           <React.Fragment>
             {this.state.data.length !== 0 ? (
               <React.Fragment>
-                <h4>{this.props.username}'s activity on {this.props.date}</h4>
+                <h4 style={{marginTop:"1rem"}}>{this.props.username}'s activity on {this.props.date}</h4>
                 {this.state.data.map((obj, index) => (
                   <Card className="commits_load" key={index}>
                     <Card.Content>
