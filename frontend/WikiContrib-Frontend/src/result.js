@@ -16,9 +16,6 @@ import {
   get_dates,
   months,
   fetchDetails,
-  phab_status,
-  gerrit_status,
-  format_status,
   full_months,
   get_timestamp,
   filterDetailApi,
@@ -144,7 +141,7 @@ class QueryResult extends React.Component {
     super(props);
     let data = false;
     let filters = {
-      status: [],
+      // status: [],
       start_time: '',
       end_time: '',
     };
@@ -154,9 +151,10 @@ class QueryResult extends React.Component {
      */
 
     if ('data' in this.props.location && this.props.location.data !== '') {
+      console.log(this.props.location.data);
       data = this.props.location.data;
       filters = data.filters;
-      filters.status = data.filters.status.split(',');
+      // filters.status = data.filters.status.split(',');
     }
 
     this.state = {
@@ -286,7 +284,6 @@ class QueryResult extends React.Component {
      */
     if (response.error !== 1) {
       let filters = response.filters;
-      filters.status = filters.status.split(',');
       this.setState({
         data: response.result,
         current: response.current,
@@ -340,9 +337,6 @@ class QueryResult extends React.Component {
     let { update_filters: uf, current_filters: cf } = this.state;
     if (JSON.stringify(uf) !== JSON.stringify(cf)) {
       let out = {};
-      if (uf.status.join(',') !== cf.status.join(',')) {
-        out['status'] = uf.status.join(',');
-      }
       if (uf.start_time !== cf.start_time) {
         out['start_time'] = uf.start_time;
       }
@@ -417,7 +411,6 @@ class QueryResult extends React.Component {
     let filters = {
       end_time: time.getFullYear() + '-' + month + '-01',
       start_time: time.getFullYear() - 1 + '-' + month + '-01',
-      status: phab_status.concat(gerrit_status).concat(['p-open', 'g-open']),
       username: this.state.current,
     };
     this.setState({
@@ -427,7 +420,6 @@ class QueryResult extends React.Component {
       notFound: false,
     });
     let data = Object.assign({}, filters);
-    data.status = filters.status.join(',');
     fetchAsynchronous(
       filterDetailApi.replace('<hash>', this.state.query),
       'PATCH',
