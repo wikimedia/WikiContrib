@@ -88,9 +88,9 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <Header className="name">{this.props.username}'s Activity</Header>
+              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
               <span>
-                <h1 className="accounts">
+                <h3 className="accounts">
                   Gerrit:{' '}
                   {this.props.gerrit_username !== '' ? (
                     <a
@@ -122,12 +122,12 @@ class DisplayUser extends React.Component {
                   ) : (
                       'None'
                     )}
-                </h1>
-                <h2 className="accounts">
+                </h3>
+                <h3 className="accounts">
                   {full_months[st.getUTCMonth()] + " " + st.getFullYear()}
                   -
                   {full_months[et.getUTCMonth() - 1] + " " + et.getFullYear()}
-                </h2>
+                </h3>
               </span>
             </React.Fragment>
           )}
@@ -499,8 +499,6 @@ class QueryResult extends React.Component {
         <NavBar />
         <Grid>
           <Grid.Row>
-            <Grid.Column width={2} />
-            <Grid.Column width={12}>
               <div className="result">
               <h1 className="result_page_heading">Query Result</h1>
                 {this.state.page_load ? (
@@ -508,25 +506,18 @@ class QueryResult extends React.Component {
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
-                  <Grid>
-                    <Grid.Row>
-                      <Grid.Column computer={14} tablet={12} mobile={16}>
+                  <div className="controls">
+                    <div className="search">
                         <UserSearch
                           set={this.onUserSearch}
                           hash={this.state.query}
                           value={this.state.value}
                         />
-                      </Grid.Column>
+                      </div>
 
-                      <Grid.Column
-                        computer={1}
-                        tablet={2}
-                        mobile={8}
-                        style={{
-                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
-                          textAlign: 'right',
-                        }}
-                      >
+
+                      <div className="filter_and_update">
+                      <div className="filter">
                         <Popup
                           content="View Filters"
                           position="top center"
@@ -543,15 +534,8 @@ class QueryResult extends React.Component {
                             />
                           }
                         />
-                      </Grid.Column>
-                      <Grid.Column
-                        computer={1}
-                        tablet={2}
-                        mobile={8}
-                        style={{
-                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
-                        }}
-                      >
+                      </div>
+                      <div className="update">
                         <Popup
                           content="Update"
                           position="top center"
@@ -572,9 +556,9 @@ class QueryResult extends React.Component {
                             />
                           }
                         />
-                      </Grid.Column>
-                    </Grid.Row>
-                  </Grid>
+                      </div>
+                    </div>
+                    </div>
                 )}
                 <Transition
                   animation="fade down"
@@ -725,8 +709,6 @@ class QueryResult extends React.Component {
                   </Card>
                 </Transition>
               </div>
-            </Grid.Column>
-            <Grid.Column width={2} />
           </Grid.Row>
           {this.state.notFound ? (
             <NotFound />
@@ -734,7 +716,7 @@ class QueryResult extends React.Component {
             <React.Fragment>
               <Grid.Row>
                 <Grid.Column width={2} />
-                <Grid.Column width={8}>
+                <Grid.Column width={12}>
                   <DisplayUser
                     loading={this.state.loading}
                     username={this.state.current}
@@ -743,7 +725,6 @@ class QueryResult extends React.Component {
                     filters={this.state.current_filters}
                   />
                 </Grid.Column>
-                <Grid.Column width={2} />
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column computer={2} mobile={1} tablet={1} />
@@ -817,17 +798,13 @@ class QueryResult extends React.Component {
                 <Grid.Column width={2} />
               </Grid.Row>
               {this.state.activity !== undefined ? (
-                <Grid.Row>
-                  <Grid.Column width={3} />
-                  <Grid.Column width={9}>
+                  <div className="activity_wrapper">
                     <Activity
                       date={this.state.activity}
                       hash={this.state.query}
                       username={this.state.current}
                     />
-                  </Grid.Column>
-                  <Grid.Column width={3} />
-                </Grid.Row>
+                  </div>
               ) : (
                 ''
               )}

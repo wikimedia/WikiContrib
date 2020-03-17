@@ -265,7 +265,7 @@ class DisplayResult(APIView):
         if query.file:
             # get the data from CSV file
             try:
-                file = read_csv(query.csv_file)
+                file = read_csv(query.csv_file,encoding="latin-1")
                 try:
                     if 'user' in request.GET:
                         user = file[file['fullname'] == request.GET['user']]
@@ -402,7 +402,7 @@ class GetUsers(APIView):
         else:
             try:
                 try:
-                    file = read_csv(query.csv_file)
+                    file = read_csv(query.csv_file,encoding="latin-1")
                     users = file[(file['fullname'] == file['fullname']) &
                                  ((file['Phabricator'] == file['Phabricator']) | (file['Gerrit'] == file['Gerrit']))]
                     users = users.iloc[:, 0].values.tolist()
@@ -424,7 +424,7 @@ def UserUpdateTimeStamp(data):
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     if data['query'].file:
         try:
-            file = read_csv(data['query'].csv_file)
+            file = read_csv(data['query'].csv_file,encoding="latin-1")
             user = file[file['fullname'] == data['username']]
             if user.empty:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)

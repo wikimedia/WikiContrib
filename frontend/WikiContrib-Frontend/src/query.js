@@ -205,9 +205,18 @@ export class Query extends Component {
      * Add CSV file to the tool.
      * @param {file} file file added to upload.
      */
-    if (file.type === 'text/csv') {
+    if(file.type === 'text/csv' ||
+       file.type === "application/vnd.ms-excel" ||
+       file.type === "text/plain" ||
+       file.type === "text/x-csv" ||
+       file.type === "application/csv" ||
+       file.type === "application/x-csv" ||
+       file.type === "text/comma-separated-values" ||
+       file.type === "text/x-comma-separated-values" ||
+       file.type === "text/tab-separated-values") {
       this.setState({ file: file });
-    } else {
+    }
+     else {
       document.getElementsByClassName('drag_drop')[0].style.border =
         '1px dashed rgb(196, 194, 194)';
 
@@ -462,11 +471,11 @@ export class Query extends Component {
                     >
                       <React.Fragment>
                         <h1><Header className="title">WikiContrib</Header></h1>
-                        <h4 className="accounts">
+                        <h2 className="accounts">
                           Get the Contributions of your fellow Wikimedians,
                           showcase yourself! Visualize their contribs using
                           graphs over different time ranges.
-                        </h4>
+                        </h2>
                         <Card className="query_create">
                           {this.state.bulk ? (
                             <React.Fragment>
