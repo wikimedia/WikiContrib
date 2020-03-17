@@ -687,15 +687,6 @@ h4.accounts {
   align-items: center;
 }
 
-.status {
-  margin-left: 3% !important;
-  display: inline-flex;
-  white-space: nowrap;
-  flex-direction: row-reverse;
-  align-items: center;
-}
-
-
 
 .input_label {
   text-align: left;
