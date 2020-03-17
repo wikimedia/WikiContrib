@@ -10,7 +10,7 @@ export const QueryCreateApi = BASE_API_URI + 'query/add/user/';
 // method: GET, PATCH, DELETE
 export const QueryDetailApi = BASE_API_URI + 'query/<hash>/update/user/';
 // method: POST
-export const filterCreateApi = BASE_API_URI + 'query/<hash>/add/filter/';
+export const filterCreateApi = BASE_API_URI + 'query/<hash>/add/filter/'; //where is this used?
 // method: GET, PATCH, DELETE
 export const filterDetailApi = BASE_API_URI + 'query/<hash>/update/filter/';
 // method: POST
@@ -102,38 +102,6 @@ export const get_dates = () => {
   return rv;
 };
 
-export const phab_status = ['declined', 'resolved', 'stalled', 'invalid'];
-
-export const gerrit_status = [
-  'merged',
-  'abandoned',
-  'closed',
-  'pending',
-  'reviewed',
-];
-
-export const format_status = arr => {
-  let rv = [];
-  for (let i of arr) {
-    if (gerrit_status.includes(i)) {
-      rv.push({
-        key: i,
-        value: i,
-        text: 'GERRIT: ' + i,
-      });
-    }
-
-    if (phab_status.includes(i)) {
-      rv.push({ key: i, value: i, text: 'PHABRICATOR: ' + i });
-    }
-
-    if (i === 'open') {
-      rv.push({ key: 'g-open', value: 'g-open', text: 'GERRIT: ' + i });
-      rv.push({ key: 'p-open', value: 'p-open', text: 'PHABRICATOR: ' + i });
-    }
-  }
-  return rv;
-};
 
 export const get_timestamp = (date1, date2) => {
   let days = Math.abs((date2 - date1) / 86400000);
