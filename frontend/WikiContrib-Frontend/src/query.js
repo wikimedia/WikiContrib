@@ -656,19 +656,25 @@ export class Query extends Component {
                                           <Table.Cell
                                             style={{ textAlign: 'center' }}
                                           >
-                                            <Icon
-                                              name="minus circle"
-                                              style={{
-                                                cursor: 'pointer',
-                                                color: '#fa5050',
-                                                fontSize: '1rem',
-                                              }}
-                                              onClick={() => {
-                                                this.setState({
-                                                  file: false,
-                                                  error: false,
-                                                });
-                                              }}
+                                            <Popup
+                                              content="Remove File"
+                                              position="top center"
+                                              trigger={
+                                                <Icon
+                                                  name="minus circle"
+                                                  style={{
+                                                    cursor: 'pointer',
+                                                    color: '#fa5050',
+                                                    fontSize: '1rem',
+                                                  }}
+                                                  onClick={() => {
+                                                    this.setState({
+                                                      file: false,
+                                                      error: false,
+                                                    });
+                                                  }}
+                                                />
+                                              }
                                             />
                                           </Table.Cell>
                                         )}
@@ -747,21 +753,31 @@ export class Query extends Component {
                                       <Table.Cell
                                        style={{ textAlign: 'center' }}
                                       >
-                                      <Button className="remove" aria-label="remove user" style={{backgroundColor:"inherit"}}
-                                      tabIndex="0"
-                                        onClick={(e)=>{
-                                          this.removeRow(index);
-                                        }}>
-                                        <Icon
-                                          name="minus circle"
-                                          label="remove row"
-                                          style={{
-                                            cursor: 'pointer',
-                                            color: '#fa5050',
-                                            fontSize: '1rem',
-                                          }}
-                                        />
-                                      </Button>
+                                      <Popup
+                                        content="Remove User"
+                                        position="top center"
+                                        trigger={
+                                          <Button 
+                                            className="remove" 
+                                            aria-label="remove user" 
+                                            style={{backgroundColor:"inherit"}}
+                                            tabIndex="0"
+                                            onClick={(e)=>{
+                                              this.removeRow(index);
+                                            }}
+                                          >
+                                          <Icon
+                                            name="minus circle" 
+                                            label="remove row" 
+                                            style={{ 
+                                              cursor: 'pointer',
+                                              color: '#fa5050', 
+                                              fontSize: '1rem', 
+                                            }}
+                                          />
+                                          </Button>
+                                        }
+                                      />
                                       </Table.Cell>
                                     </Table.Row>
                                   ))}
@@ -786,40 +802,64 @@ export class Query extends Component {
                           </Card.Content>
                         </Card>
                         <div className="reset_add_continue">
-                          <Button
-                            icon
-                            aria-label="reset"
-                            className="reset"
-                            onClick={() => {
-                              localStorage.removeItem('users');
-                              this.setState({
-                                message: {
-                                  message: 'Cleared the cache data!',
-                                  trigger: true,
-                                  type: 0,
-                                  update: !this.state.message.update,
-                                },
-                                rows: [Object.assign({}, emptyObj)],
-                              });
-                            }}
-                          >
-                            <Icon
-                              name="trash alternate"
-                              style={{ paddingRight: 4 }}
-                            />
-                          </Button>
-                          <Button className="table_row_add" aria-label="add more user" onClick={this.addrow}>
-                            <Icon name="user plus" />
-                          </Button>
-                          <Button
-                            onClick={this.createQuery}
-                            className="continue"
-                            disabled={this.state.loading}
-                            loading={this.state.loading}
-                            aria-label="search"
-                          >
-                            <Icon name="search" />
-                          </Button>
+                          <Popup
+                            content='Reset'
+                            position="top center"
+                            trigger={
+                              <Button
+                                className="reset"
+                                aria-label="reset"
+                                onClick={() => {
+                                  localStorage.removeItem('users');
+                                  this.setState({
+                                    message: {
+                                      message: 'Cleared the cache data!',
+                                      trigger: true,
+                                      type: 0,
+                                      update: !this.state.message.update,
+                                    },
+                                    rows: [Object.assign({}, emptyObj)],
+                                  });
+                                }}
+                              >
+                              <Icon 
+                                name="trash alternate"
+                                style={{ paddingLeft: 4 }}
+                              />
+                              </Button>
+                            }
+                          />
+                          <Popup 
+                            content="Add User" 
+                            position="top center"
+                            trigger={
+                              <Button 
+                                className="table_row_add" 
+                                aria-label="add more user" 
+                                onClick={this.addrow} 
+                              >
+                              <Icon name="user plus" />
+                              </Button>
+                            }
+                          />
+                          <Popup
+                            content="Search"
+                            position="top center"
+                            trigger={
+                              <Button
+                                className="continue"
+                                aria-label="search"
+                                onClick={this.createQuery}
+                                disabled={this.state.loading}
+                                loading={this.state.loading}
+                              >
+                              <Icon 
+                                name="search"
+                                style={{ paddingLeft: 4 }}
+                                />
+                              </Button>
+                            }
+                          />
                         </div>
                       </React.Fragment>
                     </Transition>
