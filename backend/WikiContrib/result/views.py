@@ -325,7 +325,7 @@ class DisplayResult(APIView):
                         next_user = get_next_user(file, ind)
                 except KeyError:
                     return Response({
-                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; to check the format.(while uploading it)',
+                        'message': 'CSV file uploaded is not in the supported format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
@@ -426,7 +426,7 @@ class GetUsers(APIView):
                     users = users.iloc[:, 0].values.tolist()
                 except KeyError:
                     return Response({
-                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; icon to check the format.',
+                        'message': 'CSV file uploaded is not in the supported format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
