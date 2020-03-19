@@ -501,7 +501,7 @@ class QueryResult extends React.Component {
           <Grid.Row>
             <Grid.Column computer={2} mobile={1} tablet={1} />
             <Grid.Column computer={12} mobile={14} tablet={14}>
-              <Header><h1 className="name" style={{paddingTop: '2rem'}}>Query Result</h1></Header>
+              <Header><h1 className="name" style={{ paddingTop: '2rem' }}>Query Result</h1></Header>
               {this.state.page_load ? (
                 <Placeholder fluid className="search_load">
                   <Placeholder.Line className="load_background" />
@@ -780,8 +780,8 @@ class QueryResult extends React.Component {
                   <Grid.Column computer={2} mobile={1} tablet={1} />
                 </Grid.Row>
                 <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
+                  <Grid.Column computer={2} mobile={1} tablet={1} />
+                  <Grid.Column computer={12} mobile={14} tablet={14}>
                     <Card className="chart_container">
                       <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
                       <UserContribution
@@ -797,13 +797,16 @@ class QueryResult extends React.Component {
                   <Grid.Column width={2} />
                 </Grid.Row>
                 {this.state.activity !== undefined ? (
-                  <div className="activity_wrapper">
-                    <Activity
-                      date={this.state.activity}
-                      hash={this.state.query}
-                      username={this.state.current}
-                    />
-                  </div>
+                  <Grid.Row>
+                    <Grid.Column computer={2} mobile={1} tablet={1} />
+                    <Grid.Column computer={12} mobile={14} tablet={14} style={{ paddingTop: '2rem' }}>
+                      <Activity
+                        date={this.state.activity}
+                        hash={this.state.query}
+                        username={this.state.current}
+                      />
+                    </Grid.Column>
+                  </Grid.Row>
                 ) : (
                     ''
                   )}
