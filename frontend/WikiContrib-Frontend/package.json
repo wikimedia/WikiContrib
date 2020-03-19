@@ -8,6 +8,7 @@
     "react": "^16.8.6",
     "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
+    "react-loadable": "^5.5.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "semantic-ui": "^2.4.2",
