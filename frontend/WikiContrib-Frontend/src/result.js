@@ -141,7 +141,6 @@ class QueryResult extends React.Component {
     super(props);
     let data = false;
     let filters = {
-      // status: [],
       start_time: '',
       end_time: '',
     };
@@ -151,10 +150,8 @@ class QueryResult extends React.Component {
      */
 
     if ('data' in this.props.location && this.props.location.data !== '') {
-      console.log(this.props.location.data);
       data = this.props.location.data;
       filters = data.filters;
-      // filters.status = data.filters.status.split(',');
     }
 
     this.state = {
