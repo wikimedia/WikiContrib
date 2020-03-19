@@ -20,6 +20,8 @@ python-dateutil==2.8.0
 pytz==2019.1
 six==1.12.0
 sqlparse==0.3.0
+selenium==3.141.0
+selenium-wire==1.0.11
 typing-extensions==3.7.4
 yarl==1.2.0
 mysqlclient==1.3.13

@@ -5,6 +5,7 @@
 /.pnp
 /semantic
 .pnp.js
+semantic.json
 
 # testing
 /coverage

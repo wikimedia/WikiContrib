@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Query } from './query';
-import QueryResult from './result';
+import QueryResult, {ListQueryResult} from './result';
 import NotFound from './components/404';
 import UserContribution from './contribution';
 
@@ -37,6 +37,9 @@ class App extends Component {
             path={domain + '/query/:hash/update/'}
             component={Query}
           />
+
+        {/* show query result in list form */}
+          <Route exact path={domain + '/exp/:hash/'} component={ListQueryResult} />
 
           {/* Result to the query */}
           <Route exact path={domain + '/:hash/'} component={QueryResult} />

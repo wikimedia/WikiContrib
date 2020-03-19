@@ -1,8 +1,9 @@
-from . views import DisplayResult, GetUserCommits, GetUsers
+from . views import DisplayResult,ExpDisplayResult, GetUserCommits, GetUsers
 from django.urls import path
 
 urlpatterns = [
     # Fetch the User contributions with a given username.
+    path("exp/<hash>/",ExpDisplayResult.as_view(), name = "exp_result"),
     path('<hash>/', DisplayResult.as_view(), name="result"),
 
     # Get user commits.

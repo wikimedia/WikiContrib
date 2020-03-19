@@ -393,16 +393,27 @@ export class Query extends Component {
     } else {
       let hash = '';
       if (this.state.operation) {
-        hash = response.query;
+        hash = response.perf ? response.users_data[0].query : response.query;
       } else {
         hash = this.props.match.params.hash;
       }
+      console.log("console.log the response",response);
+      if(response.perf){
+      this.setState({
+        redirect:
+          process.env.NODE_ENV === 'production' ? 'wikicontrib/exp/' + hash :'exp/' + hash,
+        loading: false,
+        loadData: response,
+      });
+    }
+    else{
       this.setState({
         redirect:
           process.env.NODE_ENV === 'production' ? 'wikicontrib/' + hash : hash,
         loading: false,
         loadData: response,
       });
+    }
     }
   };
 
@@ -757,9 +768,9 @@ export class Query extends Component {
                                         content="Remove User"
                                         position="top center"
                                         trigger={
-                                          <Button 
-                                            className="remove" 
-                                            aria-label="remove user" 
+                                          <Button
+                                            className="remove"
+                                            aria-label="remove user"
                                             style={{backgroundColor:"inherit"}}
                                             tabIndex="0"
                                             onClick={(e)=>{
@@ -767,12 +778,12 @@ export class Query extends Component {
                                             }}
                                           >
                                           <Icon
-                                            name="minus circle" 
-                                            label="remove row" 
-                                            style={{ 
+                                            name="minus circle"
+                                            label="remove row"
+                                            style={{
                                               cursor: 'pointer',
-                                              color: '#fa5050', 
-                                              fontSize: '1rem', 
+                                              color: '#fa5050',
+                                              fontSize: '1rem',
                                             }}
                                           />
                                           </Button>
@@ -822,21 +833,21 @@ export class Query extends Component {
                                   });
                                 }}
                               >
-                              <Icon 
+                              <Icon
                                 name="trash alternate"
                                 style={{ paddingLeft: 4 }}
                               />
                               </Button>
                             }
                           />
-                          <Popup 
-                            content="Add User" 
+                          <Popup
+                            content="Add User"
                             position="top center"
                             trigger={
-                              <Button 
-                                className="table_row_add" 
-                                aria-label="add more user" 
-                                onClick={this.addrow} 
+                              <Button
+                                className="table_row_add"
+                                aria-label="add more user"
+                                onClick={this.addrow}
                               >
                               <Icon name="user plus" />
                               </Button>
@@ -853,7 +864,7 @@ export class Query extends Component {
                                 disabled={this.state.loading}
                                 loading={this.state.loading}
                               >
-                              <Icon 
+                              <Icon
                                 name="search"
                                 style={{ paddingLeft: 4 }}
                                 />

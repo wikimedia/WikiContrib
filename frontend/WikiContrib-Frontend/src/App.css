@@ -722,34 +722,6 @@ h3.accounts  {
   align-items: center;
 }
 
-.status {
-  margin-left: 3% !important;
-  margin-top: 0;
-  display: inline-flex;
-  white-space: nowrap;
-  flex-direction: row-reverse;
-  align-items: center;
-}
-.input_label {
-  text-align: left;
-  margin-top: 1.5em;
-  margin-bottom:0.5em;
-  padding-left: 1.4rem;
-  font-weight: bold;
-}
-
-.checkbox_label {
-  display: inline-block;
-  font-weight: bold;
-  color: black;
-  position: absolute;
-  margin-left: 1em;
-}
-
-.ui.button.remove:focus,.ui.button.remove:hover {
-  outline: 2px solid #9ABDF6 !important;
-}
-
 .input_label {
   text-align: left;
   margin-top: 1.5em;
@@ -848,4 +820,20 @@ h3.accounts  {
     margin-left: 0 !important;
     flex-direction: row;
   }
+}
+
+table .list_contribution {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.list_contribution td, .list_contribution th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.list_contribution tr:nth-child(even) {
+  background-color: #dddddd;
 }

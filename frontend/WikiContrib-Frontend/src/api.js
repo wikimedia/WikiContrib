@@ -2,8 +2,9 @@
  All the Global Constants are declared here.
 */
 
-const BASE_API_URI = 'https://tools.wmflabs.org/contraband/';
-// const BASE_API_URI = 'http://127.0.0.1:8000/';
+const BASE_API_URI = process.env.NODE_ENV === 'production' ?
+                     'https://tools.wmflabs.org/contraband/'
+                  :  'http://127.0.0.1:8000/';
 
 // method: POST
 export const QueryCreateApi = BASE_API_URI + 'query/add/user/';
@@ -17,6 +18,8 @@ export const filterDetailApi = BASE_API_URI + 'query/<hash>/update/filter/';
 export const queryExist = BASE_API_URI + 'query/<hash>/check/';
 // method: GET
 export const fetchDetails = BASE_API_URI + 'result/<hash>/';
+
+export const expFetchDetails = BASE_API_URI + 'result/exp/<hash>/';
 
 export const getUsers = BASE_API_URI + 'result/<hash>/users/';
 
@@ -102,38 +105,6 @@ export const get_dates = () => {
   return rv;
 };
 
-export const phab_status = ['declined', 'resolved', 'stalled', 'invalid'];
-
-export const gerrit_status = [
-  'merged',
-  'abandoned',
-  'closed',
-  'pending',
-  'reviewed',
-];
-
-export const format_status = arr => {
-  let rv = [];
-  for (let i of arr) {
-    if (gerrit_status.includes(i)) {
-      rv.push({
-        key: i,
-        value: i,
-        text: 'GERRIT: ' + i,
-      });
-    }
-
-    if (phab_status.includes(i)) {
-      rv.push({ key: i, value: i, text: 'PHABRICATOR: ' + i });
-    }
-
-    if (i === 'open') {
-      rv.push({ key: 'g-open', value: 'g-open', text: 'GERRIT: ' + i });
-      rv.push({ key: 'p-open', value: 'p-open', text: 'PHABRICATOR: ' + i });
-    }
-  }
-  return rv;
-};
 
 export const get_timestamp = (date1, date2) => {
   let days = Math.abs((date2 - date1) / 86400000);

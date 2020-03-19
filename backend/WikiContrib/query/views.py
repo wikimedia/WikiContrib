@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.db import transaction, IntegrityError
 from django.db.models import Q
@@ -88,6 +89,8 @@ class AddQueryUser(CreateAPIView):
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part"
                     else:
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv"
+                    
+                    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                     with open(filename, 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
@@ -125,7 +128,7 @@ class AddQueryUser(CreateAPIView):
                         )
 
                 if int(request.data['complete']) is 0:
-                    return redirect('result', hash=query_obj.hash_code)
+                    return redirect('exp_result', hash=query_obj.hash_code)
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
@@ -250,9 +253,9 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
                     response = HttpResponse(content="", status=303)
                     if DEBUG:
-                        response['location'] = '/result/' + self.get_object().hash_code + '/'
+                        response['location'] = '/result/exp/' + self.get_object().hash_code + '/'
                     else:
-                        response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
+                        response['location'] = '/contraband/result/exp/' + self.get_object().hash_code + '/'
                     return response
                 else:
                     return Response({
@@ -284,7 +287,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                                 raise IntegrityError
                 except IntegrityError:
                     return Response({
-                        'message': 'Can not update with the empty fields',
+                        'message': 'Cannot update with the empty fields',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
                 response = HttpResponse(content="", status=303)
@@ -296,7 +299,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
         except KeyError:
             return Response({
-                "message": "Fill form completely!",
+                "message": "Fill the form completely!",
                 "error": 1
             }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -381,4 +384,3 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
             QueryFilter.objects.create(**kwargs)
             return UserUpdateTimeStamp(rv)
-

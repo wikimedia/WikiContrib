@@ -64,7 +64,10 @@ async def get_task_authors(url, request_data, session, resp, phid):
     :param phid: Phabricator ID of the user
     :return: None
     """
+    print("start get_task_authors")
+    s = time.time()
     if request_data['constraints[authorPHIDs][0]'] == '':
+        print("end get_task_authors, took :",time.time() - s)
         return
     page, after = True, False
     while page or after is not False:
@@ -82,6 +85,7 @@ async def get_task_authors(url, request_data, session, resp, phid):
             if data['cursor']['after']:
                 after = data['cursor']['after']
                 request_data['after'] = after
+    print("end get_task_authors, took :",time.time() - s)
 
 
 async def get_task_assigner(url, request_data, session, resp):
@@ -93,7 +97,10 @@ async def get_task_assigner(url, request_data, session, resp):
     :param resp: Global response array to which the response from the API has to be appended.
     :return: None
     """
+    print("start get_task_assigner")
+    s = time.time()
     if request_data['constraints[assigned][0]'] == '':
+        print("end get_task_assigner, took :",time.time() - s)
         return
     page, after = True, False
     while page or after is not False:
@@ -106,6 +113,7 @@ async def get_task_assigner(url, request_data, session, resp):
             if data['cursor']['after']:
                 after = data['cursor']['after']
                 request_data['after'] = after
+    print("end get_task_assigner, took :",time.time() - s)
 
 
 async def get_gerrit_data(url, session, gerrit_resp):
@@ -116,7 +124,10 @@ async def get_gerrit_data(url, session, gerrit_resp):
     :param gerrit_resp: Global response array to which the response from the API has to be appended.
     :return: None
     """
+    print("start get_gerrit_data")
+    s = time.time()
     if url.split("?")[1].split("&")[0].split(":")[1] == "":
+        print("end get_gerrit_data ,took: ",time.time() - s)
         return
     async with session.get(url) as response:
         data = await response.read()
@@ -126,6 +137,7 @@ async def get_gerrit_data(url, session, gerrit_resp):
             data = []
 
         gerrit_resp.extend(data)
+        print("end get_gerrit_data, took: ",time.time() - s)
 
 
 def format_data(pd, gd, query, phid):
@@ -196,7 +208,6 @@ def format_data(pd, gd, query, phid):
                     )
     return resp
 
-
 async def get_data(urls, request_data, loop, gerrit_response, phab_response, phid):
     """
     :Summary: Start a session and fetch the data.
@@ -213,6 +224,28 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
         tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response))))
         tasks.append(loop.create_task((get_task_authors(urls[0], request_data[0], session, phab_response, phid))))
         tasks.append(loop.create_task((get_task_assigner(urls[0], request_data[1], session, phab_response))))
+        await asyncio.gather(*tasks)
+
+async def exp_get_data(gerrit_and_phab,current_function,urls, request_data, gerrit_response, phab_response, phid):
+    """
+    :Summary: Start a session and fetch the data.
+    :param urls: URLS to be fetched.
+    :param request_data: Request Payload to be sent.
+    :param loop: asyncio event loop.
+    :param gerrit_response: Store response data to the requests from Gerrit URLs
+    :param phab_response: Store response data to the requests from Phabricator URLs
+    :param phid: Phabricator ID of the user
+    :return:
+    """
+    tasks = []
+    async with ClientSession() as session:
+        for function,current in zip(gerrit_and_phab,current_function):
+            if(current == "get_gerrit_data"):
+                tasks.append(function(urls[1],session,gerrit_response))
+            elif(current == "get_task_authors"):
+                tasks.append(function(urls[0],request_data[0],session,phab_response,phid))
+            elif(current == "get_task_assigner"):
+                tasks.append(function(urls[0],request_data[1],session,phab_response))
         await asyncio.gather(*tasks)
 
 
@@ -278,6 +311,75 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
     })
 
 
+async def exp_getDetails(users_data,fullname, username, gerrit_username, createdStart, createdEnd, phid, query):
+    """
+    :Summary: Get the contributions of the user
+    :param username: Fullname of the user.
+    :param gerrit_username: Gerrit username of the user.
+    :param createdStart: Start timeStamp from which the contributions has to be fetched.
+    :param createdEnd: End timestamp till which the contributions has to be fetched.
+    :param phid: Phabricator ID of the user.
+    :param query: Query Modal Object.
+    :param users: List of previous, current and next users Fullname's
+    :return: Response Object with query, contributions of user, query filters etc.
+    """
+    print("start get_details")
+
+    if isinstance(username, float):
+        username = ''
+
+    if isinstance(gerrit_username, float):
+        gerrit_username = ''
+
+    phab_response, gerrit_response = [], []
+    urls = [
+        'https://phabricator.wikimedia.org/api/maniphest.search',
+        "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS"
+    ]
+    request_data = [
+        {
+            'constraints[authorPHIDs][0]': username,
+            'api.token': API_TOKEN,
+            'constraints[createdStart]': int(createdStart),
+            'constraints[createdEnd]': int(createdEnd)
+        },
+        {
+            'constraints[assigned][0]': username,
+            'api.token': API_TOKEN,
+            'constraints[createdStart]': int(createdStart),
+            'constraints[createdEnd]': int(createdEnd)
+        }
+    ]
+    gerrit_and_phab = []
+    gerrit_and_phab.append(get_gerrit_data)
+    gerrit_and_phab.append(get_task_authors)
+    gerrit_and_phab.append(get_task_assigner)
+    current_function = ["get_gerrit_data","get_task_authors","get_task_assigner"]
+    start_time = time.time()
+
+    await exp_get_data(gerrit_and_phab=gerrit_and_phab,current_function=current_function,urls=urls,
+                  request_data=request_data,gerrit_response=gerrit_response,
+                  phab_response=phab_response,phid=phid)
+
+
+    print("end get_details")
+    print(time.time() - start_time)
+    formatted = format_data(phab_response, gerrit_response, query, phid[0])
+    users_data.append({
+        'query': query.hash_code,
+        "result": formatted,
+        "fullname":fullname,
+        'current_gerrit': gerrit_username,
+        'current_phabricator': username,
+        'filters': {
+            'start_time': query.queryfilter.start_time,
+            'end_time': query.queryfilter.end_time,
+            'status': query.queryfilter.status
+        }
+    })
+
+
+
 class DisplayResult(APIView):
     """
     :Summary: Create a Request Payload to the API that fetches the contributions of the user.
@@ -325,7 +427,7 @@ class DisplayResult(APIView):
                         next_user = get_next_user(file, ind)
                 except KeyError:
                     return Response({
-                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; to check the format.(while uploading it)',
+                        'message': 'CSV file uploaded is not in the supported format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
@@ -374,6 +476,48 @@ class DisplayResult(APIView):
         createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time),"%Y-%m-%d"),"str")
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                           createdEnd=createdEnd, phid=phid, query=query, users=paginate)
+
+
+
+class ExpDisplayResult(APIView):
+    """
+    :Summary: Create a Request Payload to the API that fetches the contributions of the user.
+    """
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        phid = [False]
+        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time),"%Y-%m-%d"),"str")
+        createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time),"%Y-%m-%d"),"str")
+        users_data = []
+
+        async def get_details_parallel(users_data,file):
+            tasks = []
+            for row in file.itertuples():
+                tasks.append(exp_getDetails(users_data=users_data,fullname=row.fullname,username=row.Phabricator,gerrit_username=row.Gerrit, createdStart=createdStart,
+                            createdEnd=createdEnd, phid=phid, query=query))
+            await asyncio.gather(*tasks)
+        if query.file:
+            # get the data from CSV file
+            try:
+                file = read_csv(query.csv_file,encoding="latin-1")
+                try:
+                    print("begin----------------------------")
+                    s = datetime.now()
+                    asyncio.run(get_details_parallel(users_data,file))
+                    s = (datetime.now() - s).total_seconds()
+                    print("get_details_parallel took"+" "+str(s))
+                    return Response({"perf":s,"users_data":users_data})
+                except KeyError:
+                    return Response({
+                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; to check the format.(while uploading it)',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            except FileNotFoundError:
+                return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"message":"Upload Csv file!"},status=status.HTTP_404_NOT_FOUND)
 
 
 class GetUserCommits(ListAPIView):
@@ -426,7 +570,7 @@ class GetUsers(APIView):
                     users = users.iloc[:, 0].values.tolist()
                 except KeyError:
                     return Response({
-                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; icon to check the format.',
+                        'message': 'CSV file uploaded is not in the supported format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
