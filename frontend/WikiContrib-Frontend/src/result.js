@@ -88,7 +88,7 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
+              <Header><h2 className="subtitle">{this.props.username}'s Activity</h2></Header>
               <span>
                 <h3 className="accounts">
                   Gerrit:{' '}
@@ -501,7 +501,7 @@ class QueryResult extends React.Component {
           <Grid.Row>
             <Grid.Column computer={2} mobile={1} tablet={1} />
             <Grid.Column computer={12} mobile={14} tablet={14}>
-              <Header><h1 className="name">Query Result</h1></Header>
+              <Header><h1 className="name" style={{paddingTop: '2rem'}}>Query Result</h1></Header>
               {this.state.page_load ? (
                 <Placeholder fluid className="search_load">
                   <Placeholder.Line className="load_background" />
@@ -515,8 +515,6 @@ class QueryResult extends React.Component {
                         value={this.state.value}
                       />
                     </div>
-
-
                     <div className="filter_and_update">
                       <div className="filter">
                         <Popup

@@ -18,7 +18,6 @@ import {
   Checkbox,
   Transition,
   Loader,
-  Header,
 } from 'semantic-ui-react';
 import { tool_name } from './App';
 import { NavBar } from './components/nav';
@@ -470,7 +469,7 @@ export class Query extends Component {
                       animation="fade"
                     >
                       <React.Fragment>
-                        <h1><Header className="title">WikiContrib</Header></h1>
+                        {/* <h1><Header className="title">WikiContrib</Header></h1> */}
                         <h2 className="accounts">
                           Get the Contributions of your fellow Wikimedians,
                           showcase yourself! Visualize their contribs using
