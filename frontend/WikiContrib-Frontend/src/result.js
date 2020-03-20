@@ -72,10 +72,8 @@ const chartOptions = {
 class DisplayUser extends React.Component {
   render = () => {
     let { start_time: st, end_time: et } = this.props.filters;
-    let st = new Date(st),
-    st_m = st.getUTCMonth(),
-    et = new Date(et),
-    et_m = et.getUTCMonth();
+    st = new Date(st); let st_m = st.getUTCMonth();
+    et = new Date(et);	    et = new Date(et); let et_m = et.getUTCMonth();
     return (
       <div>
         {this.props.loading ? (
