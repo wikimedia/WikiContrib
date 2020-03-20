@@ -16,9 +16,6 @@ import {
   get_dates,
   months,
   fetchDetails,
-  phab_status,
-  gerrit_status,
-  format_status,
   full_months,
   get_timestamp,
   filterDetailApi,
@@ -144,7 +141,6 @@ class QueryResult extends React.Component {
     super(props);
     let data = false;
     let filters = {
-      status: [],
       start_time: '',
       end_time: '',
     };
@@ -156,7 +152,6 @@ class QueryResult extends React.Component {
     if ('data' in this.props.location && this.props.location.data !== '') {
       data = this.props.location.data;
       filters = data.filters;
-      filters.status = data.filters.status.split(',');
     }
 
     this.state = {
@@ -286,7 +281,6 @@ class QueryResult extends React.Component {
      */
     if (response.error !== 1) {
       let filters = response.filters;
-      filters.status = filters.status.split(',');
       this.setState({
         data: response.result,
         current: response.current,
@@ -340,9 +334,6 @@ class QueryResult extends React.Component {
     let { update_filters: uf, current_filters: cf } = this.state;
     if (JSON.stringify(uf) !== JSON.stringify(cf)) {
       let out = {};
-      if (uf.status.join(',') !== cf.status.join(',')) {
-        out['status'] = uf.status.join(',');
-      }
       if (uf.start_time !== cf.start_time) {
         out['start_time'] = uf.start_time;
       }
@@ -417,7 +408,6 @@ class QueryResult extends React.Component {
     let filters = {
       end_time: time.getFullYear() + '-' + month + '-01',
       start_time: time.getFullYear() - 1 + '-' + month + '-01',
-      status: phab_status.concat(gerrit_status).concat(['p-open', 'g-open']),
       username: this.state.current,
     };
     this.setState({
@@ -427,7 +417,6 @@ class QueryResult extends React.Component {
       notFound: false,
     });
     let data = Object.assign({}, filters);
-    data.status = filters.status.join(',');
     fetchAsynchronous(
       filterDetailApi.replace('<hash>', this.state.query),
       'PATCH',
@@ -612,8 +601,8 @@ class QueryResult extends React.Component {
                               date[0] = 1;
                             }
                             let filters = Object.assign({}, uf);
-                            filters.end_time =
-                              date[1] + '-' + date[0] + '-01';
+
+                            filters.end_time = date[1] + '-' + date[0] + '-01';
                             let days = get_timestamp(
                               new Date(uf.end_time),
                               new Date(uf.start_time)
@@ -622,12 +611,12 @@ class QueryResult extends React.Component {
                               days === 30
                                 ? 1
                                 : days === 60
-                                  ? 2
-                                  : days === 90
-                                    ? 3
-                                    : days === 180
-                                      ? 6
-                                      : 12;
+                                ? 2
+                                : days === 90
+                                ? 3
+                                : days === 180
+                                ? 6
+                                : 12;
 
                             let updated_val = new Date(filters.end_time);
                             let start_time = new Date(
@@ -668,12 +657,12 @@ class QueryResult extends React.Component {
                               value <= 31
                                 ? 1
                                 : value <= 61
-                                  ? 2
-                                  : value <= 92
-                                    ? 3
-                                    : value <= 183
-                                      ? 6
-                                      : 12;
+                                ? 2
+                                : value <= 92
+                                ? 3
+                                : value <= 183
+                                ? 6
+                                : 12;
                             date = new Date(
                               date.getFullYear(),
                               date.getUTCMonth() - incr,
