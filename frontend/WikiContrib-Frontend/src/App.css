@@ -722,14 +722,6 @@ h3.accounts  {
   align-items: center;
 }
 
-.status {
-  margin-left: 3% !important;
-  margin-top: 0;
-  display: inline-flex;
-  white-space: nowrap;
-  flex-direction: row-reverse;
-  align-items: center;
-}
 .input_label {
   text-align: left;
   margin-top: 1.5em;
