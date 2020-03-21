@@ -127,12 +127,9 @@ class DisplayUser extends React.Component {
                     )}
                 </h1>
                 <h2 className="accounts">
-                {/* {full_months[st_m] + " " + st.getFullYear()} */}
                 {full_months[st_m] + " " +  ((et_m + 11) % 12 > st_m ? end_year : end_year - 1)}
-                  {/* {full_months[st.getUTCMonth()] + " " + st.getFullYear()} */}
                   -
                   {full_months[(et_m + 11) % 12] + " " + end_year}
-                  {/* {full_months[et.getUTCMonth() - 1] + " " + et.getFullYear()} */}
                 </h2>
               </span>
             </React.Fragment>
