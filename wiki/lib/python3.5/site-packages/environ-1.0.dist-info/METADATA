@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: environ
+Version: 1.0
+Summary: Python Stack Based Globals Management
+Home-page: UNKNOWN
+Author: Rich Harkins
+Author-email: rich@worldsinfinite.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Topic :: Software Development :: Libraries
+
+UNKNOWN
+
+
