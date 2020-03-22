@@ -212,6 +212,7 @@ python manage.py createsuperuser
 
 The above prompts for username, email and password. The command creates a user with the corresponding username and password. You can see the database tables or models using it.
 
+> Create a `uploads` directory in the backend root directory for saving uploaded files locally.
 
 ## Run the local server:
 Finally, run the server with the command:
