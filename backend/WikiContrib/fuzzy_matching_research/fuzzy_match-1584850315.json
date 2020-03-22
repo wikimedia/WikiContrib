@@ -1,0 +1,102 @@
+[
+    {
+        "gerrit_fullname": "TheDJ",
+        "phab_fullname": "Derk-Jan Hartman",
+        "fuzzy_match": 19
+    },
+    {
+        "gerrit_fullname": "Urbanecm",
+        "phab_fullname": "",
+        "fuzzy_match": 0
+    },
+    {
+        "gerrit_fullname": "Gopavasanth",
+        "phab_fullname": "Gopa Vasanth",
+        "fuzzy_match": 96
+    },
+    {
+        "gerrit_fullname": "Dvorapa",
+        "phab_fullname": "Pavel Dvo\u0159\u00e1k",
+        "fuzzy_match": 49
+    },
+    {
+        "gerrit_fullname": "Fdans",
+        "phab_fullname": "Francisco Dans",
+        "fuzzy_match": 72
+    },
+    {
+        "gerrit_fullname": "Pintoch",
+        "phab_fullname": "Antonin Delpeuch",
+        "fuzzy_match": 43
+    },
+    {
+        "gerrit_fullname": "Anomie",
+        "phab_fullname": "Brad Jorsch",
+        "fuzzy_match": 30
+    },
+    {
+        "gerrit_fullname": "Addshore",
+        "phab_fullname": "Adam_WMDE",
+        "fuzzy_match": 47
+    },
+    {
+        "gerrit_fullname": "SrishtiSethi",
+        "phab_fullname": "Srishti Sethi - Wikimedia Foundation",
+        "fuzzy_match": 83
+    },
+    {
+        "gerrit_fullname": "Daniel Kinzler",
+        "phab_fullname": "Daniel Kinzler",
+        "fuzzy_match": 100
+    },
+    {
+        "gerrit_fullname": "Michael Gro\u00c3\u009fe",
+        "phab_fullname": "Michael Gro\u00dfe (WMDE)",
+        "fuzzy_match": 90
+    },
+    {
+        "gerrit_fullname": "Aklapper",
+        "phab_fullname": "Andre Klapper (WMF)",
+        "fuzzy_match": 79
+    },
+    {
+        "gerrit_fullname": "Jforrester",
+        "phab_fullname": "James D. Forrester",
+        "fuzzy_match": 81
+    },
+    {
+        "gerrit_fullname": "Reedy",
+        "phab_fullname": "Sam Reed",
+        "fuzzy_match": 80
+    },
+    {
+        "gerrit_fullname": "Gerritfullerton",
+        "phab_fullname": "Santhosh Thottingal",
+        "fuzzy_match": 24
+    },
+    {
+        "gerrit_fullname": "Rammanoj",
+        "phab_fullname": "Rammanojpotla",
+        "fuzzy_match": 90
+    },
+    {
+        "gerrit_fullname": "01tonythomas",
+        "phab_fullname": "Tony Thomas",
+        "fuzzy_match": 87
+    },
+    {
+        "gerrit_fullname": "Jayprakash12345",
+        "phab_fullname": "Jay Prakash",
+        "fuzzy_match": 77
+    },
+    {
+        "gerrit_fullname": "Jon Harald S\u00c3\u00b8by",
+        "phab_fullname": "Jon Harald S\u00f8by (WMNO)",
+        "fuzzy_match": 95
+    },
+    {
+        "gerrit_fullname": "SBassett",
+        "phab_fullname": "Scott Bassett",
+        "fuzzy_match": 79
+    }
+]
