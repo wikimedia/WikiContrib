@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.db import transaction, IntegrityError
 from django.db.models import Q
@@ -88,6 +89,8 @@ class AddQueryUser(CreateAPIView):
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part"
                     else:
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv"
+                    
+                    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                     with open(filename, 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
