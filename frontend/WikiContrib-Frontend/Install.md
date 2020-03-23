@@ -57,7 +57,34 @@ This installs all the requirements to the tool.
 
 ### Start the development server.
 
-Now type the following command in the same directory.
+Before starting the development server, ensure to go to "src/api.js" file
+and comment out line 
+
+`const BASE_API_URI = 'https://tools.wmflabs.org/contraband/';`
+
+As well as un-comment the line
+
+`const BASE_API_URI = 'http://127.0.0.1:8000/';`
+
+when done, both lines should look like this:
+
+`// const BASE_API_URI = 'https://tools.wmflabs.org/contraband/';`
+`const BASE_API_URI = 'http://127.0.0.1:8000/';`
+
+If you fail to do this, your react app will be communicating with 
+the production backend hosted on toolforge and not your 
+local setup of the backend.
+
+Before committing and pushing your changes, ensure to reverse it back to 
+
+`const BASE_API_URI = 'https://tools.wmflabs.org/contraband/';`
+`// const BASE_API_URI = 'http://127.0.0.1:8000/';`
+
+or your pull request won't be merged.
+
+
+
+Now type the following command in root directory (the directory with node_modules folder).
 
 ```commandline
 npm start
