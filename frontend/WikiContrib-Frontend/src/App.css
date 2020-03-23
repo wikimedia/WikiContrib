@@ -360,8 +360,14 @@ h3.accounts  {
 
 .flex-col {
   display: flex;
-  flex-direction: column;
+  flex-direction: column;  
 }
+
+@media only screen and (min-width: 1456px){
+  .flex-col{
+    width: 1.3vw;
+  }
+} 
 
 .flex-row {
   display: flex;
