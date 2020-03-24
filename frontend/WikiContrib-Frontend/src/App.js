@@ -2,27 +2,30 @@ import React, { Component } from 'react';
 import './App.css';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Query } from './query';
-import Loadable from 'react-loadable'
+import QueryResult from './result';
+import NotFound from './components/404';
+import UserContribution from './contribution';
+// import Loadable from 'react-loadable'
 
-const Loading = ({ error }) => {
-  if (error) return <div>Error loading component</div>
-  else return <div>Loading.....</div>
-}
+// const Loading = ({ error }) => {
+//   if (error) return <div>Error loading component</div>
+//   else return <div>Loading.....</div>
+// }
 
-const QueryResult = Loadable({
-  loader: () => import('./result'),
-  loading: Loading
-})
+// const QueryResult = Loadable({
+//   loader: () => import('./result'),
+//   loading: Loading
+// })
 
-const NotFound = Loadable({
-  loader: () => import('./components/404'),
-  loading: Loading
-})
+// const NotFound = Loadable({
+//   loader: () => import('./components/404'),
+//   loading: Loading
+// })
 
-const UserContribution = Loadable({
-  loader: () => import('./contribution'),
-  loading: Loading
-})
+// const UserContribution = Loadable({
+//   loader: () => import('./contribution'),
+//   loading: Loading
+// })
 
 /*
     All the Routers are declared here.
