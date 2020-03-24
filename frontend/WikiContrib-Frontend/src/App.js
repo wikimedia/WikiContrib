@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import './App.css';
 import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Query } from './query';
-// import QueryResult from './result';
-// import NotFound from './components/404';
-// import UserContribution from './contribution';
 import Loadable from 'react-loadable'
 
 const Loading = ({ error }) => {
