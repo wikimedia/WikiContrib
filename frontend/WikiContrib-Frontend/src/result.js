@@ -76,6 +76,7 @@ class DisplayUser extends React.Component {
     let st_m = st.getUTCMonth();
     et = new Date(et);
     let et_m = et.getUTCMonth();
+    let end_year = et_m -1 > 0 ? et.getFullYear() : et.getFullYear() - 1
     return (
       <div>
         {this.props.loading ? (
@@ -123,9 +124,9 @@ class DisplayUser extends React.Component {
                     )}
                 </h3>
                 <h3 className="accounts">
-                  {full_months[st_m] + " " + st.getFullYear()}
+                  {full_months[st_m] + " " +  ((et_m + 11) % 12 > st_m ? end_year : end_year - 1)}
                   -
-                  {full_months[(et_m + 11) % 12] + " " + (et_m - 1 > 0 ? et.getFullYear() : et.getFullYear() - 1)}
+                  {full_months[(et_m + 11) % 12] + " " + end_year}
                 </h3>
               </span>
             </React.Fragment>
