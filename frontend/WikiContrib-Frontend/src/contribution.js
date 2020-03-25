@@ -44,7 +44,7 @@ class GenerateDay extends React.Component {
         }}
       >
         <div className="tooltip">
-          {data} {data === 1 ? 'Contribution' : 'Contributions'}
+          {data} {data === 1 ? 'Contribution ' : 'Contributions '}
           on {this.props.month} {this.props.date}, {this.props.year}
         </div>
       </div>
