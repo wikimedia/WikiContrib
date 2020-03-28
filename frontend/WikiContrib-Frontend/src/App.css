@@ -742,6 +742,26 @@ h3.accounts  {
   outline: 2px solid #9ABDF6 !important;
 }
 
+.input_label {
+  text-align: left;
+  margin-top: 1.5em;
+  margin-bottom:0.5em;
+  padding-left: 1.4rem;
+  font-weight: bold;
+}
+
+.checkbox_label {
+  display: inline-block;
+  font-weight: bold;
+  color: black;
+  position: absolute;
+  margin-left: 1em;
+}
+
+.ui.button.remove:focus,.ui.button.remove:hover {
+  outline: 2px solid #9ABDF6 !important;
+}
+
 @media screen and (min-width: 900px) and (max-width: 1140px ){
   .ui.card.filter_view {
     width: 75%
