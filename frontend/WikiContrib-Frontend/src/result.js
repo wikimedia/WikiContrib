@@ -577,7 +577,8 @@ class QueryResult extends React.Component {
                               date[0] = 1;
                             }
                             let filters = Object.assign({}, uf);
-                            filters.end_time = date[1] + '-' + date[0] + '-01';
+                            filters.end_time = parseInt(date[0]) > 9 ?
+                             date[1] + '-' + date[0] + '-01' : date[1] + '-0'+ date[0] + '-01';
                             let days = get_timestamp(
                               new Date(uf.end_time),
                               new Date(uf.start_time)
@@ -600,8 +601,9 @@ class QueryResult extends React.Component {
                               1
                             );
                             let month = start_time.getUTCMonth() + 1;
-                            filters.start_time =
-                              start_time.getFullYear() + '-' + month + '-01';
+                            filters.start_time = parseInt(month) > 9 ?
+                              start_time.getFullYear() + '-' + month + '-01'
+                              : start_time.getFullYear() + '-0' + month + '-01';
                             this.setState({
                               update_filters: filters,
                             });
@@ -640,13 +642,14 @@ class QueryResult extends React.Component {
                                 : 12;
                             date = new Date(
                               date.getFullYear(),
-                              date.getUTCMonth() - incr,
+                              date.getMonth() - incr,
                               1
                             );
-                            let month = date.getUTCMonth() + 1;
+                            let month = date.getMonth() + 1;
                             let filters = Object.assign({}, uf);
-                            filters.start_time =
-                              date.getFullYear() + '-' + month + '-' + 1;
+                            filters.start_time = parseInt(month) > 9 ?
+                              date.getFullYear() + '-' + month + '-' + 1
+                              : date.getFullYear() + '-0' + month + '-' + 1;
                             this.setState({ update_filters: filters });
                           }}
                           placeholder="Get by date"
