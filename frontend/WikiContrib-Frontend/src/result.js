@@ -66,6 +66,56 @@ const chartOptions = {
   },
 };
 
+// go to top class
+
+class GoTop extends React.Component {
+  state = {
+       intervalId: 0,
+       thePosition: false
+   };
+
+  componentDidMount() {
+      document.addEventListener("scroll", () => {
+          if (window.scrollY > 170) {
+              this.setState({ thePosition: true })
+          } else {
+              this.setState({ thePosition: false })
+          }
+      });
+      window.scrollTo(0, 0);
+  }
+  
+  onScrollStep = () => {
+      if (window.pageYOffset === 0){
+          clearInterval(this.state.intervalId);
+      }
+      window.scroll(0, window.pageYOffset - this.props.scrollStepInPx);
+  }
+
+  scrollToTop = () => {
+      let intervalId = setInterval(this.onScrollStep, this.props.delayInMs);
+      this.setState({ intervalId: intervalId });
+  }
+
+  renderGoTopIcon = () => {
+      if (this.state.thePosition){
+          return (
+              <div className="go-top" onClick={this.scrollToTop}>
+                Top
+              </div>
+          )
+      }
+  }
+
+  render(){
+      return (
+          <React.Fragment>
+              {this.renderGoTopIcon()}
+          </React.Fragment>
+      )
+  }
+}
+
 /**
  * Display Fullname, Phabricator Username and Gerrit Username of the user.
  */
@@ -76,6 +126,7 @@ class DisplayUser extends React.Component {
     let st_m = st.getUTCMonth();
     et = new Date(et);
     let et_m = et.getUTCMonth();
+    let end_year = et_m -1 > 0 ? et.getFullYear() : et.getFullYear() - 1
     return (
       <div>
         {this.props.loading ? (
@@ -87,6 +138,7 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
+              <GoTop scrollStepInPx="50" delayInMs="30" />
               <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
               <span>
                 <h3 className="accounts">
@@ -123,9 +175,9 @@ class DisplayUser extends React.Component {
                     )}
                 </h3>
                 <h3 className="accounts">
-                  {full_months[st_m] + " " + st.getFullYear()}
+                  {full_months[st_m] + " " +  ((et_m + 11) % 12 > st_m ? end_year : end_year - 1)}
                   -
-                  {full_months[(et_m + 11) % 12] + " " + (et_m - 1 > 0 ? et.getFullYear() : et.getFullYear() - 1)}
+                  {full_months[(et_m + 11) % 12] + " " + end_year}
                 </h3>
               </span>
             </React.Fragment>
