@@ -54,7 +54,7 @@ const chartOptions = {
         ticks: {
           fontSize: 15,
           beginAtZero: true,
-          callback: function (value) {
+          callback: function(value) {
             if (Number.isInteger(value)) {
               return value;
             }
@@ -464,8 +464,8 @@ class QueryResult extends React.Component {
             }
           />
         ) : (
-            ''
-          )}
+          ''
+        )}
 
         {this.state.next !== null ? (
           <div className="right_arrow">
@@ -485,29 +485,29 @@ class QueryResult extends React.Component {
             />
           </div>
         ) : (
-            ''
-          )}
+          ''
+        )}
         <NavBar />
         <Grid>
           <Grid.Row>
-            <div className="result">
-              <h1 className="result_page_heading">Query Result</h1>
-              {this.state.page_load ? (
-                <Placeholder fluid className="search_load">
-                  <Placeholder.Line className="load_background" />
-                </Placeholder>
-              ) : (
+              <div className="result">
+                <h1 className="result_page_heading">Query Result</h1>
+                {this.state.page_load ? (
+                  <Placeholder fluid className="search_load">
+                    <Placeholder.Line className="load_background" />
+                  </Placeholder>
+                ) : (
                   <div className="controls">
                     <div className="search">
-                      <UserSearch
-                        set={this.onUserSearch}
-                        hash={this.state.query}
-                        value={this.state.value}
-                      />
-                    </div>
+                        <UserSearch
+                          set={this.onUserSearch}
+                          hash={this.state.query}
+                          value={this.state.value}
+                        />
+                      </div>
 
 
-                    <div className="filter_and_update">
+                      <div className="filter_and_update">
                       <div className="filter">
                         <Popup
                           content="View Filters"
@@ -539,9 +539,9 @@ class QueryResult extends React.Component {
                               to={
                                 process.env.NODE_ENV === 'production'
                                   ? tool_name +
-                                  '/query/' +
-                                  this.state.query +
-                                  '/update/'
+                                    '/query/' +
+                                    this.state.query +
+                                    '/update/'
                                   : '/query/' + this.state.query + '/update/'
                               }
                             />
@@ -549,217 +549,217 @@ class QueryResult extends React.Component {
                         />
                       </div>
                     </div>
-                  </div>
+                    </div>
                 )}
-              <Transition
-                animation="fade down"
-                duration={300}
-                visible={this.state.view_filters}
-              >
-                <Card className="filter_view">
-                  <Grid>
-                    <Grid.Column computer={8} tablet={16} mobile={16}>
-                      <Header>From</Header>
-                      <Dropdown
-                        style={{ marginTop: 10 }}
-                        fluid
-                        search
-                        selection
-                        icon={false}
-                        value={this.func()}
-                        options={get_dates()}
-                        onChange={(e, obj) => {
-                          let date = obj.value.split(',');
-                          date[1] = date[1].substr(1);
-                          date[0] = full_months.indexOf(date[0]) + 2;
-                          if (date[0] === 13) {
-                            date[1] = parseInt(date[1]) + 1;
-                            date[0] = 1;
-                          }
-                          let filters = Object.assign({}, uf);
-                          filters.end_time = date[1] + '-' + date[0] + '-01';
-                          let days = get_timestamp(
-                            new Date(uf.end_time),
-                            new Date(uf.start_time)
-                          );
-                          let incr =
-                            days === 30
-                              ? 1
-                              : days === 60
+                <Transition
+                  animation="fade down"
+                  duration={300}
+                  visible={this.state.view_filters}
+                >
+                  <Card className="filter_view">
+                    <Grid>
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>From</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
+                          value={this.func()}
+                          options={get_dates()}
+                          onChange={(e, obj) => {
+                            let date = obj.value.split(',');
+                            date[1] = date[1].substr(1);
+                            date[0] = full_months.indexOf(date[0]) + 2;
+                            if (date[0] === 13) {
+                              date[1] = parseInt(date[1]) + 1;
+                              date[0] = 1;
+                            }
+                            let filters = Object.assign({}, uf);
+                            filters.end_time = date[1] + '-' + date[0] + '-01';
+                            let days = get_timestamp(
+                              new Date(uf.end_time),
+                              new Date(uf.start_time)
+                            );
+                            let incr =
+                              days === 30
+                                ? 1
+                                : days === 60
                                 ? 2
                                 : days === 90
-                                  ? 3
-                                  : days === 180
-                                    ? 6
-                                    : 12;
+                                ? 3
+                                : days === 180
+                                ? 6
+                                : 12;
 
-                          let updated_val = new Date(filters.end_time);
-                          let start_time = new Date(
-                            updated_val.getFullYear(),
-                            updated_val.getUTCMonth() - incr,
-                            1
-                          );
-                          let month = start_time.getUTCMonth() + 1;
-                          filters.start_time =
-                            start_time.getFullYear() + '-' + month + '-01';
-                          this.setState({
-                            update_filters: filters,
-                          });
-                        }}
-                        placeholder="Select Date"
-                        closeOnChange={true}
-                      />
-                    </Grid.Column>
-                    <Grid.Column computer={8} tablet={16} mobile={16}>
-                      <Header>Time Range</Header>
-                      <Dropdown
-                        style={{ marginTop: 10 }}
-                        fluid
-                        search
-                        selection
-                        icon={false}
-                        options={filter_2}
-                        value={get_timestamp(
-                          new Date(uf.start_time),
-                          new Date(uf.end_time)
-                        )}
-                        onChange={(e, obj) => {
-                          let date = new Date(
-                            this.state.update_filters.end_time
-                          );
-                          let value = obj.value;
-                          let incr =
-                            value <= 31
-                              ? 1
-                              : value <= 61
+                            let updated_val = new Date(filters.end_time);
+                            let start_time = new Date(
+                              updated_val.getFullYear(),
+                              updated_val.getUTCMonth() - incr,
+                              1
+                            );
+                            let month = start_time.getUTCMonth() + 1;
+                            filters.start_time =
+                              start_time.getFullYear() + '-' + month + '-01';
+                            this.setState({
+                              update_filters: filters,
+                            });
+                          }}
+                          placeholder="Select Date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>Time Range</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
+                          options={filter_2}
+                          value={get_timestamp(
+                            new Date(uf.start_time),
+                            new Date(uf.end_time)
+                          )}
+                          onChange={(e, obj) => {
+                            let date = new Date(
+                              this.state.update_filters.end_time
+                            );
+                            let value = obj.value;
+                            let incr =
+                              value <= 31
+                                ? 1
+                                : value <= 61
                                 ? 2
                                 : value <= 92
-                                  ? 3
-                                  : value <= 183
-                                    ? 6
-                                    : 12;
-                          date = new Date(
-                            date.getFullYear(),
-                            date.getUTCMonth() - incr,
-                            1
-                          );
-                          let month = date.getUTCMonth() + 1;
-                          let filters = Object.assign({}, uf);
-                          filters.start_time =
-                            date.getFullYear() + '-' + month + '-' + 1;
-                          this.setState({ update_filters: filters });
-                        }}
-                        placeholder="Get by date"
-                        closeOnChange={true}
-                      />
-                    </Grid.Column>
-                  </Grid>
-                  <div style={{ width: '100%' }}>
-                    <Button
-                      className="apply_filters"
-                      onClick={() => this.handleSearchClick()}
-                    >
-                      APPLY
+                                ? 3
+                                : value <= 183
+                                ? 6
+                                : 12;
+                            date = new Date(
+                              date.getFullYear(),
+                              date.getUTCMonth() - incr,
+                              1
+                            );
+                            let month = date.getUTCMonth() + 1;
+                            let filters = Object.assign({}, uf);
+                            filters.start_time =
+                              date.getFullYear() + '-' + month + '-' + 1;
+                            this.setState({ update_filters: filters });
+                          }}
+                          placeholder="Get by date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
+                    </Grid>
+                    <div style={{ width: '100%' }}>
+                      <Button
+                        className="apply_filters"
+                        onClick={() => this.handleSearchClick()}
+                      >
+                        APPLY
                       </Button>
-                    <Button
-                      className="reset_filters"
-                      onClick={() => this.handleReset()}
-                    >
-                      RESET
+                      <Button
+                        className="reset_filters"
+                        onClick={() => this.handleReset()}
+                      >
+                        RESET
                       </Button>
-                  </div>
-                </Card>
-              </Transition>
-            </div>
+                    </div>
+                  </Card>
+                </Transition>
+              </div>
           </Grid.Row>
           {this.state.notFound ? (
             <NotFound />
           ) : (
-              <React.Fragment>
-                <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
-                    <DisplayUser
+            <React.Fragment>
+              <Grid.Row>
+                <Grid.Column width={2} />
+                <Grid.Column width={12}>
+                  <DisplayUser
+                    loading={this.state.loading}
+                    username={this.state.current}
+                    gerrit_username={this.state.gerrit_username}
+                    phabricator_username={this.state.phab_username}
+                    filters={this.state.current_filters}
+                  />
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column computer={2} mobile={1} tablet={1} />
+                <Grid.Column computer={12} tablet={14} mobile={14}>
+                  <Grid>
+                    <Grid.Row>
+                      <Grid.Column computer={8} mobile={16} tablet={8}>
+                        {this.state.loading ? (
+                          <Card className="graph_load">
+                            <Card.Content>
+                              <Placeholder fluid className="image_load">
+                                <Placeholder.Line />
+                              </Placeholder>
+                            </Card.Content>
+                          </Card>
+                        ) : (
+                          <Card className="chart_container">
+                            <span style={{ textAlign: 'center' }}>
+                              <Header className="chart"> PHABRICATOR </Header>
+                              <Line
+                                ref="chart"
+                                data={this.getGraphData('phabricator')}
+                                options={chartOptions}
+                              />
+                            </span>
+                          </Card>
+                        )}
+                      </Grid.Column>
+                      <Grid.Column computer={8} mobile={16} tablet={8}>
+                        {this.state.loading ? (
+                          <Card className="graph_load">
+                            <Card.Content>
+                              <Placeholder fluid className="image_load">
+                                <Placeholder.Line />
+                              </Placeholder>
+                            </Card.Content>
+                          </Card>
+                        ) : (
+                          <Card className="chart_container">
+                            <span style={{ textAlign: 'center' }}>
+                              <Header className="chart"> GERRIT </Header>
+                              <Line
+                                ref="chart"
+                                data={this.getGraphData('gerrit')}
+                                options={chartOptions}
+                              />
+                            </span>
+                          </Card>
+                        )}
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid>
+                </Grid.Column>
+                <Grid.Column computer={2} mobile={1} tablet={1} />
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={2} />
+                <Grid.Column width={12}>
+                  <Card className="chart_container">
+                    <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
+                    <UserContribution
+                      start_time={cf.start_time}
+                      end_time={cf.end_time}
+                      user={this.state.current}
+                      data={this.state.data}
+                      set={this.set}
                       loading={this.state.loading}
-                      username={this.state.current}
-                      gerrit_username={this.state.gerrit_username}
-                      phabricator_username={this.state.phab_username}
-                      filters={this.state.current_filters}
                     />
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
-                  <Grid.Column computer={12} mobile={14} tablet={14}>
-                    <Grid>
-                      <Grid.Row>
-                        <Grid.Column computer={8} mobile={16} tablet={8}>
-                          {this.state.loading ? (
-                            <Card className="graph_load">
-                              <Card.Content>
-                                <Placeholder fluid className="image_load">
-                                  <Placeholder.Line />
-                                </Placeholder>
-                              </Card.Content>
-                            </Card>
-                          ) : (
-                              <Card className="chart_container">
-                                <span style={{ textAlign: 'center' }}>
-                                  <Header className="chart"> PHABRICATOR </Header>
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('phabricator')}
-                                    options={chartOptions}
-                                  />
-                                </span>
-                              </Card>
-                            )}
-                        </Grid.Column>
-                        <Grid.Column computer={8} mobile={16} tablet={8}>
-                          {this.state.loading ? (
-                            <Card className="graph_load">
-                              <Card.Content>
-                                <Placeholder fluid className="image_load">
-                                  <Placeholder.Line />
-                                </Placeholder>
-                              </Card.Content>
-                            </Card>
-                          ) : (
-                              <Card className="chart_container">
-                                <span style={{ textAlign: 'center' }}>
-                                  <Header className="chart"> GERRIT </Header>
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('gerrit')}
-                                    options={chartOptions}
-                                  />
-                                </span>
-                              </Card>
-                            )}
-                        </Grid.Column>
-                      </Grid.Row>
-                    </Grid>
-                  </Grid.Column>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
-                  <Grid.Column computer={12} mobile={14} tablet={14}>
-                    <Card className="chart_container">
-                      <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
-                      <UserContribution
-                        start_time={cf.start_time}
-                        end_time={cf.end_time}
-                        user={this.state.current}
-                        data={this.state.data}
-                        set={this.set}
-                        loading={this.state.loading}
-                      />
-                    </Card>
-                  </Grid.Column>
-                  <Grid.Column width={2} />
-                </Grid.Row>
-                {this.state.activity !== undefined ? (
+                  </Card>
+                </Grid.Column>
+                <Grid.Column width={2} />
+              </Grid.Row>
+              {this.state.activity !== undefined ? (
                   <Grid.Row>
                     <Grid.Column computer={2} mobile={1} tablet={1} />
                     <Grid.Column computer={12} mobile={14} tablet={14} style={{ paddingTop: '2rem' }}>
@@ -770,11 +770,11 @@ class QueryResult extends React.Component {
                       />
                     </Grid.Column>
                   </Grid.Row>
-                ) : (
-                    ''
-                  )}
-              </React.Fragment>
-            )}
+              ) : (
+                ''
+              )}
+            </React.Fragment>
+          )}
         </Grid>
       </React.Fragment>
     );
