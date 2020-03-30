@@ -312,6 +312,14 @@ class QueryResult extends React.Component {
     }
   };
 
+  componentDidUpdate = () => {
+    window.scrollTo({
+      left: 0, 
+      top: document.body.scrollHeight, 
+      behavior:"smooth"
+    });
+  }
+
   getDetails = username => {
     /**
      * Fetch the contributions of the user.
