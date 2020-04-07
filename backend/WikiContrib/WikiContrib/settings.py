@@ -158,4 +158,4 @@ except ImportError:
     pass
 
 
-COMMIT_STATUS = ['merged', 'open', 'resolved', 'p-open', 'g-open']
+COMMIT_STATUS = ['merged', 'open', 'resolved', 'p-open']
