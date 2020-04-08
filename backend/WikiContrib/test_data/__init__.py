@@ -8,7 +8,7 @@ query_create_url = BASE_URL + "query/add/user/"
 
 query_create_data = {
     "file": -1,
-    "users":[
+    "users": [
         {
             "fullname": "test_user_1",
             "gerrit_username": "test_gerrit_user_1",
@@ -33,7 +33,7 @@ query_update_url = BASE_URL + 'query/<hash>/update/user/'
 
 query_update_data = {
     "file": -1,
-    "users":[
+    "users": [
         {
             "fullname": "update_test_user_1",
             "gerrit_username": "update_test_gerrit_user_1",
@@ -56,7 +56,7 @@ query_update_data = {
 query_filter_url = BASE_URL + 'query/<hash>/update/filter/'
 
 query_filter_data = {
-    "status": "g-open,p-open,merged,closed,abandoned",
+    "status": "p-open,merged,closed,abandoned",
     "username": "test_user_1",
     "start_time": "2015-04-01",
     "end_time": "2016-02-01"
