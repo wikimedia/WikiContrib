@@ -23,7 +23,7 @@ version = sys.hexversion
 version_3_3 = 50530288
 
 
-def choose_time_format_method(expression, format):
+def choose_time_format_method(expression,format):
     """
     :Summary: strftime("%s") is not a valid string formatting method in python,
     therefore it works on linux servers but not windows. To handle this, this function
@@ -51,6 +51,7 @@ def choose_time_format_method(expression, format):
             return expression.strftime("%s")
         else:
             return int(expression.strftime("%s"))
+
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
@@ -154,10 +155,8 @@ def format_data(pd, gd, query, phid):
             if i < len_pd:
                 if pd[i]['phid'] not in temp:
                     temp.append(pd[i]['phid'])
-                    date_time = datetime.fromtimestamp(
-                        int(pd[i]['fields']['dateCreated']))
-                    date_time = choose_time_format_method(
-                        date_time.replace(hour=0, minute=0, second=0), "str")
+                    date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
+                    date_time = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "str")
                     status = pd[i]['fields']['status']['name'].lower()
                     if status_name is True or status in status_name or (status == "open" and "p-open" in status_name):
                         rv = {
@@ -179,15 +178,14 @@ def format_data(pd, gd, query, phid):
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
                                                            "%Y-%m-%d"))
                 if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
-                    epouch = choose_time_format_method(
-                        date_time.replace(hour=0, minute=0, second=0), "int")
+                    epouch = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "int")
                     status = gd[i]['status'].lower()
                     if status_name is True or status in status_name or (status == "open" in status_name):
                         rv = {
-                            "time": epouch,
-                            "gerrit": True,
-                            "status": gd[i]['status'],
-                            "owned": True
+                           "time": epouch,
+                           "gerrit": True,
+                           "status": gd[i]['status'],
+                           "owned": True
                         }
                         resp.append(rv)
                     ListCommit.objects.create(
@@ -212,12 +210,9 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
     """
     tasks = []
     async with ClientSession() as session:
-        tasks.append(loop.create_task(
-            (get_gerrit_data(urls[1], session, gerrit_response))))
-        tasks.append(loop.create_task(
-            (get_task_authors(urls[0], request_data[0], session, phab_response, phid))))
-        tasks.append(loop.create_task(
-            (get_task_assigner(urls[0], request_data[1], session, phab_response))))
+        tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response))))
+        tasks.append(loop.create_task((get_task_authors(urls[0], request_data[0], session, phab_response, phid))))
+        tasks.append(loop.create_task((get_task_assigner(urls[0], request_data[1], session, phab_response))))
         await asyncio.gather(*tasks)
 
 
@@ -245,8 +240,7 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
     asyncio.set_event_loop(loop)
     urls = [
         'https://phabricator.wikimedia.org/api/maniphest.search',
-        "https://gerrit.wikimedia.org/r/changes/?q=owner:" +
-        gerrit_username + "&o=DETAILED_ACCOUNTS"
+        "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS"
     ]
     request_data = [
         {
@@ -296,7 +290,7 @@ class DisplayResult(APIView):
         if query.file:
             # get the data from CSV file
             try:
-                file = read_csv(query.csv_file, encoding="latin-1")
+                file = read_csv(query.csv_file,encoding="latin-1")
                 try:
                     if 'user' in request.GET:
                         user = file[file['fullname'] == request.GET['user']]
@@ -376,10 +370,8 @@ class DisplayResult(APIView):
             username, gerrit_username = user.phabricator_username, user.gerrit_username
             paginate = [prev_user, user.fullname, next_user]
         # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
-        createdStart = choose_time_format_method(datetime.strptime(
-            str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
-        createdEnd = choose_time_format_method(datetime.strptime(
-            str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
+        createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
+        createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                           createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
@@ -398,11 +390,9 @@ class GetUserCommits(ListAPIView):
             date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
             date = int((date - datetime(1970, 1, 1)).total_seconds())
         except KeyError:
-            date = choose_time_format_method(
-                datetime.now().replace(hour=0, minute=0, second=0), "str")
+            date = choose_time_format_method(datetime.now().replace(hour=0, minute=0, second=0), "str")
 
-        self.queryset = ListCommit.objects.filter(
-            Q(query=query), Q(created_on=date))
+        self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
         data = []
         status = query.queryfilter.status.split(",")
@@ -428,7 +418,7 @@ class GetUsers(APIView):
         else:
             try:
                 try:
-                    file = read_csv(query.csv_file, encoding="latin-1")
+                    file = read_csv(query.csv_file,encoding="latin-1")
                     users = file[(file['fullname'] == file['fullname']) &
                                  ((file['Phabricator'] == file['Phabricator']) | (file['Gerrit'] == file['Gerrit']))]
                     users = users.iloc[:, 0].values.tolist()
@@ -450,7 +440,7 @@ def UserUpdateTimeStamp(data):
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     if data['query'].file:
         try:
-            file = read_csv(data['query'].csv_file, encoding="latin-1")
+            file = read_csv(data['query'].csv_file,encoding="latin-1")
             user = file[file['fullname'] == data['username']]
             if user.empty:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
@@ -465,10 +455,8 @@ def UserUpdateTimeStamp(data):
             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
     # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
-    createdStart = choose_time_format_method(datetime.strptime(
-        str(data["query"].queryfilter.start_time), "%Y-%m-%d"), "str")
-    createdEnd = choose_time_format_method(datetime.strptime(
-        str(data["query"].queryfilter.end_time), "%Y-%m-%d"), "str")
+    createdStart = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.start_time), "%Y-%m-%d"), "str")
+    createdEnd = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.end_time), "%Y-%m-%d"), "str")
     phid = [False]
     return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                       createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
@@ -494,15 +482,11 @@ def UserUpdateStatus(data):
 
             status.append("open")
         status = '|'.join(status)
-        commits = ListCommit.objects.filter(
-            Q(query=data['query']), Q(status__iregex="(" + status + ")"))
+        commits = ListCommit.objects.filter(Q(query=data['query']), Q(status__iregex="(" + status + ")"))
     else:
         commits = ListCommit.objects.all()
     for i in commits:
         if i.status.lower() == "open" and i.platform == "Phabricator" and p_open == -1:
-            continue
-
-        if i.status.lower() == "open" and i.platform == "Gerrit" and g_open == -1:
             continue
 
         obj = {

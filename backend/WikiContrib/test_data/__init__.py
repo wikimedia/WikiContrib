@@ -8,7 +8,7 @@ query_create_url = BASE_URL + "query/add/user/"
 
 query_create_data = {
     "file": -1,
-    "users": [
+    "users":[
         {
             "fullname": "test_user_1",
             "gerrit_username": "test_gerrit_user_1",
@@ -33,7 +33,7 @@ query_update_url = BASE_URL + 'query/<hash>/update/user/'
 
 query_update_data = {
     "file": -1,
-    "users": [
+    "users":[
         {
             "fullname": "update_test_user_1",
             "gerrit_username": "update_test_gerrit_user_1",
