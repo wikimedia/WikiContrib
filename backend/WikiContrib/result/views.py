@@ -172,7 +172,7 @@ def format_data(pd, gd, query, phid):
                         platform="Phabricator", created_on=date_time,
                         redirect="T" + str(pd[i]['id']), status=pd[i]['fields']['status']['name'],
                         owned=pd[i]['fields']['authorPHID'] == phid,
-                        assigned=pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
+                        assigned= pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
                     )
             if i < len_gd:
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
