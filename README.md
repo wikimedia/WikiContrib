@@ -31,7 +31,7 @@ There is also a feature to upload a list of usernames in a CSV format and view c
 5. Frontend running at `localhost:3000` and backend running at `localhost:8000`
   ###### NOTE:
   - Use the `--build` flag only when running docker-compose for the first time. For repeated use, simply run `docker-compose up`. This will not reflect the changes you made in you local project setup.
-  - Inorder to make the frontend send requests to the local backend, you need to change the code in the file `frontend/WikiContrib-Frontend/src/api.js` and change the value of `BASE_API_URI` to `http://127.0.0.1:8000/`
+
 #### Manually
 
  This tool has two different components: Frontend & Backend. You will have to set up both for the tool to be fully functional, and the instructions do so are here:
