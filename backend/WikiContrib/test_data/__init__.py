@@ -56,7 +56,7 @@ query_update_data = {
 query_filter_url = BASE_URL + 'query/<hash>/update/filter/'
 
 query_filter_data = {
-    "status": "g-open,p-open,merged,closed,abandoned",
+    "status": "p-open,merged,closed,abandoned",
     "username": "test_user_1",
     "start_time": "2015-04-01",
     "end_time": "2016-02-01"

@@ -211,7 +211,7 @@ def format_data(pd, gd, query, phid):
                 if pd[i]['phid'] not in temp:
                     temp.append(pd[i]['phid'])
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
-                    date_time = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0),"str")
+                    date_time = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "str")
                     status = pd[i]['fields']['status']['name'].lower()
                     if status_name is True or status in status_name or (status == "open" and "p-open" in status_name):
                         rv = {
@@ -233,9 +233,9 @@ def format_data(pd, gd, query, phid):
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
                                                            "%Y-%m-%d"))
                 if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
-                    epouch = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0),"int")
+                    epouch = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "int")
                     status = gd[i]['status'].lower()
-                    if status_name is True or status in status_name or (status == "open" and "g-open" in status_name):
+                    if status_name is True or status in status_name or (status == "open" in status_name):
                         rv = {
                            "time": epouch,
                            "gerrit": True,
@@ -436,8 +436,8 @@ class DisplayResult(APIView):
             username, gerrit_username = user.phabricator_username, user.gerrit_username
             paginate = [prev_user, user.fullname, next_user]
         # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
-        createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time),"%Y-%m-%d"),"str")
-        createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time),"%Y-%m-%d"),"str")
+        createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
+        createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                           createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
@@ -456,7 +456,7 @@ class GetUserCommits(ListAPIView):
             date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
             date = int((date - datetime(1970, 1, 1)).total_seconds())
         except KeyError:
-            date = choose_time_format_method(datetime.now().replace(hour=0, minute=0, second=0),"str")
+            date = choose_time_format_method(datetime.now().replace(hour=0, minute=0, second=0), "str")
 
         self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
@@ -464,8 +464,6 @@ class GetUserCommits(ListAPIView):
         status = query.queryfilter.status.split(",")
         for i in context.data['results']:
             if i['status'].lower() in status:
-                data.append(i)
-            elif i['status'].lower() == "open" and i['platform'] == 'Gerrit' and "g-open" in status:
                 data.append(i)
             elif i['status'].lower() == "open" and i['platform'] == 'Phabricator' and "p-open" in status:
                 data.append(i)
@@ -523,8 +521,8 @@ def UserUpdateTimeStamp(data):
             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
     # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
-    createdStart = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.start_time),"%Y-%m-%d"),"str")
-    createdEnd = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.end_time),"%Y-%m-%d"),"str")
+    createdStart = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.start_time), "%Y-%m-%d"), "str")
+    createdEnd = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.end_time), "%Y-%m-%d"), "str")
     phid = [False]
     return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                       createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
@@ -538,18 +536,13 @@ def UserUpdateStatus(data):
     result = []
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     status = data['query'].queryfilter.status
-    p_open, g_open = -1, -1
+    p_open = -1
     if status is not None and status != "":
         status = status.split(",")
-        if "p-open" in status or "g-open" in status:
+        if "p-open" in status:
             try:
                 status.remove("p-open")
                 p_open = 0
-            except ValueError:
-                pass
-            try:
-                status.remove("g-open")
-                g_open = 0
             except ValueError:
                 pass
 
@@ -560,9 +553,6 @@ def UserUpdateStatus(data):
         commits = ListCommit.objects.all()
     for i in commits:
         if i.status.lower() == "open" and i.platform == "Phabricator" and p_open == -1:
-            continue
-
-        if i.status.lower() == "open" and i.platform == "Gerrit" and g_open == -1:
             continue
 
         obj = {
