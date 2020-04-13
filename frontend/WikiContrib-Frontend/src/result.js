@@ -8,6 +8,7 @@ import {
   Placeholder,
   Transition,
   Header,
+  Message
 } from 'semantic-ui-react';
 import { fetchAsynchronous } from './components/fetch';
 import { Link } from 'react-router-dom';
@@ -160,6 +161,8 @@ class QueryResult extends React.Component {
       query: this.props.match.params.hash,
       loading: data === false,
       data: data !== false ? data.result : [],
+      matchDetails: data !== false ? data.match_details : {},
+      showMismatch: data === false ? false : (data.match_details.match_percent > 70 ? true : false),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
@@ -171,7 +174,7 @@ class QueryResult extends React.Component {
       page_load: data === false,
       view_filters: false,
       gerrit_username: data !== false ? data.current_gerrit : null,
-      phab_username: data !== false ? data.current_phabricator : null,
+      phab_username: data !== false ? data.current_phabricator : null
     };
   }
 
@@ -277,6 +280,7 @@ class QueryResult extends React.Component {
   };
 
   callback = response => {
+    console.log(response)
     /**
      * Callback function that feeds the fetched information to the state.
      * @param {Object} response Response data from API fetch
@@ -285,6 +289,8 @@ class QueryResult extends React.Component {
       let filters = response.filters;
       this.setState({
         data: response.result,
+        matchDetails: response !== false ? response.match_details : {},
+        showMismatch: response === false ? false : (response.match_details.match_percent > 70 ? true : false),
         current: response.current,
         prev: response.previous,
         gerrit_username: response.current_gerrit,
@@ -356,6 +362,8 @@ class QueryResult extends React.Component {
     if (response.error !== 1) {
       this.setState({
         data: response.result,
+        matchDetails: response !== false ? response.match_details : {},
+        showMismatch: response === false ? false : (response.match_details.match_percent > 70 ? true : false),
         current_filters: this.state.update_filters,
         loading: false,
       });
@@ -675,102 +683,140 @@ class QueryResult extends React.Component {
           {this.state.notFound ? (
             <NotFound />
           ) : (
-            <React.Fragment>
+            !this.state.showMismatch && !this.state.page_load? (
               <Grid.Row>
-                <Grid.Column width={2} />
-                <Grid.Column width={12}>
-                  <DisplayUser
-                    loading={this.state.loading}
-                    username={this.state.current}
-                    gerrit_username={this.state.gerrit_username}
-                    phabricator_username={this.state.phab_username}
-                    filters={this.state.current_filters}
-                  />
-                </Grid.Column>
+              <Grid.Column width={2} />
+              <Grid.Column width={12}>
+              <Card className="graph_load">
+              <Message
+                attached
+                warning
+                header="Warning! It seems like the Provided Usernames doesn't belong to the same user"
+                content={`This can happen when the provided fullname is too different from the retrieved
+                        fullname(s), when there is no existing user for the provided username(s) or
+                        when any of the query form fields is left blank. If the submitted usernames are
+                        yours, try updating the fullname used to register the different accounts to
+                        be similar to the fullname provided during query`}
+              />
+              <Button
+                color="yellow"
+                onClick={() => this.setState({showMismatch:true})}
+                >Proceed</Button>
+              </Card>
+              </Grid.Column>
               </Grid.Row>
-              <Grid.Row>
-                <Grid.Column computer={2} mobile={1} tablet={1} />
-                <Grid.Column computer={12} tablet={14} mobile={14}>
-                  <Grid>
-                    <Grid.Row>
-                      <Grid.Column computer={8} mobile={16} tablet={8}>
-                        {this.state.loading ? (
-                          <Card className="graph_load">
-                            <Card.Content>
-                              <Placeholder fluid className="image_load">
-                                <Placeholder.Line />
-                              </Placeholder>
-                            </Card.Content>
-                          </Card>
-                        ) : (
-                          <Card className="chart_container">
-                            <span style={{ textAlign: 'center' }}>
-                              <Header className="chart"> PHABRICATOR </Header>
-                              <Line
-                                ref="chart"
-                                data={this.getGraphData('phabricator')}
-                                options={chartOptions}
-                              />
-                            </span>
-                          </Card>
-                        )}
-                      </Grid.Column>
-                      <Grid.Column computer={8} mobile={16} tablet={8}>
-                        {this.state.loading ? (
-                          <Card className="graph_load">
-                            <Card.Content>
-                              <Placeholder fluid className="image_load">
-                                <Placeholder.Line />
-                              </Placeholder>
-                            </Card.Content>
-                          </Card>
-                        ) : (
-                          <Card className="chart_container">
-                            <span style={{ textAlign: 'center' }}>
-                              <Header className="chart"> GERRIT </Header>
-                              <Line
-                                ref="chart"
-                                data={this.getGraphData('gerrit')}
-                                options={chartOptions}
-                              />
-                            </span>
-                          </Card>
-                        )}
-                      </Grid.Column>
-                    </Grid.Row>
-                  </Grid>
-                </Grid.Column>
-                <Grid.Column computer={2} mobile={1} tablet={1} />
-              </Grid.Row>
-              <Grid.Row>
-                <Grid.Column width={2} />
-                <Grid.Column width={12}>
-                  <Card className="chart_container">
-                    <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
-                    <UserContribution
-                      start_time={cf.start_time}
-                      end_time={cf.end_time}
-                      user={this.state.current}
-                      data={this.state.data}
-                      set={this.set}
+            ) : (
+              <React.Fragment>
+                <Grid.Row>
+                  <Grid.Column width={2} />
+                  <Grid.Column width={12}>
+                    <DisplayUser
                       loading={this.state.loading}
-                    />
-                  </Card>
-                </Grid.Column>
-                <Grid.Column width={2} />
-              </Grid.Row>
-              {this.state.activity !== undefined ? (
-                  <div className="activity_wrapper">
-                    <Activity
-                      date={this.state.activity}
-                      hash={this.state.query}
                       username={this.state.current}
+                      gerrit_username={this.state.gerrit_username}
+                      phabricator_username={this.state.phab_username}
+                      filters={this.state.current_filters}
                     />
-                  </div>
-              ) : (
-                ''
-              )}
-            </React.Fragment>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column computer={2} mobile={1} tablet={1} />
+                  <Grid.Column computer={12} tablet={14} mobile={14}>
+                    <Grid>
+                      <Grid.Row>
+                        <Grid.Column computer={8} mobile={16} tablet={8}>
+                          {this.state.loading ? (
+                            <Card className="graph_load">
+                              <Card.Content>
+                                <Placeholder fluid className="image_load">
+                                  <Placeholder.Line />
+                                </Placeholder>
+                              </Card.Content>
+                            </Card>
+                          ) : (
+                            <Card className="chart_container">
+                              <span style={{ textAlign: 'center' }}>
+                                <Header className="chart"> PHABRICATOR </Header>
+                                {this.state.matchDetails.full_names.phab_full_name !== "no username provided" &&
+                                 this.state.matchDetails.full_names.phab_full_name !== "username does not exist" ? (
+                                  <Line
+                                    ref="chart"
+                                    data={this.getGraphData('phabricator')}
+                                    options={chartOptions}
+                                  />
+                                ) : (
+                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
+                                  {this.state.matchDetails.full_names.phab_full_name}
+                                  </div>
+                                )}
+                              </span>
+                            </Card>
+                          )}
+                        </Grid.Column>
+                        <Grid.Column computer={8} mobile={16} tablet={8}>
+                          {this.state.loading ? (
+                            <Card className="graph_load">
+                              <Card.Content>
+                                <Placeholder fluid className="image_load">
+                                  <Placeholder.Line />
+                                </Placeholder>
+                              </Card.Content>
+                            </Card>
+                          ) : (
+                            <Card className="chart_container">
+                              <span style={{ textAlign: 'center' }}>
+                                <Header className="chart"> GERRIT </Header>
+                                {this.state.matchDetails.full_names.gerrit_full_name !== "no username provided" &&
+                                 this.state.matchDetails.full_names.gerrit_full_name !== "username does not exist" ? (
+                                  <Line
+                                    ref="chart"
+                                    data={this.getGraphData('gerrit')}
+                                    options={chartOptions}
+                                  />
+                                ) : (
+                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
+                                  {this.state.matchDetails.full_names.gerrit_full_name}
+                                  </div>
+                                )}
+                              </span>
+                            </Card>
+                          )}
+                        </Grid.Column>
+                      </Grid.Row>
+                    </Grid>
+                  </Grid.Column>
+                  <Grid.Column computer={2} mobile={1} tablet={1} />
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column width={2} />
+                  <Grid.Column width={12}>
+                    <Card className="chart_container">
+                      <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
+                      <UserContribution
+                        start_time={cf.start_time}
+                        end_time={cf.end_time}
+                        user={this.state.current}
+                        data={this.state.data}
+                        set={this.set}
+                        loading={this.state.loading}
+                      />
+                    </Card>
+                  </Grid.Column>
+                  <Grid.Column width={2} />
+                </Grid.Row>
+                {this.state.activity !== undefined ? (
+                    <div className="activity_wrapper">
+                      <Activity
+                        date={this.state.activity}
+                        hash={this.state.query}
+                        username={this.state.current}
+                      />
+                    </div>
+                ) : (
+                  ''
+                )}
+              </React.Fragment>
+            )
           )}
         </Grid>
       </React.Fragment>
