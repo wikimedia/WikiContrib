@@ -16,9 +16,6 @@ import {
   get_dates,
   months,
   fetchDetails,
-  phab_status,
-  gerrit_status,
-  format_status,
   full_months,
   get_timestamp,
   filterDetailApi,
@@ -76,7 +73,9 @@ class DisplayUser extends React.Component {
   render = () => {
     let { start_time: st, end_time: et } = this.props.filters;
     st = new Date(st);
+    let st_m = st.getUTCMonth();
     et = new Date(et);
+    let et_m = et.getUTCMonth();
     return (
       <div>
         {this.props.loading ? (
@@ -88,9 +87,9 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <Header className="name">{this.props.username}'s Activity</Header>
+              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
               <span>
-                <h1 className="accounts">
+                <h3 className="accounts">
                   Gerrit:{' '}
                   {this.props.gerrit_username !== '' ? (
                     <a
@@ -122,12 +121,12 @@ class DisplayUser extends React.Component {
                   ) : (
                       'None'
                     )}
-                </h1>
-                <h2 className="accounts">
-                  {full_months[st.getUTCMonth()] + " " + st.getFullYear()}
+                </h3>
+                <h3 className="accounts">
+                  {full_months[st_m] + " " + st.getFullYear()}
                   -
-                  {full_months[et.getUTCMonth() - 1] + " " + et.getFullYear()}
-                </h2>
+                  {full_months[(et_m + 11) % 12] + " " + (et_m - 1 > 0 ? et.getFullYear() : et.getFullYear() - 1)}
+                </h3>
               </span>
             </React.Fragment>
           )}
@@ -144,7 +143,6 @@ class QueryResult extends React.Component {
     super(props);
     let data = false;
     let filters = {
-      status: [],
       start_time: '',
       end_time: '',
     };
@@ -156,7 +154,6 @@ class QueryResult extends React.Component {
     if ('data' in this.props.location && this.props.location.data !== '') {
       data = this.props.location.data;
       filters = data.filters;
-      filters.status = data.filters.status.split(',');
     }
 
     this.state = {
@@ -286,7 +283,6 @@ class QueryResult extends React.Component {
      */
     if (response.error !== 1) {
       let filters = response.filters;
-      filters.status = filters.status.split(',');
       this.setState({
         data: response.result,
         current: response.current,
@@ -340,9 +336,6 @@ class QueryResult extends React.Component {
     let { update_filters: uf, current_filters: cf } = this.state;
     if (JSON.stringify(uf) !== JSON.stringify(cf)) {
       let out = {};
-      if (uf.status.join(',') !== cf.status.join(',')) {
-        out['status'] = uf.status.join(',');
-      }
       if (uf.start_time !== cf.start_time) {
         out['start_time'] = uf.start_time;
       }
@@ -417,7 +410,6 @@ class QueryResult extends React.Component {
     let filters = {
       end_time: time.getFullYear() + '-' + month + '-01',
       start_time: time.getFullYear() - 1 + '-' + month + '-01',
-      status: phab_status.concat(gerrit_status).concat(['p-open', 'g-open']),
       username: this.state.current,
     };
     this.setState({
@@ -427,7 +419,6 @@ class QueryResult extends React.Component {
       notFound: false,
     });
     let data = Object.assign({}, filters);
-    data.status = filters.status.join(',');
     fetchAsynchronous(
       filterDetailApi.replace('<hash>', this.state.query),
       'PATCH',
@@ -499,34 +490,25 @@ class QueryResult extends React.Component {
         <NavBar />
         <Grid>
           <Grid.Row>
-            <Grid.Column width={2} />
-            <Grid.Column width={12}>
               <div className="result">
-              <h1 className="result_page_heading">Query Result</h1>
+                <h1 className="result_page_heading">Query Result</h1>
                 {this.state.page_load ? (
                   <Placeholder fluid className="search_load">
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
-                  <Grid>
-                    <Grid.Row>
-                      <Grid.Column computer={14} tablet={12} mobile={16}>
+                  <div className="controls">
+                    <div className="search">
                         <UserSearch
                           set={this.onUserSearch}
                           hash={this.state.query}
                           value={this.state.value}
                         />
-                      </Grid.Column>
+                      </div>
 
-                      <Grid.Column
-                        computer={1}
-                        tablet={2}
-                        mobile={8}
-                        style={{
-                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
-                          textAlign: 'right',
-                        }}
-                      >
+
+                      <div className="filter_and_update">
+                      <div className="filter">
                         <Popup
                           content="View Filters"
                           position="top center"
@@ -543,15 +525,8 @@ class QueryResult extends React.Component {
                             />
                           }
                         />
-                      </Grid.Column>
-                      <Grid.Column
-                        computer={1}
-                        tablet={2}
-                        mobile={8}
-                        style={{
-                          marginTop: window.innerWidth >= 768 ? '8vh' : '',
-                        }}
-                      >
+                      </div>
+                      <div className="update">
                         <Popup
                           content="Update"
                           position="top center"
@@ -572,9 +547,9 @@ class QueryResult extends React.Component {
                             />
                           }
                         />
-                      </Grid.Column>
-                    </Grid.Row>
-                  </Grid>
+                      </div>
+                    </div>
+                    </div>
                 )}
                 <Transition
                   animation="fade down"
@@ -583,130 +558,101 @@ class QueryResult extends React.Component {
                 >
                   <Card className="filter_view">
                     <Grid>
-                      <Grid.Row>
-                        <Grid.Column computer={16} tablet={16} mobile={16}>
-                          <Header>Contribution Status</Header>
-                          <Dropdown
-                            style={{ marginTop: 10 }}
-                            fluid
-                            search
-                            multiple
-                            selection
-                            options={format_status(
-                              gerrit_status.concat(phab_status, 'open')
-                            )}
-                            value={uf.status}
-                            onChange={(e, obj) => {
-                              let value = obj.value;
-                              let filters = Object.assign({}, uf);
-                              filters.status = value;
-                              this.setState({
-                                update_filters: filters,
-                              });
-                            }}
-                            placeholder="Status of Commit"
-                            closeOnChange={true}
-                          />
-                        </Grid.Column>
-                      </Grid.Row>
-                      <Grid.Row>
-                        <Grid.Column computer={8} tablet={16} mobile={16}>
-                          <Header>From</Header>
-                          <Dropdown
-                            style={{ marginTop: 10 }}
-                            fluid
-                            search
-                            selection
-                            icon={false}
-                            value={this.func()}
-                            options={get_dates()}
-                            onChange={(e, obj) => {
-                              let date = obj.value.split(',');
-                              date[1] = date[1].substr(1);
-                              date[0] = full_months.indexOf(date[0]) + 2;
-                              if (date[0] === 13) {
-                                date[1] = parseInt(date[1]) + 1;
-                                date[0] = 1;
-                              }
-                              let filters = Object.assign({}, uf);
-                              filters.end_time =
-                                date[1] + '-' + date[0] + '-01';
-                              let days = get_timestamp(
-                                new Date(uf.end_time),
-                                new Date(uf.start_time)
-                              );
-                              let incr =
-                                days === 30
-                                  ? 1
-                                  : days === 60
-                                  ? 2
-                                  : days === 90
-                                  ? 3
-                                  : days === 180
-                                  ? 6
-                                  : 12;
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>From</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
+                          value={this.func()}
+                          options={get_dates()}
+                          onChange={(e, obj) => {
+                            let date = obj.value.split(',');
+                            date[1] = date[1].substr(1);
+                            date[0] = full_months.indexOf(date[0]) + 2;
+                            if (date[0] === 13) {
+                              date[1] = parseInt(date[1]) + 1;
+                              date[0] = 1;
+                            }
+                            let filters = Object.assign({}, uf);
+                            filters.end_time = date[1] + '-' + date[0] + '-01';
+                            let days = get_timestamp(
+                              new Date(uf.end_time),
+                              new Date(uf.start_time)
+                            );
+                            let incr =
+                              days === 30
+                                ? 1
+                                : days === 60
+                                ? 2
+                                : days === 90
+                                ? 3
+                                : days === 180
+                                ? 6
+                                : 12;
 
-                              let updated_val = new Date(filters.end_time);
-                              let start_time = new Date(
-                                updated_val.getFullYear(),
-                                updated_val.getUTCMonth() - incr,
-                                1
-                              );
-                              let month = start_time.getUTCMonth() + 1;
-                              filters.start_time =
-                                start_time.getFullYear() + '-' + month + '-01';
-                              this.setState({
-                                update_filters: filters,
-                              });
-                            }}
-                            placeholder="Select Date"
-                            closeOnChange={true}
-                          />
-                        </Grid.Column>
-                        <Grid.Column computer={8} tablet={16} mobile={16}>
-                          <Header>Time Range</Header>
-                          <Dropdown
-                            style={{ marginTop: 10 }}
-                            fluid
-                            search
-                            selection
-                            icon={false}
-                            options={filter_2}
-                            value={get_timestamp(
-                              new Date(uf.start_time),
-                              new Date(uf.end_time)
-                            )}
-                            onChange={(e, obj) => {
-                              let date = new Date(
-                                this.state.update_filters.end_time
-                              );
-                              let value = obj.value;
-                              let incr =
-                                value <= 31
-                                  ? 1
-                                  : value <= 61
-                                  ? 2
-                                  : value <= 92
-                                  ? 3
-                                  : value <= 183
-                                  ? 6
-                                  : 12;
-                              date = new Date(
-                                date.getFullYear(),
-                                date.getUTCMonth() - incr,
-                                1
-                              );
-                              let month = date.getUTCMonth() + 1;
-                              let filters = Object.assign({}, uf);
-                              filters.start_time =
-                                date.getFullYear() + '-' + month + '-' + 1;
-                              this.setState({ update_filters: filters });
-                            }}
-                            placeholder="Get by date"
-                            closeOnChange={true}
-                          />
-                        </Grid.Column>
-                      </Grid.Row>
+                            let updated_val = new Date(filters.end_time);
+                            let start_time = new Date(
+                              updated_val.getFullYear(),
+                              updated_val.getUTCMonth() - incr,
+                              1
+                            );
+                            let month = start_time.getUTCMonth() + 1;
+                            filters.start_time =
+                              start_time.getFullYear() + '-' + month + '-01';
+                            this.setState({
+                              update_filters: filters,
+                            });
+                          }}
+                          placeholder="Select Date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>Time Range</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
+                          options={filter_2}
+                          value={get_timestamp(
+                            new Date(uf.start_time),
+                            new Date(uf.end_time)
+                          )}
+                          onChange={(e, obj) => {
+                            let date = new Date(
+                              this.state.update_filters.end_time
+                            );
+                            let value = obj.value;
+                            let incr =
+                              value <= 31
+                                ? 1
+                                : value <= 61
+                                ? 2
+                                : value <= 92
+                                ? 3
+                                : value <= 183
+                                ? 6
+                                : 12;
+                            date = new Date(
+                              date.getFullYear(),
+                              date.getUTCMonth() - incr,
+                              1
+                            );
+                            let month = date.getUTCMonth() + 1;
+                            let filters = Object.assign({}, uf);
+                            filters.start_time =
+                              date.getFullYear() + '-' + month + '-' + 1;
+                            this.setState({ update_filters: filters });
+                          }}
+                          placeholder="Get by date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
                     </Grid>
                     <div style={{ width: '100%' }}>
                       <Button
@@ -725,8 +671,6 @@ class QueryResult extends React.Component {
                   </Card>
                 </Transition>
               </div>
-            </Grid.Column>
-            <Grid.Column width={2} />
           </Grid.Row>
           {this.state.notFound ? (
             <NotFound />
@@ -734,7 +678,7 @@ class QueryResult extends React.Component {
             <React.Fragment>
               <Grid.Row>
                 <Grid.Column width={2} />
-                <Grid.Column width={8}>
+                <Grid.Column width={12}>
                   <DisplayUser
                     loading={this.state.loading}
                     username={this.state.current}
@@ -743,7 +687,6 @@ class QueryResult extends React.Component {
                     filters={this.state.current_filters}
                   />
                 </Grid.Column>
-                <Grid.Column width={2} />
               </Grid.Row>
               <Grid.Row>
                 <Grid.Column computer={2} mobile={1} tablet={1} />
@@ -817,17 +760,16 @@ class QueryResult extends React.Component {
                 <Grid.Column width={2} />
               </Grid.Row>
               {this.state.activity !== undefined ? (
-                <Grid.Row>
-                  <Grid.Column width={3} />
-                  <Grid.Column width={9}>
-                    <Activity
-                      date={this.state.activity}
-                      hash={this.state.query}
-                      username={this.state.current}
-                    />
-                  </Grid.Column>
-                  <Grid.Column width={3} />
-                </Grid.Row>
+                  <Grid.Row>
+                    <Grid.Column computer={2} mobile={1} tablet={1} />
+                    <Grid.Column computer={12} mobile={14} tablet={14} style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+                      <Activity
+                        date={this.state.activity}
+                        hash={this.state.query}
+                        username={this.state.current}
+                      />
+                    </Grid.Column>
+                  </Grid.Row>
               ) : (
                 ''
               )}

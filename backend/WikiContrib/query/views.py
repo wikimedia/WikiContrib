@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.db import transaction, IntegrityError
 from django.db.models import Q
@@ -88,6 +89,8 @@ class AddQueryUser(CreateAPIView):
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part"
                     else:
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv"
+                    
+                    os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                     with open(filename, 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
@@ -284,7 +287,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                                 raise IntegrityError
                 except IntegrityError:
                     return Response({
-                        'message': 'Can not update with the empty fields',
+                        'message': 'Cannot update with the empty fields',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
                 response = HttpResponse(content="", status=303)
@@ -296,7 +299,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
         except KeyError:
             return Response({
-                "message": "Fill form completely!",
+                "message": "Fill the form completely!",
                 "error": 1
             }, status=status.HTTP_400_BAD_REQUEST)
 

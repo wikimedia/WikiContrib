@@ -17,6 +17,41 @@ from .serializers import UserCommitSerializer
 from pytz import utc
 from WikiContrib.settings import API_TOKEN
 from .helper import get_prev_user, get_next_user
+import sys
+
+version = sys.hexversion
+version_3_3 = 50530288
+
+
+def choose_time_format_method(expression,format):
+    """
+    :Summary: strftime("%s") is not a valid string formatting method in python,
+    therefore it works on linux servers but not windows. To handle this, this function
+    checks for python version and decides what conversion method to use.
+    the "format" parameter makes sure that that the correct required type is always returned
+    """
+
+    # if we are running python3.3 or greater
+    if(version >= version_3_3):
+        # if the datetime object is offset aware
+        if(expression.tzinfo != None):
+            if(format == "str"):
+                return str(int(expression.timestamp()))
+            else:
+                return int(expression.timestamp())
+        # else if the datetime object is offset naive
+        else:
+            if(format == "str"):
+                return str(int((expression - datetime(1970, 1, 1)).total_seconds()))
+            else:
+                return int((expression - datetime(1970, 1, 1)).total_seconds())
+    # else if we are running python version lower than python3.3 i.e most linux servers
+    else:
+        if(format == "str"):
+            return expression.strftime("%s")
+        else:
+            return int(expression.strftime("%s"))
+
 
 
 async def get_task_authors(url, request_data, session, resp, phid):
@@ -121,7 +156,7 @@ def format_data(pd, gd, query, phid):
                 if pd[i]['phid'] not in temp:
                     temp.append(pd[i]['phid'])
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
-                    date_time = date_time.replace(hour=0, minute=0, second=0).strftime("%s")
+                    date_time = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "str")
                     status = pd[i]['fields']['status']['name'].lower()
                     if status_name is True or status in status_name or (status == "open" and "p-open" in status_name):
                         rv = {
@@ -143,9 +178,9 @@ def format_data(pd, gd, query, phid):
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
                                                            "%Y-%m-%d"))
                 if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
-                    epouch = int(date_time.replace(hour=0, minute=0, second=0).strftime("%s"))
+                    epouch = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "int")
                     status = gd[i]['status'].lower()
-                    if status_name is True or status in status_name or (status == "open" and "g-open" in status_name):
+                    if status_name is True or status in status_name or (status == "open" in status_name):
                         rv = {
                            "time": epouch,
                            "gerrit": True,
@@ -255,7 +290,7 @@ class DisplayResult(APIView):
         if query.file:
             # get the data from CSV file
             try:
-                file = read_csv(query.csv_file)
+                file = read_csv(query.csv_file,encoding="latin-1")
                 try:
                     if 'user' in request.GET:
                         user = file[file['fullname'] == request.GET['user']]
@@ -290,7 +325,7 @@ class DisplayResult(APIView):
                         next_user = get_next_user(file, ind)
                 except KeyError:
                     return Response({
-                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; to check the format.(while uploading it)',
+                        'message': 'CSV file uploaded is not in the supported format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
@@ -334,10 +369,9 @@ class DisplayResult(APIView):
 
             username, gerrit_username = user.phabricator_username, user.gerrit_username
             paginate = [prev_user, user.fullname, next_user]
-
-        createdStart = query.queryfilter.start_time.strftime('%s')
-        createdEnd = query.queryfilter.end_time.strftime('%s')
-
+        # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
+        createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
+        createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
         return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                           createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
@@ -356,7 +390,7 @@ class GetUserCommits(ListAPIView):
             date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
             date = int((date - datetime(1970, 1, 1)).total_seconds())
         except KeyError:
-            date = datetime.now().date().strftime("%s")
+            date = choose_time_format_method(datetime.now().replace(hour=0, minute=0, second=0), "str")
 
         self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
@@ -364,8 +398,6 @@ class GetUserCommits(ListAPIView):
         status = query.queryfilter.status.split(",")
         for i in context.data['results']:
             if i['status'].lower() in status:
-                data.append(i)
-            elif i['status'].lower() == "open" and i['platform'] == 'Gerrit' and "g-open" in status:
                 data.append(i)
             elif i['status'].lower() == "open" and i['platform'] == 'Phabricator' and "p-open" in status:
                 data.append(i)
@@ -386,13 +418,13 @@ class GetUsers(APIView):
         else:
             try:
                 try:
-                    file = read_csv(query.csv_file)
+                    file = read_csv(query.csv_file,encoding="latin-1")
                     users = file[(file['fullname'] == file['fullname']) &
                                  ((file['Phabricator'] == file['Phabricator']) | (file['Gerrit'] == file['Gerrit']))]
                     users = users.iloc[:, 0].values.tolist()
                 except KeyError:
                     return Response({
-                        'message': 'CSV file you have uploaded is not in the supported format. Click on the &#9432; icon to check the format.',
+                        'message': 'CSV file uploaded is not in the supported format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
@@ -408,7 +440,7 @@ def UserUpdateTimeStamp(data):
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     if data['query'].file:
         try:
-            file = read_csv(data['query'].csv_file)
+            file = read_csv(data['query'].csv_file,encoding="latin-1")
             user = file[file['fullname'] == data['username']]
             if user.empty:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
@@ -422,9 +454,9 @@ def UserUpdateTimeStamp(data):
         if not user.exists():
             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
         username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
-
-    createdStart = data['query'].queryfilter.start_time.strftime('%s')
-    createdEnd = data['query'].queryfilter.end_time.strftime('%s')
+    # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
+    createdStart = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.start_time), "%Y-%m-%d"), "str")
+    createdEnd = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.end_time), "%Y-%m-%d"), "str")
     phid = [False]
     return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
                       createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
@@ -438,18 +470,13 @@ def UserUpdateStatus(data):
     result = []
     data['query'] = get_object_or_404(Query, hash_code=data['query'])
     status = data['query'].queryfilter.status
-    p_open, g_open = -1, -1
+    p_open = -1
     if status is not None and status != "":
         status = status.split(",")
-        if "p-open" in status or "g-open" in status:
+        if "p-open" in status:
             try:
                 status.remove("p-open")
                 p_open = 0
-            except ValueError:
-                pass
-            try:
-                status.remove("g-open")
-                g_open = 0
             except ValueError:
                 pass
 
@@ -460,9 +487,6 @@ def UserUpdateStatus(data):
         commits = ListCommit.objects.all()
     for i in commits:
         if i.status.lower() == "open" and i.platform == "Phabricator" and p_open == -1:
-            continue
-
-        if i.status.lower() == "open" and i.platform == "Gerrit" and g_open == -1:
             continue
 
         obj = {

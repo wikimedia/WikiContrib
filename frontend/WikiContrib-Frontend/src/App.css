@@ -3,6 +3,7 @@
 
 h1.accounts,
 h2.accounts,
+h3.accounts,
 h4.accounts {
   color: #54595d;
   font-weight: 200;
@@ -12,6 +13,15 @@ h4.accounts {
   font-family: 'Charter';
   font-size: 5rem;
 }
+
+h2.accounts{
+  font-size: 1.6rem;
+}
+
+h3.accounts  {
+  font-size: 2rem;
+}
+
 
 .ui.header.chart {
   font-family: 'Lato ', sans-serif;
@@ -23,7 +33,7 @@ h4.accounts {
   padding-left: 0.2rem;
 }
 
-.ui.header.name {
+.ui.header .name {
   font-family: 'Charter';
   font-size: 4rem;
 }
@@ -369,6 +379,11 @@ h4.accounts {
   margin: 2px;
 }
 
+.activity_wrapper {
+  margin-left: 15%;
+  margin-right: 15%;
+}
+
 .day .tooltip {
   visibility: hidden;
   position: absolute;
@@ -403,8 +418,10 @@ h4.accounts {
 
 /* End of user activity */
 
-.ui.card.result {
+.result {
   width: 100%;
+  padding-left:14%;
+  padding-right:14%;
 }
 
 .drop {
@@ -413,7 +430,6 @@ h4.accounts {
 }
 
 #dropdown {
-  width: 95%;
   font-size: 1.5rem;
   font-family: 'Lato ', sans-serif;
   padding: 10px;
@@ -457,10 +473,30 @@ h4.accounts {
   font-size: 3rem;
 }
 
+/* <--------- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.filter_and_update {
+  display: flex;
+  margin-top: 8vh;
+}
+
+
+.search {
+  width: 80%;
+  margin-right: 1.3rem;
+}
+
+/* ----------/> */
+
 .ui.icon.button.filters {
-  left: 0px !important;
-  margin-left: -3rem;
-  float: left !important;
+  /* left: 0px !important; */
+  /* margin-left: 3rem; */
+  /* float: left !important; */
+  margin-right: 1.3em;
   background: #222 !important;
   color: white !important;
   padding: 17px !important;
@@ -482,8 +518,7 @@ h4.accounts {
 .ui.card.filter_view {
   background: #eaecf0;
   width: 80%;
-  margin: 1rem;
-  margin-top: -1rem;
+  margin-top:0.1rem;
   padding: 1rem;
   font-family: 'Lato ', sans-serif;
   font-size: 1.1rem;
@@ -545,13 +580,13 @@ h4.accounts {
 .ui.icon.button.update_query {
   background: #222 !important;
   transition: 0.3s !important;
-  float: left !important;
+  /* float: left !important; */
   color: white;
   z-index: 1;
   font-size: 1.5rem;
   opacity: 1;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  margin-left: -50%;
+  /* margin-left: -50%; */
 }
 
 .ui.icon.button.update_query:hover,.ui.icon.button.update_query:focus {
@@ -627,13 +662,13 @@ h4.accounts {
 
 .ui.card.commits_load {
   width: 100% !important;
-  padding: 2% !important;
+  padding: 0.5% !important;
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25) !important;
 }
 
 .ui.card.commits_load:not(.loading_card):hover {
   box-shadow: none !important;
-  padding: 2% !important;
+  padding: 0.5% !important;
   border: 1px solid #C3C4C4;
 }
 
@@ -693,15 +728,25 @@ h4.accounts {
   align-items: center;
 }
 
-.status {
-  margin-left: 3% !important;
-  display: inline-flex;
-  white-space: nowrap;
-  flex-direction: row-reverse;
-  align-items: center;
+.input_label {
+  text-align: left;
+  margin-top: 1.5em;
+  margin-bottom:0.5em;
+  padding-left: 1.4rem;
+  font-weight: bold;
 }
 
+.checkbox_label {
+  display: inline-block;
+  font-weight: bold;
+  color: black;
+  position: absolute;
+  margin-left: 1em;
+}
 
+.ui.button.remove:focus,.ui.button.remove:hover {
+  outline: 2px solid #9ABDF6 !important;
+}
 
 .input_label {
   text-align: left;
@@ -721,4 +766,84 @@ h4.accounts {
 
 .ui.button.remove:focus,.ui.button.remove:hover {
   outline: 2px solid #9ABDF6 !important;
+}
+
+@media screen and (min-width: 900px) and (max-width: 1140px ){
+  .ui.card.filter_view {
+    width: 75%
+  }
+
+  .search {
+    width: 75%
+  }
+
+
+}
+
+@media screen and (min-width: 768px) and (max-width: 900px ){
+  .ui.card.filter_view {
+    width: 70%;
+  }
+
+  .search {
+    width: 70%;
+  }
+
+}
+
+@media screen and (max-width: 752px){
+  .ui.header .name {
+    font-size: 3rem;
+  }
+
+  h3.accounts  {
+    font-size: 1.7rem;
+  }
+}
+
+@media screen and (max-width: 768px){
+  .ui.header.title {
+    font-size: 4rem;
+  }
+
+  .ui.card.filter_view {
+    width: 100%;
+  }
+
+  .search {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .filter_and_update {
+    margin-top: 4vh;
+    margin-bottom: 4vh;
+  }
+}
+
+
+@media screen and (max-width: 565px){
+  .ui.header .name {
+    font-size: 2rem;
+  }
+
+  h3.accounts  {
+    font-size: 1.4rem;
+  }
+
+  .card{
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .wraper {
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .status {
+    margin-top: 1rem;
+    margin-left: 0 !important;
+    flex-direction: row;
+  }
 }
