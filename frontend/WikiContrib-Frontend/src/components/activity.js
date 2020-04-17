@@ -100,7 +100,6 @@ class Activity extends React.Component {
             {this.state.data.length !== 0 ? (
               <React.Fragment>
                 <Header className="chart">
-                  {' '}
                   {this.props.username}'s activity on {this.props.date}
                 </Header>
                 {this.state.data.map((obj, index) => (
@@ -140,7 +139,6 @@ class Activity extends React.Component {
               </React.Fragment>
             ) : (
               <Header className="chart">
-                {' '}
                 {this.props.username} has no activity on {this.props.date}.
               </Header>
             )}

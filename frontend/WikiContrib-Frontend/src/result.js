@@ -762,7 +762,7 @@ class QueryResult extends React.Component {
               {this.state.activity !== undefined ? (
                   <Grid.Row>
                     <Grid.Column computer={2} mobile={1} tablet={1} />
-                    <Grid.Column computer={12} mobile={14} tablet={14} style={{ paddingTop: '2rem' }}>
+                    <Grid.Column computer={12} mobile={14} tablet={14} style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
                       <Activity
                         date={this.state.activity}
                         hash={this.state.query}
