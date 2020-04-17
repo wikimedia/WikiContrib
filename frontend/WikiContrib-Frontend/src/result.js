@@ -760,13 +760,16 @@ class QueryResult extends React.Component {
                 <Grid.Column width={2} />
               </Grid.Row>
               {this.state.activity !== undefined ? (
-                  <div className="activity_wrapper">
-                    <Activity
-                      date={this.state.activity}
-                      hash={this.state.query}
-                      username={this.state.current}
-                    />
-                  </div>
+                  <Grid.Row>
+                    <Grid.Column computer={2} mobile={1} tablet={1} />
+                    <Grid.Column computer={12} mobile={14} tablet={14} style={{ paddingTop: '2rem' }}>
+                      <Activity
+                        date={this.state.activity}
+                        hash={this.state.query}
+                        username={this.state.current}
+                      />
+                    </Grid.Column>
+                  </Grid.Row>
               ) : (
                 ''
               )}
