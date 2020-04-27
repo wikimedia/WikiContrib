@@ -42,7 +42,6 @@ class Activity extends React.Component {
   };
 
   callback = response => {
-
     /**
      * Callback function to feed the fetched data from API to the state of current component.
      * @param {Object} response JSON data returned from the API.
@@ -99,7 +98,7 @@ class Activity extends React.Component {
             </Card>
           </React.Fragment>
         ) : (
-           <React.Fragment>
+          <React.Fragment>
             {this.state.data.length !== 0 ? (
               <React.Fragment>
                 <Header className="chart">
@@ -134,7 +133,7 @@ class Activity extends React.Component {
                               </a>
                             )}
                             </div>
-                          </div>
+                      </div>
                     </div>
                     </Card.Content>
                   </Card>
@@ -144,7 +143,7 @@ class Activity extends React.Component {
               <Header className="chart">
                 {this.props.username} has no activity on {this.props.date}.
               </Header>
-               )}
+            )}
           </React.Fragment>
         )}
       </React.Fragment>
