@@ -75,7 +75,7 @@ class Activity extends React.Component {
    */
   normalizeWord = (originalWord) => {
     originalWord = originalWord.toLowerCase();
-    return originalWord.slice(0, 1).toUpperCase() + originalWord.slice(1);
+    return originalWord.slice(0,1).toUpperCase() + originalWord.slice(1);
   };
 
   render = () => {
@@ -99,54 +99,54 @@ class Activity extends React.Component {
             </Card>
           </React.Fragment>
         ) : (
-            <React.Fragment>
-              {this.state.data.length !== 0 ? (
-                <React.Fragment>
-                  <Header className="chart">
-                    {this.props.username}'s activity on {this.props.date}
-                  </Header>
-                  {this.state.data.map((obj, index) => (
-                    <Card className="commits_load" key={index}>
-                      <Card.Content>
-                        <div className="card">
-                          <div className="wraper">
-                            <div className="platform">
-                              <Popup
-                                content={this.normalizeWord(obj.platform)}
-                                position="top center"
-                                trigger={
-                                  <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
-                                  ) : (
-                                      "https://gerrit.wikimedia.org/r/#/q/"
-                                    )
-                                  }><img alt={obj.platform} height="30px" src={this.choosePlatformIcon(obj.platform)}></img></a>
-                                }
-                              />
-                            </div>
-                            <div className="title">
-                              {obj.platform === 'Phabricator' ? (
-                                <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                                  <h3>{obj.heading}</h3>
-                                </a>
-                              ) : (
-                                  <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                                    <h3>{obj.heading}</h3>
-                                  </a>
-                                )}
+           <React.Fragment>
+            {this.state.data.length !== 0 ? (
+              <React.Fragment>
+                <Header className="chart">
+                  {this.props.username}'s activity on {this.props.date}
+                </Header>
+                {this.state.data.map((obj, index) => (
+                  <Card className="commits_load" key={index}>
+                    <Card.Content>
+                    <div className="card">
+                      <div className="wraper">
+                        <div className="platform">
+                          <Popup
+                            content={this.normalizeWord(obj.platform)}
+                            position="top center"
+                            trigger={
+                              <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
+                            ) : (
+                              "https://gerrit.wikimedia.org/r/#/q/"
+                            )
+                          }><img alt={obj.platform} height="30px" src={this.choosePlatformIcon(obj.platform)}></img></a>
+                            }
+                          />
+                        </div>
+                        <div className="title">
+                          {obj.platform === 'Phabricator' ? (
+                            <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                              <h3>{obj.heading}</h3>
+                              </a>
+                            ) : (
+                              <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                              <h3>{obj.heading}</h3>
+                              </a>
+                            )}
                             </div>
                           </div>
-                        </div>
-                      </Card.Content>
-                    </Card>
-                  ))}
-                </React.Fragment>
-              ) : (
-                  <Header className="chart">
-                    {this.props.username} has no activity on {this.props.date}.
+                    </div>
+                    </Card.Content>
+                  </Card>
+                ))}
+              </React.Fragment>
+            ) : (
+              <Header className="chart">
+                {this.props.username} has no activity on {this.props.date}.
               </Header>
-                )}
-            </React.Fragment>
-          )}
+               )}
+          </React.Fragment>
+        )}
       </React.Fragment>
     );
   };
