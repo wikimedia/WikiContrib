@@ -25,7 +25,6 @@ import { Line } from 'react-chartjs-2';
 import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
-import { tool_name } from './App';
 import { NavBar } from './components/nav';
 
 /**
@@ -537,12 +536,7 @@ class QueryResult extends React.Component {
                               icon="write"
                               as={Link}
                               to={
-                                process.env.NODE_ENV === 'production'
-                                  ? tool_name +
-                                    '/query/' +
-                                    this.state.query +
-                                    '/update/'
-                                  : '/query/' + this.state.query + '/update/'
+                                '/query/' + this.state.query + '/update/'
                               }
                             />
                           }
