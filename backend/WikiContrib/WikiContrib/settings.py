@@ -29,7 +29,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['tools.wmflabs.org']
+ALLOWED_HOSTS = ['contraband.toolforge.org']
 
 BASE_URL = env('BASE_URL_REMOTE')
 
@@ -143,7 +143,7 @@ REST_FRAMEWORK = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/contraband/static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
 
 MEDIA_URL = '/uploads/'

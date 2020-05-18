@@ -42,7 +42,7 @@ class Activity extends React.Component {
   };
 
   callback = response => {
-    
+
     /**
      * Callback function to feed the fetched data from API to the state of current component.
      * @param {Object} response JSON data returned from the API.

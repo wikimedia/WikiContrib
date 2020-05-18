@@ -89,7 +89,7 @@ class AddQueryUser(CreateAPIView):
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part"
                     else:
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv"
-                    
+
                     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                     with open(filename, 'wb+') as destination:
@@ -252,10 +252,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     rename(file_path + ".part", file_path)
 
                     response = HttpResponse(content="", status=303)
-                    if DEBUG:
-                        response['location'] = '/result/' + self.get_object().hash_code + '/'
-                    else:
-                        response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
+                    response['location'] = '/result/' + self.get_object().hash_code + '/'
                     return response
                 else:
                     return Response({
@@ -291,10 +288,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                         'error': 1
                     }, status=status.HTTP_400_BAD_REQUEST)
                 response = HttpResponse(content="", status=303)
-                if DEBUG:
-                    response['location'] = '/result/' + self.get_object().hash_code + '/'
-                else:
-                    response['location'] = '/contraband/result/' + self.get_object().hash_code + '/'
+                response['location'] = '/result/' + self.get_object().hash_code + '/'
                 return response
 
         except KeyError:
@@ -384,4 +378,3 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
             QueryFilter.objects.create(**kwargs)
             return UserUpdateTimeStamp(rv)
-
