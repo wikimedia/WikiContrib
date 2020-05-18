@@ -10,36 +10,34 @@ import UserContribution from './contribution';
     All the Routers are declared here.
 */
 
-export const tool_name = '/wikicontrib';
 
 class App extends Component {
   render() {
-    let domain = process.env.NODE_ENV === 'production' ? tool_name : '';
     return (
       <BrowserRouter>
         <Switch>
           {/* 404 handler */}
-          <Route exact path={domain + '/404/'} component={NotFound} />
+          <Route exact path={'/404/'} component={NotFound} />
 
           {/* Display user Contribuions */}
           <Route
             exact
-            path={domain + '/contribution/'}
+            path={'/contribution/'}
             component={UserContribution}
           />
 
           {/* Create a new Query */}
-          <Route exact path={domain + '/'} component={Query} />
+          <Route exact path={'/'} component={Query} />
 
           {/* Update a Query */}
           <Route
             exact
-            path={domain + '/query/:hash/update/'}
+            path={'/query/:hash/update/'}
             component={Query}
           />
 
           {/* Result to the query */}
-          <Route exact path={domain + '/:hash/'} component={QueryResult} />
+          <Route exact path={'/:hash/'} component={QueryResult} />
 
           {/* 404 Handler */}
           <Route component={NotFound} />
