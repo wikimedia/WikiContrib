@@ -3,7 +3,7 @@
 */
 
 const BASE_API_URI = process.env.NODE_ENV === 'production' ?
-                     'https://contraband.toolforge.org'
+                     'https://contraband.toolforge.org/'
                   :  'http://127.0.0.1:8000/';
 
 // method: POST
