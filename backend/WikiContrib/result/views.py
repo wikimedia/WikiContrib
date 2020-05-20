@@ -7,17 +7,19 @@ from rest_framework.response import Response
 import asyncio
 from json import loads, JSONDecodeError
 from aiohttp import ClientSession
+import requests
 import time
 from query.models import Query
 from django.shortcuts import get_object_or_404
 from pandas import read_csv, isnull
-from datetime import datetime
+from datetime import datetime,timedelta
+from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
-from pytz import utc
-from WikiContrib.settings import API_TOKEN
+from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN
 from .helper import get_prev_user, get_next_user
 import sys
+from math import ceil
 
 version = sys.hexversion
 version_3_3 = 50530288
@@ -128,11 +130,86 @@ async def get_gerrit_data(url, session, gerrit_resp):
         gerrit_resp.extend(data)
 
 
-def format_data(pd, gd, query, phid):
+
+
+
+async def get_github_data_by_org(orgs,url,request_data,session,github_resp):
+    """
+    :Summary: make concurrent requests to get the users contributions to wikimedia accounts on github two at a time.
+    :param url: URL to be fetched.
+    :param session: ClientSession to perform the API request.
+    :param request_data: data that is expected to be in the request but not in the url string link headers
+    :param github_resp: Global response array to which the response from the API has to be appended.
+    :return: None
+    """
+    createdStart = datetime.fromtimestamp(request_data["createdStart"])
+    createdEnd = datetime.fromtimestamp(request_data["createdEnd"])
+    headers = {"Authorization":"token "+request_data["github_access_token"]}
+    orgs_filter = """user:{org_0}+user:{org_1}""".format(org_0=orgs[0],org_1=orgs[1])
+
+    url = """{url}+{orgs_filter}+merged:{createdStartIsoFormat}..{createdEndIsoFormat}""".format(url=url,orgs_filter=orgs_filter,
+          createdStartIsoFormat=createdStart.isoformat()+"Z",createdEndIsoFormat=createdEnd.isoformat()+"Z")
+
+    def getNextUrlOrNone(response):
+        url = None
+        link = response.headers.get("Link")
+        try:
+            for page in link.split(","):
+                if(page.endswith('rel="next"')):
+                    url = page.split(";")[0].split(">")[0].split("<")[1]
+                    break
+        except:
+            pass
+        return url
+
+
+    while url:
+        async with session.get(url,headers=headers) as response:
+            data = await response.read()
+            data = loads(data.decode("utf-8"))["items"]
+            github_resp.extend(data)
+            url = getNextUrlOrNone(response)
+
+
+
+async def get_github_data(url, request_data, session, github_resp):
+    """
+    :Summary: make concurrent requests to get the users contributions to wikimedia accounts on github two at a time.
+    :param url: URL to be fetched.
+    :param session: ClientSession to perform the API request.
+    :param request_data: data that is expected to be in the request but not in the url string link headers
+    :param github_resp: Global response array to which the response from the API has to be appended.
+    :return: None
+    """
+    orgs = [
+    "wikimedia",
+    "wmde",
+    "DataValues",
+    "commons-app",
+    "wikidata",
+    "openzim",
+    "mediawiki-utilities",
+    "wiki-ai",
+    "wikimedia-research",
+    "toollabs",
+    "toolforge",
+    "counterVandalism"
+    ]
+    tasks = []
+    index = 0
+    while index < (len(orgs)):# iterate through two items in the orgs list at once
+        tasks.append(get_github_data_by_org([orgs[index],orgs[index+1]],url,request_data,session,github_resp))
+        index = index + 2
+    await asyncio.gather(*tasks)
+
+
+
+def format_data(pd, gd, ghd, query, phid):
     """
     :Summary: Format the data fetched, store the data to Databases and remove the irrelevant data.
     :param pd: Phabricator Data.
     :param gd: Gerrit Data
+    :param ghd: Github Data
     :param query: Query Modal Object
     :param phid: Phabricator ID of the user.
     :return: JSON response of all the tasks in which the user involved, in the specified time span.
@@ -140,10 +217,14 @@ def format_data(pd, gd, query, phid):
     resp = []
     len_pd = len(pd)
     len_gd = len(gd)
-    if len_pd > len_gd:
+    len_ghd = len(ghd)
+    if len_pd > len_gd and len_pd > len_ghd:
         leng = len_pd
-    else:
+    elif len_gd > len_pd and len_gd > len_ghd:
         leng = len_gd
+    else:
+        leng = len_ghd
+
     temp = []
     if query.queryfilter.status is not None and query.queryfilter.status != "":
         status_name = query.queryfilter.status.split(",")
@@ -194,10 +275,29 @@ def format_data(pd, gd, query, phid):
                         redirect=gd[i]['change_id'], status=gd[i]['status'],
                         owned=True, assigned=True
                     )
+
+            if i < len_ghd:
+                date_time = utc.localize(datetime.strptime(ghd[i]["closed_at"].split("T")[0],"%Y-%m-%d"))
+                epouch = choose_time_format_method(date_time.replace(hour=0,minute=0,second=0), "int")
+                rv = {
+                "time": epouch,
+                "github":True,
+                "status":"merged",
+                "owned":"True"
+                }
+                resp.append(rv)
+
+                ListCommit.objects.create(
+                query=query, heading = ghd[i]["title"],
+                platform="Github", created_on=epouch,
+                redirect=ghd[i]["html_url"], status="merged",owned=True,
+                assigned=True
+                )
+
     return resp
 
 
-async def get_data(urls, request_data, loop, gerrit_response, phab_response, phid):
+async def get_data(urls, request_data, loop, gerrit_response, phab_response, github_response, phid):
     """
     :Summary: Start a session and fetch the data.
     :param urls: URLS to be fetched.
@@ -213,10 +313,11 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
         tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response))))
         tasks.append(loop.create_task((get_task_authors(urls[0], request_data[0], session, phab_response, phid))))
         tasks.append(loop.create_task((get_task_assigner(urls[0], request_data[1], session, phab_response))))
+        tasks.append(loop.create_task((get_github_data(urls[2],request_data[2], session, github_response))))
         await asyncio.gather(*tasks)
 
 
-def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query, users):
+def getDetails(username, gerrit_username,github_username, createdStart, createdEnd, phid, query, users):
     """
     :Summary: Get the contributions of the user
     :param username: Fullname of the user.
@@ -235,12 +336,16 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
     if isinstance(gerrit_username, float):
         gerrit_username = ''
 
+    if isinstance(github_username, float):
+        github_username = ''
+
     loop = asyncio.new_event_loop()
-    phab_response, gerrit_response = [], []
+    phab_response, gerrit_response, github_response = [], [], []
     asyncio.set_event_loop(loop)
     urls = [
         'https://phabricator.wikimedia.org/api/maniphest.search',
-        "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS"
+        "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS",
+        "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username
     ]
     request_data = [
         {
@@ -254,14 +359,19 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
             'api.token': API_TOKEN,
             'constraints[createdStart]': int(createdStart),
             'constraints[createdEnd]': int(createdEnd)
+        },
+        {
+        'github_access_token':GITHUB_ACCESS_TOKEN,
+        'createdStart':int(createdStart),
+        'createdEnd':int(createdEnd)
         }
     ]
     start_time = time.time()
     loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
                                      gerrit_response=gerrit_response, phab_response=phab_response,
-                                     phid=phid))
+                                     github_response=github_response, phid=phid))
     print(time.time() - start_time)
-    formatted = format_data(phab_response, gerrit_response, query, phid[0])
+    formatted = format_data(phab_response, gerrit_response, github_response, query, phid[0])
     return Response({
         'query': query.hash_code,
         "result": formatted,
@@ -270,6 +380,7 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
         'next': users[2],
         'current_gerrit': gerrit_username,
         'current_phabricator': username,
+        'current_github': github_username,
         'filters': {
             'start_time': query.queryfilter.start_time,
             'end_time': query.queryfilter.end_time,
@@ -299,14 +410,14 @@ class DisplayResult(APIView):
                         else:
                             ind = user.index[0]
                             user = user.iloc[0, :]
-                            username, gerrit_username = user['Phabricator'], user['Gerrit']
+                            username, gerrit_username, github_username = user['Phabricator'], user['Gerrit'], user['Github']
                             next_user = get_next_user(file, int(ind))
                             prev_user = get_prev_user(file, int(ind))
                     else:
                         user = file.head(1).iloc[0, :]
                         ind = 0
                         temp = True
-                        while isnull(user['fullname']) or (isnull(user['Gerrit']) and isnull(user['Phabricator'])):
+                        while isnull(user['fullname']) or (isnull(user['Gerrit']) and isnull(user['Phabricator']) and isnull(user['Github'])):
                             ind += 1
                             if ind >= len(file):
                                 temp = False
@@ -315,12 +426,12 @@ class DisplayResult(APIView):
 
                         if not temp:
                             return Response({
-                                'message': 'Full name and both Gerrit and Phabricator username cannot be left blank. It is missing for all user(s) in the CSV file!',
+                                'message': 'Full name or all Platform\'s usernames cannot be left blank at once. It is missing for all user(s) in the CSV file!',
                                 'error': 1
                             }, status=status.HTTP_404_NOT_FOUND)
 
                         user = file.iloc[ind, :]
-                        username, gerrit_username = user['Phabricator'], user['Gerrit']
+                        username, gerrit_username, github_username = user['Phabricator'], user['Gerrit'], user['Github']
                         prev_user = None
                         next_user = get_next_user(file, ind)
                 except KeyError:
@@ -367,13 +478,13 @@ class DisplayResult(APIView):
                 prev_user = None
                 next_user = None
 
-            username, gerrit_username = user.phabricator_username, user.gerrit_username
+            username, gerrit_username, github_username = user.phabricator_username, user.gerrit_username, user.github_username
             paginate = [prev_user, user.fullname, next_user]
         # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
         createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
         createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
-        return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
-                          createdEnd=createdEnd, phid=phid, query=query, users=paginate)
+        return getDetails(username=username, gerrit_username=gerrit_username, github_username=github_username,
+              createdStart=createdStart, createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
 
 class GetUserCommits(ListAPIView):
@@ -420,7 +531,8 @@ class GetUsers(APIView):
                 try:
                     file = read_csv(query.csv_file,encoding="latin-1")
                     users = file[(file['fullname'] == file['fullname']) &
-                                 ((file['Phabricator'] == file['Phabricator']) | (file['Gerrit'] == file['Gerrit']))]
+                            ((file['Phabricator'] == file['Phabricator']) |
+                            (file['Gerrit'] == file['Gerrit']) | (file['Github'] == file['Github']))]
                     users = users.iloc[:, 0].values.tolist()
                 except KeyError:
                     return Response({
@@ -445,7 +557,7 @@ def UserUpdateTimeStamp(data):
             if user.empty:
                 return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
             else:
-                username, gerrit_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit']
+                username, gerrit_username, github_username = user.iloc[0]['Phabricator'], user.iloc[0]['Gerrit'], user.iloc[0]['Github']
 
         except FileNotFoundError:
             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
@@ -453,12 +565,12 @@ def UserUpdateTimeStamp(data):
         user = data['query'].queryuser_set.filter(fullname=data['username'])
         if not user.exists():
             return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
-        username, gerrit_username = user[0].phabricator_username, user[0].gerrit_username
+        username, gerrit_username, github_username = user[0].phabricator_username, user[0].gerrit_username, user[0].github_username
     # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
     createdStart = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.start_time), "%Y-%m-%d"), "str")
     createdEnd = choose_time_format_method(datetime.strptime(str(data["query"].queryfilter.end_time), "%Y-%m-%d"), "str")
     phid = [False]
-    return getDetails(username=username, gerrit_username=gerrit_username, createdStart=createdStart,
+    return getDetails(username=username, gerrit_username=gerrit_username, github_username=github_username, createdStart=createdStart,
                       createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
 
 
@@ -498,8 +610,10 @@ def UserUpdateStatus(data):
 
         if i.platform == 'Phabricator':
             obj['phabricator'] = True
-        else:
+        elif i.platform == 'Gerrit':
             obj['gerrit'] = True
+        else:
+            obj['Github'] = True
         result.append(obj)
 
     return Response({"result": result})

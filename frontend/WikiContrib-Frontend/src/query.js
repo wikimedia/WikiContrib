@@ -275,7 +275,8 @@ export class Query extends Component {
         }
         if (
           this.state.rows[i].gerrit_username.length === 0 &&
-          this.state.rows[i].phabricator_username.length === 0
+          this.state.rows[i].phabricator_username.length === 0 &&
+          this.state.rows[i].github_username.length === 0
         ) {
           usernameEmptyAtRow = parseInt(i);
         }
@@ -322,7 +323,7 @@ export class Query extends Component {
       this.setState({
         message: {
           message:
-            'Both Gerrit and Phabricator fields cannot be left blank. Provide username for one of these accounts in row ' +
+            'All username fields cannot be left blank at the same time. Provide username for one of these accounts in row ' +
             usernameEmptyAtRow,
           update: !this.state.message.update,
           trigger: true,
@@ -753,13 +754,34 @@ export class Query extends Component {
                                       <Table.Cell
                                        style={{ textAlign: 'center' }}
                                       >
+
+                                      <label>
+                                        <div className="input_label">Github Username</div>
+                                        <input
+                                          className="user_input"
+                                          value={obj.github_username}
+                                          name="github_username"
+                                          placeholder="Github Username"
+                                          onChange={e =>
+                                            this.handlChange(
+                                              e.target.name,
+                                              e.target.value,
+                                              index
+                                            )
+                                          }
+                                        />
+                                      </label>
+                                    </Table.Cell>
+                                    <Table.Cell
+                                     style={{ textAlign: 'center' }}
+                                    >
                                       <Popup
                                         content="Remove User"
                                         position="top center"
                                         trigger={
-                                          <Button 
-                                            className="remove" 
-                                            aria-label="remove user" 
+                                          <Button
+                                            className="remove"
+                                            aria-label="remove user"
                                             style={{backgroundColor:"inherit"}}
                                             tabIndex="0"
                                             onClick={(e)=>{
@@ -767,12 +789,12 @@ export class Query extends Component {
                                             }}
                                           >
                                           <Icon
-                                            name="minus circle" 
-                                            label="remove row" 
-                                            style={{ 
+                                            name="minus circle"
+                                            label="remove row"
+                                            style={{
                                               cursor: 'pointer',
-                                              color: '#fa5050', 
-                                              fontSize: '1rem', 
+                                              color: '#fa5050',
+                                              fontSize: '1rem',
                                             }}
                                           />
                                           </Button>
@@ -822,21 +844,21 @@ export class Query extends Component {
                                   });
                                 }}
                               >
-                              <Icon 
+                              <Icon
                                 name="trash alternate"
                                 style={{ paddingLeft: 4 }}
                               />
                               </Button>
                             }
                           />
-                          <Popup 
-                            content="Add User" 
+                          <Popup
+                            content="Add User"
                             position="top center"
                             trigger={
-                              <Button 
-                                className="table_row_add" 
-                                aria-label="add more user" 
-                                onClick={this.addrow} 
+                              <Button
+                                className="table_row_add"
+                                aria-label="add more user"
+                                onClick={this.addrow}
                               >
                               <Icon name="user plus" />
                               </Button>
@@ -853,7 +875,7 @@ export class Query extends Component {
                                 disabled={this.state.loading}
                                 loading={this.state.loading}
                               >
-                              <Icon 
+                              <Icon
                                 name="search"
                                 style={{ paddingLeft: 4 }}
                                 />

@@ -4,6 +4,7 @@ import { commits_by_date } from './../api';
 import { Card, Placeholder, Header, Popup } from 'semantic-ui-react';
 import gerritPlatformIcon from '../img/gerritPlatformIcon.png';
 import phabricatorPlatformIcon from '../img/phabricatorPlatformIcon.png';
+import githubPlatformIcon from '../img/githubPlatformIcon.png';
 /**
  * Show all the user Commits on a specific day
  */
@@ -42,7 +43,7 @@ class Activity extends React.Component {
   };
 
   callback = response => {
-    
+
     /**
      * Callback function to feed the fetched data from API to the state of current component.
      * @param {Object} response JSON data returned from the API.
@@ -62,8 +63,10 @@ class Activity extends React.Component {
     let platformPath;
     if (platform.toLowerCase() === "gerrit") {
       platformPath = gerritPlatformIcon;
-    } else {
+    } else if (platform.toLowerCase() === "phabricator") {
       platformPath = phabricatorPlatformIcon;
+    } else {
+      platformPath = githubPlatformIcon;
     }
     return platformPath;
   };
@@ -117,7 +120,10 @@ class Activity extends React.Component {
                             trigger={
                               <a href={obj.platform.toLowerCase() === "phabricator" ? ("https://phabricator.wikimedia.org/"
                             ) : (
-                              "https://gerrit.wikimedia.org/r/#/q/"
+                              obj.platform.toLowerCase() === "gerrit" ? ("https://gerrit.wikimedia.org/r/#/q/"
+                            ):(
+                              "https://github.com/wikimedia/"
+                            )
                             )
                           }><img alt={obj.platform} height="30px" src={this.choosePlatformIcon(obj.platform)}></img></a>
                             }
@@ -129,9 +135,15 @@ class Activity extends React.Component {
                               <h3>{obj.heading}</h3>
                               </a>
                             ) : (
-                              <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                              <h3>{obj.heading}</h3>
-                              </a>
+                              obj.platform === 'Gerrit' ? (
+                                <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
+                                <h3>{obj.heading}</h3>
+                                </a>
+                              ) : (
+                                <a href={obj.redirect} target="_blank" rel="noopener noreferrer">
+                                <h3>{obj.heading}</h3>
+                                </a>
+                              )
                             )}
                           </div>
                       </div>

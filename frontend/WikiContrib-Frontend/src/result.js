@@ -67,7 +67,7 @@ const chartOptions = {
 };
 
 /**
- * Display Fullname, Phabricator Username and Gerrit Username of the user.
+ * Display Fullname, Phabricator Username, Gerrit Username and Github Username of the user.
  */
 class DisplayUser extends React.Component {
   render = () => {
@@ -117,6 +117,22 @@ class DisplayUser extends React.Component {
                       }
                     >
                       {this.props.phabricator_username}
+                    </a>
+                  ) : (
+                      'None'
+                    )}{' '}
+                  | Github:{' '}
+                  {this.props.github_username !== '' ? (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={
+                        'https://github.com/' +
+                        this.props.github_username +
+                        '/'
+                      }
+                    >
+                      {this.props.github_username}
                     </a>
                   ) : (
                       'None'
@@ -172,6 +188,7 @@ class QueryResult extends React.Component {
       view_filters: false,
       gerrit_username: data !== false ? data.current_gerrit : null,
       phab_username: data !== false ? data.current_phabricator : null,
+      github_username: data !== false ? data.current_github : null
     };
   }
 
@@ -289,6 +306,7 @@ class QueryResult extends React.Component {
         prev: response.previous,
         gerrit_username: response.current_gerrit,
         phab_username: response.current_phabricator,
+        github_username: response.current_github,
         next: response.next,
         loading: false,
         current_filters: filters,
@@ -684,6 +702,7 @@ class QueryResult extends React.Component {
                     username={this.state.current}
                     gerrit_username={this.state.gerrit_username}
                     phabricator_username={this.state.phab_username}
+                    github_username={this.state.github_username}
                     filters={this.state.current_filters}
                   />
                 </Grid.Column>
@@ -731,6 +750,28 @@ class QueryResult extends React.Component {
                               <Line
                                 ref="chart"
                                 data={this.getGraphData('gerrit')}
+                                options={chartOptions}
+                              />
+                            </span>
+                          </Card>
+                        )}
+                      </Grid.Column>
+                      <Grid.Column computer={8} mobile={16} tablet={8}>
+                        {this.state.loading ? (
+                          <Card className="graph_load">
+                            <Card.Content>
+                              <Placeholder fluid className="image_load">
+                                <Placeholder.Line />
+                              </Placeholder>
+                            </Card.Content>
+                          </Card>
+                        ) : (
+                          <Card className="chart_container">
+                            <span style={{ textAlign: 'center' }}>
+                              <Header className="chart"> GITHUB </Header>
+                              <Line
+                                ref="chart"
+                                data={this.getGraphData('github')}
                                 options={chartOptions}
                               />
                             </span>
