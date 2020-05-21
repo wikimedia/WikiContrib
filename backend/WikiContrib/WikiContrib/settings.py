@@ -29,7 +29,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['tools.wmflabs.org']
+ALLOWED_HOSTS = ['wikicontrib.toolforge.org']
 
 BASE_URL = env('BASE_URL_REMOTE')
 
