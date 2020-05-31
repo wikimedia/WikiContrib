@@ -10,7 +10,6 @@ django-cleanup==3.2.0
 django-cors-headers==3.0.2
 django-environ==0.4.5
 djangorestframework==3.9.4
-fuzzywuzzy==0.18.0
 idna==2.8
 idna-ssl==1.1.0
 multidict==4.5.2
@@ -18,8 +17,8 @@ numpy==1.16.4
 pandas==0.24.2
 pycparser==2.19
 python-dateutil==2.8.0
-python-Levenshtein==0.12.0
 pytz==2019.1
+rapidfuzz==0.9.1
 six==1.12.0
 sqlparse==0.3.0
 typing-extensions==3.7.4

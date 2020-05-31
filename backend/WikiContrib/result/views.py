@@ -18,7 +18,7 @@ from pytz import utc
 from WikiContrib.settings import API_TOKEN
 from .helper import get_prev_user, get_next_user
 import sys
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 
 version = sys.hexversion
 version_3_3 = 50530288
