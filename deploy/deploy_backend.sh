@@ -16,7 +16,7 @@ echo "Performed the shell operations"
 python manage.py makemigrations
 python manage.py migrate
 echo "Ran updated migrations"
-webservice --backend=kubernetes python3.5 restart
+webservice --backend=kubernetes python3.7 restart
 cd ../
 rm -rf WikiContrib src/WikiContrib/.env.example
 echo "Updated backend"

@@ -20,7 +20,6 @@ import {
   Loader,
   Header,
 } from 'semantic-ui-react';
-import { tool_name } from './App';
 import { NavBar } from './components/nav';
 
 var emptyObj = {
@@ -37,19 +36,13 @@ export class Query extends Component {
   constructor(props) {
     super(props);
     let type;
-    if (process.env.NODE_ENV === 'production') {
-      type =
-        this.props.location.pathname === tool_name + '/' ||
-        this.props.location.pathname === tool_name
-          ? true
-          : false;
-    } else {
-      type =
-        this.props.location.pathname === '/' ||
-        this.props.location.pathname === ''
-          ? true
-          : false;
-    }
+    
+    type =
+      this.props.location.pathname === '/' ||
+      this.props.location.pathname === ''
+        ? true
+        : false;
+
     this.state = {
       step: 1,
       rows:
@@ -399,8 +392,7 @@ export class Query extends Component {
         hash = this.props.match.params.hash;
       }
       this.setState({
-        redirect:
-          process.env.NODE_ENV === 'production' ? 'wikicontrib/' + hash : hash,
+        redirect: hash,
         loading: false,
         loadData: response,
       });

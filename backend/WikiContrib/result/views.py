@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import asyncio
-from json import loads, JSONDecodeError
+from json import loads, dumps, JSONDecodeError
 from aiohttp import ClientSession
 import requests
 import time
@@ -19,7 +19,7 @@ from .serializers import UserCommitSerializer
 from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN
 from .helper import get_prev_user, get_next_user
 import sys
-from math import ceil
+from fuzzywuzzy import fuzz
 
 version = sys.hexversion
 version_3_3 = 50530288
@@ -55,8 +55,73 @@ def choose_time_format_method(expression,format):
             return int(expression.strftime("%s"))
 
 
+def fuzzyMatching(control,full_names):
+    """
+    :Summary: compare the full names in the full_names dictionary to the control full name
+              , gather parcentage similarity in an array and return the average.
+    :control: A control full name string against which other full names in full_names dict are compared.
+    :full_names: A Dictionary containing a users full names as specified in the neccessary platforms
+    :return: returns average parcentage similarity or zero if any of the usernames doesn't exist or
+             was not provided.
+    """
+    _list = []
+    ave = 0
+    for key in full_names:
+        if full_names[key] != "username does not exist" and full_names[key] != "no username provided":
+            _list.append(fuzz.WRatio(control,full_names[key]))
+        else:
+            return 0
+    for each in _list:
+        ave += each
 
-async def get_task_authors(url, request_data, session, resp, phid):
+    return ave/len(_list)
+
+
+async def get_full_name(data):
+    """
+    :Summary: Gets users full name per platform and add them to the full_names dictionary.
+
+    """
+    if data["platform"] == "phab":
+        if data["full_names"]["phab_full_name"] == "":
+            if data["request_data"][2]['constraints[usernames][0]'] != "":
+                async with data["session"].post(data["url"][1],data=data["request_data"][2]) as response:
+                    realname  = await response.read()
+                    _data = loads(realname.decode("utf-8"))['result']['data']
+                    if(len(_data) != 0):
+                        realname = _data[0]['fields']['realName']
+                        data["full_names"]["phab_full_name"] = realname
+                    else:
+                        data["full_names"]["phab_full_name"] = "username does not exist"
+            else:
+                data["full_names"]["phab_full_name"] = "no username provided"
+
+    if data["platform"] == "gerrit":
+        try:
+            data["full_names"]["gerrit_full_name"] = data["gerrit_response"][0]["owner"]["name"]
+        except:
+            if data["url"].split("?")[1].split("&")[0].split(":")[1] == "":
+                data["full_names"]["gerrit_full_name"] = "no username provided"
+            else:
+                data["full_names"]["gerrit_full_name"] = "username does not exist"
+
+    if data["platform"] == "github":
+        if data["request_data"]["github_username"] != "":
+            headers = {"Authorization":"bearer "+data["request_data"]["github_access_token"]}
+            query = """{{user(login:"{username}"){{name}}}}""".format(username=data["request_data"]["github_username"])
+            async with data["session"].post("https://api.github.com/graphql",headers=headers,data=dumps({"query":query})) as response:
+                full_name = await response.read()
+                full_name = loads(full_name.decode('utf-8'))
+                full_name = full_name['data']['user']['name']
+                if full_name:
+                    data["full_names"]["github_full_name"] = full_name
+                else:
+                    data["full_names"]["github_full_name"] = "username does not exist"
+        else:
+            data["full_names"]["github_full_name"] = "no username provided"
+
+
+async def get_task_authors(url, request_data, session, resp, phid, full_names):
     """
     :Summary: Get the Phabricator tasks that the user authored.
     :param url: URL to be fetched.
@@ -66,27 +131,27 @@ async def get_task_authors(url, request_data, session, resp, phid):
     :param phid: Phabricator ID of the user
     :return: None
     """
-    if request_data['constraints[authorPHIDs][0]'] == '':
-        return
-    page, after = True, False
-    while page or after is not False:
-        page = False
-        after = False
-        async with session.post(url, data=request_data) as response:
-            data = await response.read()
-            data = loads(data.decode('utf-8'))['result']
-            resp.extend(data['data'])
-            if phid[0] is False:
-                if len(data['data']) > 0:
-                    phid[0] = data['data'][0]['fields']['authorPHID']
-                else:
-                    phid[0] = True
-            if data['cursor']['after']:
-                after = data['cursor']['after']
-                request_data['after'] = after
+    if request_data[0]['constraints[authorPHIDs][0]'] != '':
+        page, after = True, False
+        while page or after is not False:
+            page = False
+            after = False
+            async with session.post(url[0], data=request_data[0]) as response:
+                data = await response.read()
+                data = loads(data.decode('utf-8'))['result']
+                resp.extend(data['data'])
+                if phid[0] is False:
+                    if len(data['data']) > 0:
+                        phid[0] = data['data'][0]['fields']['authorPHID']
+                    else:
+                        phid[0] = True
+                if data['cursor']['after']:
+                    after = data['cursor']['after']
+                    request_data[0]['after'] = after
 
+    await get_full_name(data={"platform":"phab","session":session,"full_names":full_names,"url":url,"request_data":request_data})
 
-async def get_task_assigner(url, request_data, session, resp):
+async def get_task_assigner(url, request_data, session, resp, full_names):
     """
     :Summary: Get the Phabricator tasks that the user assigned with.
     :param url: URL to be fetched.
@@ -95,22 +160,24 @@ async def get_task_assigner(url, request_data, session, resp):
     :param resp: Global response array to which the response from the API has to be appended.
     :return: None
     """
-    if request_data['constraints[assigned][0]'] == '':
-        return
-    page, after = True, False
-    while page or after is not False:
-        page = False
-        after = False
-        async with session.post(url, data=request_data) as response:
-            data = await response.read()
-            data = loads(data.decode('utf-8'))['result']
-            resp.extend(data['data'])
-            if data['cursor']['after']:
-                after = data['cursor']['after']
-                request_data['after'] = after
+    if request_data[1]['constraints[assigned][0]'] != '':
+        page, after = True, False
+        while page or after is not False:
+            page = False
+            after = False
+            async with session.post(url[0], data=request_data[1]) as response:
+                data = await response.read()
+                data = loads(data.decode('utf-8'))['result']
+                resp.extend(data['data'])
+                if data['cursor']['after']:
+                    after = data['cursor']['after']
+                    request_data[1]['after'] = after
+
+    await get_full_name(data={"platform":"phab","session":session,"full_names":full_names,"url":url,"request_data":request_data})
 
 
-async def get_gerrit_data(url, session, gerrit_resp):
+
+async def get_gerrit_data(url, session, gerrit_resp,full_names):
     """
     :Summary: Get all the Gerrit tasks of the user.
     :param url: URL to be fetched.
@@ -118,16 +185,18 @@ async def get_gerrit_data(url, session, gerrit_resp):
     :param gerrit_resp: Global response array to which the response from the API has to be appended.
     :return: None
     """
-    if url.split("?")[1].split("&")[0].split(":")[1] == "":
-        return
-    async with session.get(url) as response:
-        data = await response.read()
-        try:
-            data = loads(data[4:].decode("utf-8"))
-        except JSONDecodeError:
-            data = []
+    data = []
+    if url.split("?")[1].split("&")[0].split(":")[1] != "":
+        async with session.get(url) as response:
+            data = await response.read()
+            try:
+                data = loads(data[4:].decode("utf-8"))
+            except JSONDecodeError:
+                data = []
 
-        gerrit_resp.extend(data)
+            gerrit_resp.extend(data)
+
+    await get_full_name(data={"platform":"gerrit","full_names":full_names,"url":url,"gerrit_response":data})
 
 
 
@@ -172,7 +241,7 @@ async def get_github_data_by_org(orgs,url,request_data,session,github_resp):
 
 
 
-async def get_github_data(url, request_data, session, github_resp):
+async def get_github_data(url, request_data, session, github_resp,full_names):
     """
     :Summary: make concurrent requests to get the users contributions to wikimedia accounts on github two at a time.
     :param url: URL to be fetched.
@@ -201,6 +270,7 @@ async def get_github_data(url, request_data, session, github_resp):
         tasks.append(get_github_data_by_org([orgs[index],orgs[index+1]],url,request_data,session,github_resp))
         index = index + 2
     await asyncio.gather(*tasks)
+    await get_full_name(data={"platform":"github","session":session,"full_names":full_names,"request_data":request_data})
 
 
 
@@ -297,7 +367,7 @@ def format_data(pd, gd, ghd, query, phid):
     return resp
 
 
-async def get_data(urls, request_data, loop, gerrit_response, phab_response, github_response, phid):
+async def get_data(urls, request_data, loop, gerrit_response, phab_response, github_response, phid, full_names):
     """
     :Summary: Start a session and fetch the data.
     :param urls: URLS to be fetched.
@@ -310,10 +380,10 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, git
     """
     tasks = []
     async with ClientSession() as session:
-        tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response))))
-        tasks.append(loop.create_task((get_task_authors(urls[0], request_data[0], session, phab_response, phid))))
-        tasks.append(loop.create_task((get_task_assigner(urls[0], request_data[1], session, phab_response))))
-        tasks.append(loop.create_task((get_github_data(urls[2],request_data[2], session, github_response))))
+        tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response,full_names))))
+        tasks.append(loop.create_task((get_task_authors(urls[0], request_data, session, phab_response, phid,full_names))))
+        tasks.append(loop.create_task((get_task_assigner(urls[0], request_data, session, phab_response,full_names))))
+        tasks.append(loop.create_task((get_github_data(urls[2], request_data[3], session, github_response,full_names))))
         await asyncio.gather(*tasks)
 
 
@@ -340,10 +410,11 @@ def getDetails(username, gerrit_username,github_username, createdStart, createdE
         github_username = ''
 
     loop = asyncio.new_event_loop()
-    phab_response, gerrit_response, github_response = [], [], []
+    phab_response, gerrit_response, github_response, full_names = [], [], [], {"phab_full_name":""}
     asyncio.set_event_loop(loop)
     urls = [
-        'https://phabricator.wikimedia.org/api/maniphest.search',
+        ['https://phabricator.wikimedia.org/api/maniphest.search',
+        'https://phabricator.wikimedia.org/api/user.search'],
         "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS",
         "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username
     ]
@@ -361,19 +432,29 @@ def getDetails(username, gerrit_username,github_username, createdStart, createdE
             'constraints[createdEnd]': int(createdEnd)
         },
         {
-        'github_access_token':GITHUB_ACCESS_TOKEN,
-        'createdStart':int(createdStart),
-        'createdEnd':int(createdEnd)
+            'constraints[usernames][0]':username,
+            'api.token': API_TOKEN
+        },
+        {
+            'github_username':github_username,
+            'github_access_token':GITHUB_ACCESS_TOKEN,
+            'createdStart':int(createdStart),
+            'createdEnd':int(createdEnd)
         }
     ]
     start_time = time.time()
     loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
                                      gerrit_response=gerrit_response, phab_response=phab_response,
-                                     github_response=github_response, phid=phid))
+                                     github_response=github_response,full_names=full_names, phid=phid))
     print(time.time() - start_time)
     formatted = format_data(phab_response, gerrit_response, github_response, query, phid[0])
+    match_percent = fuzzyMatching(control=users[1],full_names=full_names)
     return Response({
         'query': query.hash_code,
+        'match_details':{
+        'full_names':full_names,
+        'match_percent':match_percent
+        },
         "result": formatted,
         'previous': users[0],
         'current': users[1],
