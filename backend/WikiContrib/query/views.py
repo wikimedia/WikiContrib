@@ -9,6 +9,8 @@ from rest_framework import status
 from .models import Query, QueryFilter, QueryUser
 from datetime import timedelta, datetime
 from django.utils.crypto import get_random_string
+from django.utils.text import slugify
+from hashlib import sha256
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
@@ -20,13 +22,26 @@ from WikiContrib.settings import COMMIT_STATUS
 from result.views import UserUpdateStatus, UserUpdateTimeStamp
 
 
-def create_hash():
+def create_hash(usersArr=None):
     """
     :return: hash code to create the Query.
     """
-    hash_code = get_random_string(64)
-    while Query.objects.filter(hash_code=hash_code).exists():
+    hash_code = ""
+    if usersArr == None:
         hash_code = get_random_string(64)
+        while Query.objects.filter(hash_code=hash_code).exists():
+            hash_code = get_random_string(64)
+    else:
+        fullname_slug = ""
+        for dict in usersArr:
+            for field in dict:
+                hash_code + dict[field].lower()
+        if len(usersArr) == 1:
+            fullname_slug = slugify(usersArr[0]["fullname"].lower())
+            hash_code = fullname_slug +"-"+ sha256(hash_code.encode("utf-8")).hexdigest()[:9]
+        else:
+            hash_code = sha256(hash_code.encode("utf-8")).hexdigest()
+
     return hash_code
 
 
@@ -132,53 +147,58 @@ class AddQueryUser(CreateAPIView):
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
-                request.data['hash_code'] = create_hash()
-                try:
-                    with transaction.atomic():
-                        # Add the Query
-                        query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                        filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
-                        QueryFilter.objects.create(
-                            query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                            start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time,
-                            status=','.join(COMMIT_STATUS)
-                        )
+                request.data['hash_code'] = create_hash(request.data['users'])
+                if request.data['hash_code'] != "" and Query.objects.filter(hash_code=request.data['hash_code']).exists():
+                    return redirect('result',hash=request.data['hash_code'])
+                else:
+                    try:
+                        with transaction.atomic():
+                            # Add the Query
+                            query = super(AddQueryUser, self).post(request, *args, **kwargs)
+                            filter_time = timezone.now().date()
+                            filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
+                            QueryFilter.objects.create(
+                                query=get_object_or_404(Query, hash_code=query.data['hash_code']),
+                                start_time=filter_time - timedelta(days=365),
+                                end_time=filter_time,
+                                status=','.join(COMMIT_STATUS)
+                            )
 
-                        # Add username's & platform's to the query
-                        temp = 1
-                        for i in request.data['users']:
-                            data = i.copy()
-                            if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
-                                raise IntegrityError
-                            # Ignore if all the fields are empty
-                            if not (data['fullname'] == "" and data['gerrit_username'] == ""
-                                    and data['github_username'] == "" and data['phabricator_username'] == ""):
-                                data['query'] = query.data['pk']
-                                s = QueryUserSerializer(data=data)
-                                s.is_valid(raise_exception=True)
-                                s.save()
-                                temp = 0
+                            # Add username's & platform's to the query
+                            temp = 1
+                            print("users in query -----------")
+                            print(request.data['users'])
+                            for i in request.data['users']:
+                                data = i.copy()
+                                if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
+                                    raise IntegrityError
+                                # Ignore if all the fields are empty
+                                if not (data['fullname'] == "" and data['gerrit_username'] == ""
+                                        and data['github_username'] == "" and data['phabricator_username'] == ""):
+                                    data['query'] = query.data['pk']
+                                    s = QueryUserSerializer(data=data)
+                                    s.is_valid(raise_exception=True)
+                                    s.save()
+                                    temp = 0
 
-                        # If all the fields are empty all the times, delete the query
-                        if temp == 1:
-                            raise KeyError
-                except KeyError:
-                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
-                    return Response({
-                        'message': 'Please provide users data',
-                        'error': 1
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                            # If all the fields are empty all the times, delete the query
+                            if temp == 1:
+                                raise KeyError
+                    except KeyError:
+                        Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                        return Response({
+                            'message': 'Please provide users data',
+                            'error': 1
+                        }, status=status.HTTP_400_BAD_REQUEST)
 
-                except IntegrityError:
-                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
-                    return Response({
-                        'message': 'Fullname\'s has to be unique!!',
-                        'error': 1
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                    except IntegrityError:
+                        Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                        return Response({
+                            'message': 'Fullname\'s has to be unique!!',
+                            'error': 1
+                        }, status=status.HTTP_400_BAD_REQUEST)
 
-                return redirect('result', hash=query.data['hash_code'])
+                    return redirect('result', hash=query.data['hash_code'])
         except KeyError:
             return Response({
                 'message': 'Fill the form completely!',
