@@ -9,6 +9,7 @@ from json import loads, dumps, JSONDecodeError
 from aiohttp import ClientSession
 import requests
 import time
+from math import ceil
 from query.models import Query
 from django.shortcuts import get_object_or_404
 from pandas import read_csv, isnull
@@ -16,10 +17,12 @@ from datetime import datetime,timedelta
 from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
-from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN
+from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR
 from .helper import get_prev_user, get_next_user
 import sys
 from fuzzywuzzy import fuzz
+if GITHUB_FALLBACK_TO_PR:
+    from .github_fallback import get_github_pr_by_org
 
 version = sys.hexversion
 version_3_3 = 50530288
@@ -80,7 +83,6 @@ def fuzzyMatching(control,full_names):
 async def get_full_name(data):
     """
     :Summary: Gets users full name per platform and add them to the full_names dictionary.
-
     """
     if data["platform"] == "phab":
         if data["full_names"]["phab_full_name"] == "":
@@ -176,7 +178,6 @@ async def get_task_assigner(url, request_data, session, resp, full_names):
     await get_full_name(data={"platform":"phab","session":session,"full_names":full_names,"url":url,"request_data":request_data})
 
 
-
 async def get_gerrit_data(url, session, gerrit_resp,full_names):
     """
     :Summary: Get all the Gerrit tasks of the user.
@@ -199,12 +200,9 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
     await get_full_name(data={"platform":"gerrit","full_names":full_names,"url":url,"gerrit_response":data})
 
 
-
-
-
-async def get_github_data_by_org(orgs,url,request_data,session,github_resp):
+async def get_github_commit_by_org(orgs,url,request_data,session,github_resp,rateLimitCount):
     """
-    :Summary: make concurrent requests to get the users contributions to wikimedia accounts on github two at a time.
+    :Summary: make concurrent requests to get the users commits to wikimedia accounts on github two at a time.
     :param url: URL to be fetched.
     :param session: ClientSession to perform the API request.
     :param request_data: data that is expected to be in the request but not in the url string link headers
@@ -213,11 +211,28 @@ async def get_github_data_by_org(orgs,url,request_data,session,github_resp):
     """
     createdStart = datetime.fromtimestamp(request_data["createdStart"])
     createdEnd = datetime.fromtimestamp(request_data["createdEnd"])
-    headers = {"Authorization":"token "+request_data["github_access_token"]}
-    orgs_filter = """user:{org_0}+user:{org_1}""".format(org_0=orgs[0],org_1=orgs[1])
 
-    url = """{url}+{orgs_filter}+merged:{createdStartIsoFormat}..{createdEndIsoFormat}""".format(url=url,orgs_filter=orgs_filter,
-          createdStartIsoFormat=createdStart.isoformat()+"Z",createdEndIsoFormat=createdEnd.isoformat()+"Z")
+    dateRangeStart = createdStart
+    dateRangeEnd = createdEnd
+
+    """
+    <-----------------------------------------------------------
+    If time range between createdStart and createdEnd is greater than 6 months, divide it into two and fetch
+    each half seperately
+     """
+    if(dateRangeEnd - dateRangeStart) > timedelta(183):
+        dateRangeEnd = createdStart + timedelta(183)
+
+    loopCount = ceil((createdEnd - createdStart)/timedelta(183))
+    """-----------------------------------------------------/>"""
+
+
+    headers = {"Authorization":"token "+request_data["github_access_token"],
+               "Accept":"application/vnd.github.cloak-preview"}
+
+    orgs_filter = """user:{org_0}+user:{org_1}""".format(org_0=orgs[0],org_1=orgs[1])
+    query = """{url}+{orgs_filter}+committer-date:{dateRangeStartIsoFormat}..{dateRangeEndIsoFormat}"""
+
 
     def getNextUrlOrNone(response):
         url = None
@@ -231,13 +246,28 @@ async def get_github_data_by_org(orgs,url,request_data,session,github_resp):
             pass
         return url
 
-
-    while url:
-        async with session.get(url,headers=headers) as response:
-            data = await response.read()
-            data = loads(data.decode("utf-8"))["items"]
-            github_resp.extend(data)
-            url = getNextUrlOrNone(response)
+    count = 0
+    while loopCount > 0:
+        count += 1
+        newURL = query.format(url=url,orgs_filter=orgs_filter,dateRangeStartIsoFormat=dateRangeStart.isoformat()+"Z",
+                              dateRangeEndIsoFormat=dateRangeEnd.isoformat()+"Z")
+        while newURL:
+            if rateLimitCount[0] == 30:
+                break
+            async with session.get(newURL,headers=headers) as response:
+                data = await response.read()
+                try:
+                    data = loads(data.decode("utf-8"))["items"]
+                    github_resp.extend(data)
+                    newURL = getNextUrlOrNone(response)
+                    rateLimitCount[0] += 1
+                except:
+                    github_resp.extend([{"message":"API limit exceeded. Checkback in a minute time"}])
+                    newURL = None
+                    loopCount = 0
+        dateRangeStart = dateRangeStart + timedelta(184)
+        dateRangeEnd = createdEnd
+        loopCount -= 1
 
 
 
@@ -266,15 +296,18 @@ async def get_github_data(url, request_data, session, github_resp,full_names):
     ]
     tasks = []
     index = 0
+    rateLimitCount = [0]
     while index < (len(orgs)):# iterate through two items in the orgs list at once
-        tasks.append(get_github_data_by_org([orgs[index],orgs[index+1]],url,request_data,session,github_resp))
+        if GITHUB_FALLBACK_TO_PR == False:
+            tasks.append(get_github_commit_by_org([orgs[index],orgs[index+1]],url[0],request_data,session,github_resp,rateLimitCount))
+        else:
+            tasks.append(get_github_pr_by_org([orgs[index],orgs[index+1]],url[1],request_data,session,github_resp))
         index = index + 2
     await asyncio.gather(*tasks)
     await get_full_name(data={"platform":"github","session":session,"full_names":full_names,"request_data":request_data})
+    
 
-
-
-def format_data(pd, gd, ghd, query, phid):
+def format_data(pd, gd, ghd,ghd_rate_limit_message, query, phid):
     """
     :Summary: Format the data fetched, store the data to Databases and remove the irrelevant data.
     :param pd: Phabricator Data.
@@ -284,10 +317,13 @@ def format_data(pd, gd, ghd, query, phid):
     :param phid: Phabricator ID of the user.
     :return: JSON response of all the tasks in which the user involved, in the specified time span.
     """
+
     resp = []
+    ghdRateLimitTriggered = False
     len_pd = len(pd)
     len_gd = len(gd)
     len_ghd = len(ghd)
+
     if len_pd > len_gd and len_pd > len_ghd:
         leng = len_pd
     elif len_gd > len_pd and len_gd > len_ghd:
@@ -347,22 +383,47 @@ def format_data(pd, gd, ghd, query, phid):
                     )
 
             if i < len_ghd:
-                date_time = utc.localize(datetime.strptime(ghd[i]["closed_at"].split("T")[0],"%Y-%m-%d"))
-                epouch = choose_time_format_method(date_time.replace(hour=0,minute=0,second=0), "int")
-                rv = {
-                "time": epouch,
-                "github":True,
-                "status":"merged",
-                "owned":"True"
-                }
-                resp.append(rv)
+                try:
+                    if ghdRateLimitTriggered is not True:
+                        if GITHUB_FALLBACK_TO_PR == False:
+                            date_time = utc.localize(datetime.strptime(ghd[i]["commit"]["committer"]["date"].split("T")[0],"%Y-%m-%d"))
+                            epouch = choose_time_format_method(date_time.replace(hour=0,minute=0,second=0), "int")
+                            rv = {
+                            "time": epouch,
+                            "github":True,
+                            "status":"merged",
+                            "owned":"True"
+                            }
+                            resp.append(rv)
 
-                ListCommit.objects.create(
-                query=query, heading = ghd[i]["title"],
-                platform="Github", created_on=epouch,
-                redirect=ghd[i]["html_url"], status="merged",owned=True,
-                assigned=True
-                )
+                            ListCommit.objects.create(
+                            query=query, heading = ghd[i]["commit"]["message"],
+                            platform="Github", created_on=epouch,
+                            redirect=ghd[i]["html_url"], status="merged",owned=True,
+                            assigned=True
+                            )
+                        else:
+                            date_time = utc.localize(datetime.strptime(ghd[i]["closed_at"].split("T")[0],"%Y-%m-%d"))
+                            epouch = choose_time_format_method(date_time.replace(hour=0,minute=0,second=0), "int")
+                            rv = {
+                            "time": epouch,
+                            "github":True,
+                            "status":"merged",
+                            "owned":"True"
+                            }
+                            resp.append(rv)
+
+                            ListCommit.objects.create(
+                            query=query, heading = ghd[i]["title"],
+                            platform="Github", created_on=epouch,
+                            redirect=ghd[i]["html_url"], status="merged",owned=True,
+                            assigned=True
+                            )
+                except:
+                    ghdRateLimitTriggered = True
+                    ghd_rate_limit_message[0] = ghd[i]['rate-limit-message']
+                    ghd.clear()
+
 
     return resp
 
@@ -408,6 +469,7 @@ def getDetails(username, gerrit_username,github_username, createdStart, createdE
 
     if isinstance(github_username, float):
         github_username = ''
+    github_rate_limit_message = ['']
 
     loop = asyncio.new_event_loop()
     phab_response, gerrit_response, github_response, full_names = [], [], [], {"phab_full_name":""}
@@ -416,7 +478,8 @@ def getDetails(username, gerrit_username,github_username, createdStart, createdE
         ['https://phabricator.wikimedia.org/api/maniphest.search',
         'https://phabricator.wikimedia.org/api/user.search'],
         "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS",
-        "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username
+        ["https://api.github.com/search/commits?per_page=100&q=author:"+github_username,
+        "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username]
     ]
     request_data = [
         {
@@ -447,12 +510,16 @@ def getDetails(username, gerrit_username,github_username, createdStart, createdE
                                      gerrit_response=gerrit_response, phab_response=phab_response,
                                      github_response=github_response,full_names=full_names, phid=phid))
     print(time.time() - start_time)
-    formatted = format_data(phab_response, gerrit_response, github_response, query, phid[0])
+    formatted = format_data(phab_response, gerrit_response, github_response, github_rate_limit_message, query, phid[0])
     match_percent = fuzzyMatching(control=users[1],full_names=full_names)
+
     return Response({
         'query': query.hash_code,
-        'match_details':{
+        'meta':{
         'full_names':full_names,
+        'rate_limits':{
+        'github_rate_limit_message':github_rate_limit_message[0]
+        },
         'match_percent':match_percent
         },
         "result": formatted,

@@ -176,8 +176,8 @@ class QueryResult extends React.Component {
       query: this.props.match.params.hash,
       loading: data === false,
       data: data !== false ? data.result : [],
-      matchDetails: data !== false ? data.match_details : {},
-      showMismatch: data === false ? false : (data.match_details.match_percent > 70 ? true : false),
+      meta: data !== false ? data.meta : {},
+      showMismatch: data === false ? false : (data.meta.match_percent > 70 ? true : false),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
@@ -270,7 +270,7 @@ class QueryResult extends React.Component {
 
     /*
      * Sort data array based on the start date such that
-     * the data in the `Phabricator` and `Gerrit` graph
+     * the data in the `Phabricator` and `Gerrit` and `Github` graph
      * flows left to right i.e., from a past month to the
      * selected month.
      */
@@ -296,7 +296,6 @@ class QueryResult extends React.Component {
   };
 
   callback = response => {
-    console.log(response)
     /**
      * Callback function that feeds the fetched information to the state.
      * @param {Object} response Response data from API fetch
@@ -305,8 +304,8 @@ class QueryResult extends React.Component {
       let filters = response.filters;
       this.setState({
         data: response.result,
-        matchDetails: response !== false ? response.match_details : {},
-        showMismatch: response === false ? false : (response.match_details.match_percent > 70 ? true : false),
+        meta: response !== false ? response.meta : {},
+        showMismatch: response === false ? false : (response.meta.match_percent > 70 ? true : false),
         current: response.current,
         prev: response.previous,
         gerrit_username: response.current_gerrit,
@@ -379,8 +378,8 @@ class QueryResult extends React.Component {
     if (response.error !== 1) {
       this.setState({
         data: response.result,
-        matchDetails: response !== false ? response.match_details : {},
-        showMismatch: response === false ? false : (response.match_details.match_percent > 70 ? true : false),
+        meta: response !== false ? response.meta : {},
+        showMismatch: response === false ? false : (response.meta.match_percent > 70 ? true : false),
         current_filters: this.state.update_filters,
         loading: false,
       });
@@ -750,16 +749,16 @@ class QueryResult extends React.Component {
                             <Card className="chart_container">
                               <span style={{ textAlign: 'center' }}>
                                 <Header className="chart"> PHABRICATOR </Header>
-                                {this.state.matchDetails.full_names.phab_full_name !== "no username provided" &&
-                                 this.state.matchDetails.full_names.phab_full_name !== "username does not exist" ? (
+                                {this.state.meta.full_names.phab_full_name !== "no username provided" &&
+                                 this.state.meta.full_names.phab_full_name !== "username does not exist" ? (
                                   <Line
                                     ref="chart"
                                     data={this.getGraphData('phabricator')}
                                     options={chartOptions}
                                   />
                                 ) : (
-                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
-                                  {this.state.matchDetails.full_names.phab_full_name}
+                                  <div className="chart_message">
+                                  <h2>{this.state.meta.full_names.phab_full_name}</h2>
                                   </div>
                                 )}
                               </span>
@@ -779,16 +778,16 @@ class QueryResult extends React.Component {
                             <Card className="chart_container">
                               <span style={{ textAlign: 'center' }}>
                                 <Header className="chart"> GERRIT </Header>
-                                {this.state.matchDetails.full_names.gerrit_full_name !== "no username provided" &&
-                                 this.state.matchDetails.full_names.gerrit_full_name !== "username does not exist" ? (
+                                {this.state.meta.full_names.gerrit_full_name !== "no username provided" &&
+                                 this.state.meta.full_names.gerrit_full_name !== "username does not exist" ? (
                                   <Line
                                     ref="chart"
                                     data={this.getGraphData('gerrit')}
                                     options={chartOptions}
                                   />
                                 ) : (
-                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
-                                  {this.state.matchDetails.full_names.gerrit_full_name}
+                                  <div className="chart_message">
+                                  <h2>{this.state.meta.full_names.gerrit_full_name}</h2>
                                   </div>
                                 )}
                               </span>
@@ -808,16 +807,22 @@ class QueryResult extends React.Component {
                             <Card className="chart_container">
                               <span style={{ textAlign: 'center' }}>
                                 <Header className="chart"> GITHUB </Header>
-                                {this.state.matchDetails.full_names.github_full_name !== "no username provided" &&
-                                 this.state.matchDetails.full_names.github_full_name !== "username does not exist" ? (
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('github')}
-                                    options={chartOptions}
-                                  />
+                                {this.state.meta.full_names.github_full_name !== "no username provided" &&
+                                 this.state.meta.full_names.github_full_name !== "username does not exist" ? (
+                                  this.state.meta.rate_limits.github_rate_limit_message === "" ? (
+                                    <Line
+                                      ref="chart"
+                                      data={this.getGraphData('github')}
+                                      options={chartOptions}
+                                    />
                                 ) : (
-                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
-                                  {this.state.matchDetails.full_names.github_full_name}
+                                  <div className="chart_message">
+                                  <h2>{this.state.meta.rate_limits.github_rate_limit_message}</h2>
+                                  </div>
+                                )
+                                ) : (
+                                  <div className="chart_message">
+                                  <h2>{this.state.meta.full_names.github_full_name}</h2>
                                   </div>
                                 )}
                               </span>

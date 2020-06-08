@@ -154,6 +154,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 API_TOKEN = env('PHAB_KEY')
 GITHUB_ACCESS_TOKEN = env('GITHUB_ACCESS_TOKEN')
 CORS_ORIGIN_ALLOW_ALL = True
+GITHUB_FALLBACK_TO_PR = False
 
 try:
     from .local_settings import *

@@ -116,6 +116,12 @@ h3.accounts  {
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
 }
 
+.chart_message {
+  height: 7.5em;
+  font-size: 1.8rem;
+  font-weight: bold
+}
+
 .user_input {
   border: none;
   border-radius: 2px;
@@ -360,14 +366,14 @@ h3.accounts  {
 
 .flex-col {
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
 }
 
 @media only screen and (min-width: 1456px){
   .flex-col{
     width: 1.3vw;
   }
-} 
+}
 
 .flex-row {
   display: flex;

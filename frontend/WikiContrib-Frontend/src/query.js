@@ -36,7 +36,7 @@ export class Query extends Component {
   constructor(props) {
     super(props);
     let type;
-    
+
     type =
       this.props.location.pathname === '/' ||
       this.props.location.pathname === ''
@@ -428,8 +428,8 @@ export class Query extends Component {
             <div style={{ marginTop: '8%' }} />
             <Grid>
               <Grid.Row>
-                <Grid.Column computer={3} tablet={1} mobile={1} />
-                <Grid.Column computer={10} tablet={14} mobile={14}>
+                <Grid.Column computer={2} tablet={1} mobile={1} />
+                <Grid.Column computer={12} tablet={14} mobile={14}>
                   {this.state.progress ? (
                     <Card className="query_create">
                       {this.state.bulk ? (
@@ -879,7 +879,7 @@ export class Query extends Component {
                     </Transition>
                   )}
                 </Grid.Column>
-                <Grid.Column computer={3} tablet={1} mobile={1} />
+                <Grid.Column computer={2} tablet={1} mobile={1} />
               </Grid.Row>
             </Grid>
           </React.Fragment>
