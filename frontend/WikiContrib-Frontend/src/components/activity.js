@@ -8,7 +8,7 @@ import phabricatorPlatformIcon from '../img/phabricatorPlatformIcon.png';
  * Show all the user Commits on a specific day
  */
 
-window.history.pushState({ page: 1 }, "WikiContrib", "/");
+// window.history.pushState({ page: 1 }, "WikiContrib", "/");
 
 class Activity extends React.Component {
   constructor(props) {

@@ -234,7 +234,7 @@ class QueryResult extends React.Component {
     }
     this.state.data.forEach(e => {
       let index = new Date(parseInt(e.time) * 1000).getMonth();
-      if (platform === 'phabricator' && platform in e) {
+      if (platform === 'phabricator' && e.platform.toLowerCase() === platform) {
         if (e.assigned && !e.owned) {
           data.datasets[0].data[index] += 1;
           data.datasets[2].data[index] += 1;
@@ -246,7 +246,7 @@ class QueryResult extends React.Component {
           data.datasets[1].data[index] += 1;
           data.datasets[2].data[index] += 1;
         }
-      } else if (platform !== 'phabricator' && platform in e) {
+      } else if (platform !== 'phabricator' && e.platform.toLowerCase() === platform) {
         data.datasets[0].data[index] += 1;
       }
     });

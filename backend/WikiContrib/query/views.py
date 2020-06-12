@@ -8,42 +8,18 @@ from django.utils import timezone
 from rest_framework import status
 from .models import Query, QueryFilter, QueryUser
 from datetime import timedelta, datetime
-from django.utils.crypto import get_random_string
-from django.utils.text import slugify
-from hashlib import sha256
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
+from django.core.serializers import serialize
+from collections import namedtuple
 from WikiContrib.settings import BASE_DIR, DEBUG
 from os import rename, remove
 from WikiContrib.settings import COMMIT_STATUS
 from result.views import UserUpdateStatus, UserUpdateTimeStamp
-
-
-def create_hash(usersArr=None):
-    """
-    :return: hash code to create the Query.
-    """
-    hash_code = ""
-    if usersArr == None:
-        hash_code = get_random_string(64)
-        while Query.objects.filter(hash_code=hash_code).exists():
-            hash_code = get_random_string(64)
-    else:
-        fullname_slug = ""
-        for dict in usersArr:
-            for field in dict:
-                hash_code + dict[field].lower()
-        if len(usersArr) == 1:
-            fullname_slug = slugify(usersArr[0]["fullname"].lower())
-            hash_code = fullname_slug +"-"+ sha256(hash_code.encode("utf-8")).hexdigest()[:9]
-        else:
-            hash_code = sha256(hash_code.encode("utf-8")).hexdigest()
-
-    return hash_code
-
+from result.helper import create_hash
 
 class CheckQuery(APIView):
     """
@@ -52,6 +28,7 @@ class CheckQuery(APIView):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
+        print("calling post in checkquery-------------------")
         """
         :param request: request Object.
         :param args: arguments passed to the function.
@@ -76,6 +53,7 @@ class AddQueryUser(CreateAPIView):
     serializer_class = QuerySerializer
 
     def post(self, request, *args, **kwargs):
+        print("calling post in AddQueryUser-------------------")
         """
         :param request: request Object.
         :param args: arguments passed to the function.
@@ -148,57 +126,71 @@ class AddQueryUser(CreateAPIView):
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
                 request.data['hash_code'] = create_hash(request.data['users'])
-                if request.data['hash_code'] != "" and Query.objects.filter(hash_code=request.data['hash_code']).exists():
-                    return redirect('result',hash=request.data['hash_code'])
-                else:
-                    try:
-                        with transaction.atomic():
+                print("request.data[hash_code] ",request.data["hash_code"])
+                try:
+                    with transaction.atomic():
+                        query = ""
+                        if Query.objects.filter(hash_code=request.data['hash_code']).exists():
+                            query = Query.objects.filter(hash_code=request.data['hash_code'])
+                            print("this is query after being fetched: ",query)
+                            query[0].queryuser_set.all().delete()
+                            query[0].queryfilter.delete()
+
+                            query = json.loads(serialize("json",query))
+                            query[0]["fields"]["pk"] = query[0]["pk"]
+                            query = {"data":query[0]["fields"]}
+                            query = namedtuple("query",query.keys())(*query.values())
+
+                        else:
                             # Add the Query
                             query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                            filter_time = timezone.now().date()
-                            filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
-                            QueryFilter.objects.create(
-                                query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                                start_time=filter_time - timedelta(days=365),
-                                end_time=filter_time,
-                                status=','.join(COMMIT_STATUS)
-                            )
+                            print("this is query after being created through super: ",query)
 
-                            # Add username's & platform's to the query
-                            temp = 1
-                            print("users in query -----------")
-                            print(request.data['users'])
-                            for i in request.data['users']:
-                                data = i.copy()
-                                if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
-                                    raise IntegrityError
-                                # Ignore if all the fields are empty
-                                if not (data['fullname'] == "" and data['gerrit_username'] == ""
-                                        and data['github_username'] == "" and data['phabricator_username'] == ""):
-                                    data['query'] = query.data['pk']
-                                    s = QueryUserSerializer(data=data)
-                                    s.is_valid(raise_exception=True)
-                                    s.save()
-                                    temp = 0
+                        filter_time = timezone.now().date()
+                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
 
-                            # If all the fields are empty all the times, delete the query
-                            if temp == 1:
-                                raise KeyError
-                    except KeyError:
-                        Query.objects.filter(hash_code=query.data['hash_code']).delete()
-                        return Response({
-                            'message': 'Please provide users data',
-                            'error': 1
-                        }, status=status.HTTP_400_BAD_REQUEST)
+                        QueryFilter.objects.create(
+                            query=get_object_or_404(Query, hash_code=query.data['hash_code']),
+                            start_time=filter_time - timedelta(days=365),
+                            end_time=filter_time,
+                            status=','.join(COMMIT_STATUS)
+                        )
 
-                    except IntegrityError:
-                        Query.objects.filter(hash_code=query.data['hash_code']).delete()
-                        return Response({
-                            'message': 'Fullname\'s has to be unique!!',
-                            'error': 1
-                        }, status=status.HTTP_400_BAD_REQUEST)
+                        # Add username's & platform's to the query
+                        temp = 1
+                        print("users in query -----------")
+                        print(request.data['users'])
+                        for i in request.data['users']:
+                            data = i.copy()
+                            if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
+                                raise IntegrityError
+                            # Ignore if all the fields are empty
+                            if not (data['fullname'] == "" and data['gerrit_username'] == ""
+                                    and data['github_username'] == "" and data['phabricator_username'] == ""):
+                                data['query'] = query.data['pk']
+                                s = QueryUserSerializer(data=data)
+                                s.is_valid(raise_exception=True)
+                                s.save()
+                                temp = 0
 
-                    return redirect('result', hash=query.data['hash_code'])
+                        # If all the fields are empty all the times, delete the query
+                        if temp == 1:
+                            raise KeyError
+                except KeyError:
+                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                    return Response({
+                        'message': 'Please provide users data',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                except IntegrityError:
+                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                    return Response({
+                        'message': 'Fullname\'s has to be unique!!',
+                        'error': 1
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                return redirect('result', hash=query.data['hash_code'])
         except KeyError:
             return Response({
                 'message': 'Fill the form completely!',
@@ -214,12 +206,14 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch', 'delete']
 
     def get_object(self):
+        print("calling get_object in QueryRetrieveUpdateDeleteView-------------------")
         """
         :return: ModalObject of Query
         """
         return get_object_or_404(Query, hash_code=self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
+        print("calling get in QueryRetrieveUpdateDeleteView-------------------")
         """
         :Summary: GET request to view the query.
         :param request: request Object.
@@ -237,6 +231,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             return Response(data)
 
     def patch(self, request, *args, **kwargs):
+        print("calling patch in QueryRetrieveUpdateDeleteView-------------------")
         """
         :Summary: PATCH request to update the query.
         :param request: request Object.
@@ -318,6 +313,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
+        print("calling delete in QueryRetrieveUpdateDeleteView-------------------")
         """
          :Summary: DELETE request to delete the query.
          :param request: request Object.
@@ -340,9 +336,11 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch']
 
     def get_object(self):
+        print("calling get_object in queryfilterview----------------------")
         return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
+        print("calling get in queryfilterview--------------------")
         """
         :Summary: GET request to view the query filters.
         :param request: request Object.
@@ -362,6 +360,7 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             })
 
     def patch(self, request, *args, **kwargs):
+        print("calling patch in query filter view---------------------")
         """
         :Summary: PATCH request to Update the query filters.
         :param request: request Object.
@@ -382,7 +381,10 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             if 'username' not in request.data:
                 return Response({'message': 'Fill the form completely', 'error': 1},
                                 status=status.HTTP_400_BAD_REQUEST)
-            data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
+            data = super(QueryFilterView, self).patch(request, *args, **kwargs).data#an inconsistency with the how this method patches filters
+            # and how AddQueryUsers creates the first queryfilter causes the application to make network requests when it is supposed to fetch
+            # from the cache. this might have something to do with the way we handle time in the whole application. We might have to handle time
+            # properly before this issue can be solved
 
             if data['status'] != commit_status:
                 if commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()\

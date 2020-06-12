@@ -14,9 +14,10 @@ from pandas import read_csv, isnull
 from datetime import datetime
 from .models import ListCommit
 from .serializers import UserCommitSerializer
+from django.core.serializers import serialize
 from pytz import utc
-from WikiContrib.settings import API_TOKEN
-from .helper import get_prev_user, get_next_user
+from WikiContrib.settings import API_TOKEN, DEBUG
+from .helper import get_prev_user, get_next_user, create_hash
 import sys
 from fuzzywuzzy import fuzz
 
@@ -82,30 +83,31 @@ async def get_full_name(data):
 
     """
     if data["platform"] == "phab":
-        if data["full_names"]["phab_full_name"] == "":
-            if data["request_data"][2]['constraints[usernames][0]'] != "":
-                async with data["session"].post(data["url"][1],data=data["request_data"][2]) as response:
-                    realname  = await response.read()
-                    _data = loads(realname.decode("utf-8"))['result']['data']
-                    if(len(_data) != 0):
-                        realname = _data[0]['fields']['realName']
-                        data["full_names"]["phab_full_name"] = realname
-                    else:
-                        data["full_names"]["phab_full_name"] = "username does not exist"
-            else:
-                data["full_names"]["phab_full_name"] = "no username provided"
+        if data["request_data"][2]['constraints[usernames][0]'] != "":
+            async with data["session"].post(data["urls"][1],data=data["request_data"][2]) as response:
+                realname  = await response.read()
+                _data = loads(realname.decode("utf-8"))['result']['data']
+                if(len(_data) != 0):
+                    realname = _data[0]['fields']['realName']
+                    data["full_names"]["phab_full_name"] = realname
+                else:
+                    data["full_names"]["phab_full_name"] = "username does not exist"
+        else:
+            data["full_names"]["phab_full_name"] = "no username provided"
 
     if data["platform"] == "gerrit":
-        try:
-            data["full_names"]["gerrit_full_name"] = data["gerrit_response"][0]["owner"]["name"]
-        except:
-            if data["url"].split("?")[1].split("&")[0].split(":")[1] == "":
-                data["full_names"]["gerrit_full_name"] = "no username provided"
-            else:
-                data["full_names"]["gerrit_full_name"] = "username does not exist"
+        if data["urls"][1].split("?")[1].split("&")[0].split(":")[1] != "":
+            async with data["session"].get(data["urls"][1]) as response:
+                realname = await response.read()
+                try:
+                    data["full_names"]["gerrit_full_name"] = loads(realname[4:].decode("utf-8"))[0]["name"]
+                except:
+                    data["full_names"]["gerrit_full_name"] = "username does not exist"
+        else:
+            data["full_names"]["gerrit_full_name"] = "no username provided"
 
 
-async def get_task_authors(url, request_data, session, resp, phid, full_names):
+async def get_task_authors(url, request_data, session, resp, phid):
     """
     :Summary: Get the Phabricator tasks that the user authored.
     :param url: URL to be fetched.
@@ -133,9 +135,8 @@ async def get_task_authors(url, request_data, session, resp, phid, full_names):
                     after = data['cursor']['after']
                     request_data[0]['after'] = after
 
-    await get_full_name(data={"platform":"phab","session":session,"full_names":full_names,"url":url,"request_data":request_data})
 
-async def get_task_assigner(url, request_data, session, resp, full_names):
+async def get_task_assigner(url, request_data, session, resp):
     """
     :Summary: Get the Phabricator tasks that the user assigned with.
     :param url: URL to be fetched.
@@ -157,11 +158,8 @@ async def get_task_assigner(url, request_data, session, resp, full_names):
                     after = data['cursor']['after']
                     request_data[1]['after'] = after
 
-    await get_full_name(data={"platform":"phab","session":session,"full_names":full_names,"url":url,"request_data":request_data})
 
-
-
-async def get_gerrit_data(url, session, gerrit_resp,full_names):
+async def get_gerrit_data(url, session, gerrit_resp):
     """
     :Summary: Get all the Gerrit tasks of the user.
     :param url: URL to be fetched.
@@ -170,8 +168,8 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
     :return: None
     """
     data = []
-    if url.split("?")[1].split("&")[0].split(":")[1] != "":
-        async with session.get(url) as response:
+    if url[0].split("?")[1].split("&")[0].split(":")[1] != "":
+        async with session.get(url[0]) as response:
             data = await response.read()
             try:
                 data = loads(data[4:].decode("utf-8"))
@@ -180,10 +178,8 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
 
             gerrit_resp.extend(data)
 
-    await get_full_name(data={"platform":"gerrit","full_names":full_names,"url":url,"gerrit_response":data})
 
-
-def format_data(pd, gd, query, phid):
+def format_data(unique_user_hash = None, pd = None, gd = None, query = None, phid = None,cachedResults=None):
     """
     :Summary: Format the data fetched, store the data to Databases and remove the irrelevant data.
     :param pd: Phabricator Data.
@@ -193,6 +189,31 @@ def format_data(pd, gd, query, phid):
     :return: JSON response of all the tasks in which the user involved, in the specified time span.
     """
     resp = []
+    if query.queryfilter.status is not None and query.queryfilter.status != "":
+        status_name = query.queryfilter.status.split(",")
+    else:
+        status_name = True
+
+
+
+    """ If there are matching results in the cache"""
+    if cachedResults != None:
+        print("returning cached results---------------------")
+        results = loads(serialize("json",cachedResults,fields=("created_on","platform","status","owned","assigned")))
+        for result in results:
+            status = result["fields"]["status"].lower()
+            if (status_name is True or status in status_name or
+            ((status == "open" and "p-open" in status_name) or (status == "open" in status_name))):
+                rv = {
+                   "time": result["fields"]["created_on"],"platform":result["fields"]["platform"],
+                   "staus":result["fields"]["status"],"owned":result["fields"]["owned"],
+                   "assigned":result["fields"]["assigned"]
+                }
+                resp.append(rv)
+        return resp
+
+
+
     len_pd = len(pd)
     len_gd = len(gd)
     if len_pd > len_gd:
@@ -200,12 +221,9 @@ def format_data(pd, gd, query, phid):
     else:
         leng = len_gd
     temp = []
-    if query.queryfilter.status is not None and query.queryfilter.status != "":
-        status_name = query.queryfilter.status.split(",")
-    else:
-        status_name = True
     with transaction.atomic():
-        ListCommit.objects.filter(query=query).delete()
+        print("list commits where deleted----------------------------")
+        ListCommit.objects.filter(user_hash=unique_user_hash).delete()
         for i in range(0, leng):
             if i < len_pd:
                 if pd[i]['phid'] not in temp:
@@ -213,46 +231,101 @@ def format_data(pd, gd, query, phid):
                     date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
                     date_time = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "str")
                     status = pd[i]['fields']['status']['name'].lower()
+                    # qs = query.queryfilter.start_time
+                    # qe = query.queryfilter.end_time
+                    # cs = str(datetime(qs.year,qs.month,qs.day).timestamp())
+                    # ce = str(datetime(qe.year,qe.month,qe.day).timestamp())
+                    createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
+                    createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
+                    contrib = ListCommit.objects.create(
+                        query=query,
+                        user_hash = unique_user_hash,
+                        heading=pd[i]['fields']['name'], created_on=date_time,
+                        createdStart = createdStart,
+                        createdEnd = createdEnd,
+                        platform="Phabricator", status=pd[i]['fields']['status']['name'],
+                        redirect="T" + str(pd[i]['id']), owned=pd[i]['fields']['authorPHID'] == phid,
+                        assigned= pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
+                        )
                     if status_name is True or status in status_name or (status == "open" and "p-open" in status_name):
                         rv = {
-                            "time": date_time,
-                            "phabricator": True,
-                            "status": pd[i]['fields']['status']['name'],
-                            "owned": pd[i]['fields']['authorPHID'] == phid,
-                            "assigned": pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
-                        }
+                            "time": contrib.created_on,"platform": contrib.platform,
+                            "status": contrib.status,"owned": contrib.owned,
+                            "assigned": contrib.assigned
+                             }
                         resp.append(rv)
-                    ListCommit.objects.create(
-                        query=query, heading=pd[i]['fields']['name'],
-                        platform="Phabricator", created_on=date_time,
-                        redirect="T" + str(pd[i]['id']), status=pd[i]['fields']['status']['name'],
-                        owned=pd[i]['fields']['authorPHID'] == phid,
-                        assigned= pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
-                    )
+
             if i < len_gd:
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
                                                            "%Y-%m-%d"))
                 if date_time.date() < query.queryfilter.end_time and date_time.date() > query.queryfilter.start_time:
                     epouch = choose_time_format_method(date_time.replace(hour=0, minute=0, second=0), "int")
                     status = gd[i]['status'].lower()
+
+                    # qs = query.queryfilter.start_time
+                    # qe = query.queryfilter.end_time
+                    createdStart = choose_time_format_method(datetime.strptime(str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
+                    createdEnd = choose_time_format_method(datetime.strptime(str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
+                    # cs = str(datetime(qs.year,qs.month,qs.day).timestamp())
+                    # ce = str(datetime(qe.year,qe.month,qe.day).timestamp())
+
+                    contrib = ListCommit.objects.create(
+                        query=query,
+                        user_hash = unique_user_hash,
+                        heading=gd[i]['subject'],created_on=epouch,
+                        createdStart = createdStart,
+                        createdEnd = createdEnd,
+                        platform="Gerrit", status=gd[i]['status'],
+                        redirect=gd[i]['change_id'], owned=True,
+                        assigned=True
+                    )
+
                     if status_name is True or status in status_name or (status == "open" in status_name):
                         rv = {
-                           "time": epouch,
-                           "gerrit": True,
-                           "status": gd[i]['status'],
-                           "owned": True
+                           "time": contrib.created_on,"platform":contrib.platform,
+                           "staus":contrib.status,"owned":contrib.owned,
+                           "assigned":contrib.assigned
                         }
                         resp.append(rv)
-                    ListCommit.objects.create(
-                        query=query, heading=gd[i]['subject'],
-                        platform="Gerrit", created_on=epouch,
-                        redirect=gd[i]['change_id'], status=gd[i]['status'],
-                        owned=True, assigned=True
-                    )
+
     return resp
 
 
-async def get_data(urls, request_data, loop, gerrit_response, phab_response, phid, full_names):
+async def get_full_names(urls,request_data,full_names,loop):
+    tasks = []
+    async with ClientSession() as session:
+        tasks.append(loop.create_task((get_full_name(data={"platform":"phab","urls":urls[0],
+        "session":session,"request_data":request_data,"full_names":full_names}))))
+        tasks.append(loop.create_task((get_full_name(data={"platform":"gerrit","urls":urls[1],
+        "session":session,"full_names":full_names}))))
+        await asyncio.gather(*tasks)
+
+
+def get_cache_or_request(query,unique_user_hash,urls,request_data,loop,createdStart,createdEnd,phid,gerrit_response,phab_response):
+
+    cache = ListCommit.objects.filter(user_hash = unique_user_hash)
+    print(cache)
+    if len(cache) > 0:
+        cacheCreatedStart, cacheCreatedEnd = cache[:1][0].createdStart,cache[:1][0].createdEnd
+        print("cacheCreatedStart",cacheCreatedStart)
+        print("cacheCreatedEnd",cacheCreatedEnd)
+        # cs = str(datetime.fromtimestamp(int(createdStart)).replace(hour=0,minute=0,second=0).timestamp())
+        # ce = str(datetime.fromtimestamp(int(createdEnd)).replace(hour=0,minute=0,second=0).timestamp())
+        print("createdStart",createdStart)
+        print("createdEnd",createdEnd)
+        if (cacheCreatedStart <= createdStart) and (cacheCreatedEnd >= createdEnd):
+            cache = cache.filter(created_on__gte = createdStart, created_on__lte = createdEnd)
+            return format_data(query=query,cachedResults=cache)
+
+    start_time = time.time()
+
+    loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
+                                     gerrit_response=gerrit_response, phab_response=phab_response,phid=phid))
+    print(time.time() - start_time)
+    return format_data(unique_user_hash = unique_user_hash, pd = phab_response, gd = gerrit_response, query = query, phid = phid[0])
+
+
+async def get_data(urls, request_data, loop, gerrit_response, phab_response, phid):
     """
     :Summary: Start a session and fetch the data.
     :param urls: URLS to be fetched.
@@ -265,13 +338,14 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response, phi
     """
     tasks = []
     async with ClientSession() as session:
-        tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response,full_names))))
-        tasks.append(loop.create_task((get_task_authors(urls[0], request_data, session, phab_response, phid, full_names))))
-        tasks.append(loop.create_task((get_task_assigner(urls[0], request_data, session, phab_response, full_names))))
+        tasks.append(loop.create_task((get_gerrit_data(urls[1], session, gerrit_response))))
+        tasks.append(loop.create_task((get_task_authors(urls[0], request_data, session, phab_response, phid))))
+        tasks.append(loop.create_task((get_task_assigner(urls[0], request_data, session, phab_response))))
         await asyncio.gather(*tasks)
 
 
 def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query, users):
+    print("calling getDetails-------------------")
     """
     :Summary: Get the contributions of the user
     :param username: Fullname of the user.
@@ -290,14 +364,18 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
     if isinstance(gerrit_username, float):
         gerrit_username = ''
 
+    phab_response, full_names, gerrit_response, formatted = [], {}, [] , []
+
     loop = asyncio.new_event_loop()
-    phab_response, full_names, gerrit_response = [], {"phab_full_name":""}, []
     asyncio.set_event_loop(loop)
+
     urls = [
         ['https://phabricator.wikimedia.org/api/maniphest.search',
         'https://phabricator.wikimedia.org/api/user.search'],
-        "https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS"
+        ["https://gerrit.wikimedia.org/r/changes/?q=owner:" + gerrit_username + "&o=DETAILED_ACCOUNTS",
+        "https://gerrit.wikimedia.org/r/accounts/?q=name:"+gerrit_username+"&o=DETAILS"]
     ]
+
     request_data = [
         {
             'constraints[authorPHIDs][0]': username,
@@ -316,14 +394,23 @@ def getDetails(username, gerrit_username, createdStart, createdEnd, phid, query,
             'api.token': API_TOKEN,
         }
     ]
-    start_time = time.time()
-    loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
-                                     gerrit_response=gerrit_response, phab_response=phab_response,
-                                     full_names=full_names,phid=phid))
-    print(time.time() - start_time)
 
-    formatted = format_data(phab_response, gerrit_response, query, phid[0])
+    loop.run_until_complete(get_full_names(urls=urls,request_data=request_data,full_names=full_names,loop=loop))
     match_percent = fuzzyMatching(control=users[1],full_names=full_names)
+
+    unique_user_hash = create_hash([{"fullname":users[1],"gerrit_username":gerrit_username,"phabricator_username":username}])
+
+    formatted = get_cache_or_request(query=query,unique_user_hash=unique_user_hash,urls=urls,request_data=request_data,loop=loop,
+                            gerrit_response=gerrit_response,phab_response=phab_response,
+                            createdStart=createdStart,createdEnd=createdEnd,phid=phid)
+    # else:
+    #     start_time = time.time()
+    #     loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
+    #                                      gerrit_response=gerrit_response, phab_response=phab_response,phid=phid))
+    #     print(time.time() - start_time)
+
+        # formatted = format_data(unique_user_hash = unique_user_hash, pd = phab_response, gd = gerrit_response, query = query, phid = phid[0])
+
     return Response({
         'query': query.hash_code,
         'match_details':{
@@ -351,6 +438,7 @@ class DisplayResult(APIView):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        print("calling get in DisplayResult-------------------")
         phid = [False]
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if query.file:
@@ -450,6 +538,7 @@ class GetUserCommits(ListAPIView):
     serializer_class = UserCommitSerializer
 
     def get(self, request, *args, **kwargs):
+        print("calling get in GetUserCommits-------------------")
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
 
         try:
@@ -478,6 +567,7 @@ class GetUsers(APIView):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        print("calling get inside getusers-------------------")
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if not query.file:
             users = query.queryuser_set.all().values_list('fullname', flat=True)
@@ -499,6 +589,7 @@ class GetUsers(APIView):
 
 
 def UserUpdateTimeStamp(data):
+    print("calling UserUpdateTimeStamp-----------------------------")
     """
     :param data: Hash Code of the Query.
     :return: contributions of the user on updating Query Filter timestamp.
@@ -529,6 +620,7 @@ def UserUpdateTimeStamp(data):
 
 
 def UserUpdateStatus(data):
+    print("calling UserUpdateStatus----------------------------")
     """
     :param data: Hash Code of the Query.
     :return: contributions of the user on updating Query Filter commit status.
