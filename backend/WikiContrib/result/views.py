@@ -20,7 +20,7 @@ from .serializers import UserCommitSerializer
 from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR
 from .helper import get_prev_user, get_next_user
 import sys
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 if GITHUB_FALLBACK_TO_PR:
     from .github_fallback import get_github_pr_by_org
 
@@ -305,7 +305,7 @@ async def get_github_data(url, request_data, session, github_resp,full_names):
         index = index + 2
     await asyncio.gather(*tasks)
     await get_full_name(data={"platform":"github","session":session,"full_names":full_names,"request_data":request_data})
-    
+
 
 def format_data(pd, gd, ghd,ghd_rate_limit_message, query, phid):
     """
