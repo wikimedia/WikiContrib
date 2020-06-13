@@ -315,9 +315,8 @@ export class Query extends Component {
       usernameEmptyAtRow = usernameEmptyAtRow + 1;
       this.setState({
         message: {
-          message:
-            'All username fields cannot be left blank at the same time. Provide username for one of these accounts in row ' +
-            usernameEmptyAtRow,
+          message:`OOPS, usernames are missing! Provide a username for at least
+           one of your Wikimedia accounts in row ${usernameEmptyAtRow} to see your contribution activity.`,
           update: !this.state.message.update,
           trigger: true,
           type: 1,
