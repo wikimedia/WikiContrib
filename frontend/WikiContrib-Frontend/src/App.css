@@ -360,14 +360,14 @@ h3.accounts  {
 
 .flex-col {
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
 }
 
 @media only screen and (min-width: 1456px){
   .flex-col{
     width: 1.3vw;
   }
-} 
+}
 
 .flex-row {
   display: flex;
@@ -631,9 +631,9 @@ h3.accounts  {
 }
 
 .render_activity {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .contribution_text {

@@ -11,7 +11,7 @@ class Query(models.Model):
     hash_code = models.CharField(unique=True, max_length=64)
     file = models.BooleanField(default=False)
     csv_file = models.FileField(upload_to='uploads/', null=True, blank=True)
-    created_on = models.DateTimeField(default=timezone.now)
+    created_on = models.DateTimeField(default=timezone.now())
 
     @property
     def csv_file_uri(self):
@@ -45,8 +45,8 @@ class QueryFilter(models.Model):
     :Summary: Store filters of a Query.
     """
     query = models.OneToOneField(Query, on_delete=models.CASCADE)
-    start_time = models.DateField(null=True, blank=True)
-    end_time = models.DateField(null=True, blank=True)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):

@@ -9,7 +9,7 @@ class ListCommit(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     heading = models.CharField(max_length=200)
     platform = models.CharField(max_length=20)
-    created_on = models.CharField(max_length=50)
+    created_on = models.DateTimeField()
     redirect = models.CharField(max_length=200)
     status = models.CharField(max_length=20)
     owned = models.BooleanField(default=False)
