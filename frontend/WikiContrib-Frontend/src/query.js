@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { fetchAsynchronous } from './components/fetch';
 import fetchFileAsynchronous from './components/fetchFile';
 import MessageDisplay from './components/message';
-import { Redirect } from 'react-router-dom';
 import { QueryCreateApi, QueryDetailApi } from './api';
 import csv from './img/csv.png';
 import format from './img/format.png';
@@ -394,6 +393,14 @@ export class Query extends Component {
         redirect: hash,
         loading: false,
         loadData: response,
+      },()=>{
+        if(this.state.redirect !== false){
+        this.props.history.push({
+            pathname: '/' + this.state.redirect + '/',
+            data: this.state.loadData,
+          })
+        }
+
       });
     }
   };
@@ -402,17 +409,6 @@ export class Query extends Component {
     document.body.style.backgroundColor = '#f8f9fa';
     return (
       <React.Fragment>
-        {this.state.redirect !== false ? (
-          <Redirect
-            to={{
-              pathname: '/' + this.state.redirect + '/',
-              data: this.state.loadData,
-            }}
-          />
-        ) : (
-          ''
-        )}
-
         {this.state.loadData !== false ? (
           <Loader active>Loading</Loader>
         ) : (
