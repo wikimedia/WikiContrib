@@ -279,7 +279,6 @@ class QueryResult extends React.Component {
   };
 
   callback = response => {
-    console.log(response)
     /**
      * Callback function that feeds the fetched information to the state.
      * @param {Object} response Response data from API fetch
