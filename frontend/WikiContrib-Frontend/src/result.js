@@ -70,7 +70,7 @@ const chartOptions = {
 };
 
 /**
- * Display Fullname, Phabricator Username and Gerrit Username of the user.
+ * Display Fullname, Phabricator Username, Gerrit Username and Github Username of the user.
  */
 class DisplayUser extends React.Component {
   render = () => {
@@ -123,6 +123,22 @@ class DisplayUser extends React.Component {
                     </a>
                   ) : (
                       'None'
+                    )}{' '}
+                  | Github:{' '}
+                  {this.props.github_username !== '' ? (
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={
+                        'https://github.com/' +
+                        this.props.github_username +
+                        '/'
+                      }
+                    >
+                      {this.props.github_username}
+                    </a>
+                  ) : (
+                      'None'
                     )}
                 </h3>
                 <h3 className="accounts">
@@ -159,12 +175,14 @@ class QueryResult extends React.Component {
       filters = data.filters;
     }
 
+    console.log("this is insider constructor: filters = ",filters);
+
     this.state = {
       query: this.props.match.params.hash,
       loading: data === false,
       data: data !== false ? data.result : [],
-      matchDetails: data !== false ? data.match_details : {},
-      showMismatch: data === false ? false : (data.match_details.match_percent > 70 ? true : false),
+      meta: data !== false ? data.meta : {},
+      showMismatch: data === false ? false : (data.meta.match_percent > 60 ? true : false),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
@@ -176,7 +194,8 @@ class QueryResult extends React.Component {
       page_load: data === false,
       view_filters: false,
       gerrit_username: data !== false ? data.current_gerrit : null,
-      phab_username: data !== false ? data.current_phabricator : null
+      phab_username: data !== false ? data.current_phabricator : null,
+      github_username: data !== false ? data.current_github : null
     };
   }
 
@@ -286,7 +305,7 @@ class QueryResult extends React.Component {
 
     /*
      * Sort data array based on the start date such that
-     * the data in the `Phabricator` and `Gerrit` graph
+     * the data in the `Phabricator` and `Gerrit` and `Github` graph
      * flows left to right i.e., from a past month to the
      * selected month.
      */
@@ -318,14 +337,16 @@ class QueryResult extends React.Component {
      */
     if (response.error !== 1) {
       let filters = response.filters;
+      console.log("inside callback. filters == ",filters);
       this.setState({
         data: response.result,
-        matchDetails: response !== false ? response.match_details : {},
-        showMismatch: response === false ? false : (response.match_details.match_percent > 70 ? true : false),
+        meta: response !== false ? response.meta : {},
+        showMismatch: response === false ? false : (response.meta.match_percent > 60 ? true : false),
         current: response.current,
         prev: response.previous,
         gerrit_username: response.current_gerrit,
         phab_username: response.current_phabricator,
+        github_username: response.current_github,
         next: response.next,
         loading: false,
         current_filters: filters,
@@ -393,8 +414,8 @@ class QueryResult extends React.Component {
     if (response.error !== 1) {
       this.setState({
         data: response.result,
-        matchDetails: response !== false ? response.match_details : {},
-        showMismatch: response === false ? false : (response.match_details.match_percent > 70 ? true : false),
+        meta: response !== false ? response.meta : {},
+        showMismatch: response === false ? false : (response.meta.match_percent > 60 ? true : false),
         current_filters: this.state.update_filters,
         loading: false,
       });
@@ -453,6 +474,8 @@ class QueryResult extends React.Component {
       start_time: new Date(time - one_year).toISOString(),
       username: this.state.current,
     };
+
+    console.log("inside handle reset,filters == ",filters);
 
     this.setState({
       loading: true,
@@ -617,6 +640,8 @@ class QueryResult extends React.Component {
 
                             filters.start_time = start_time.toISOString();
 
+                            console.log("inside filter 'from' onchange,filters == ",filters);
+
                             this.setState({
                               update_filters: filters,
                             });
@@ -648,6 +673,8 @@ class QueryResult extends React.Component {
 
                             let filters = Object.assign({}, uf);
                             filters.start_time = date.toISOString();
+
+                            console.log("inside filters 'to' onchange,filters == ",filters);
 
                             this.setState({ update_filters: filters });
                           }}
@@ -709,77 +736,113 @@ class QueryResult extends React.Component {
                       username={this.state.current}
                       gerrit_username={this.state.gerrit_username}
                       phabricator_username={this.state.phab_username}
+                      github_username={this.state.github_username}
                       filters={this.state.current_filters}
                     />
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
-                  <Grid.Column computer={12} tablet={14} mobile={14}>
-                    <Grid>
-                      <Grid.Row>
-                        <Grid.Column computer={8} mobile={16} tablet={8}>
-                          {this.state.loading ? (
-                            <Card className="graph_load">
-                              <Card.Content>
-                                <Placeholder fluid className="image_load">
-                                  <Placeholder.Line />
-                                </Placeholder>
-                              </Card.Content>
-                            </Card>
-                          ) : (
-                            <Card className="chart_container">
-                              <span style={{ textAlign: 'center' }}>
-                                <Header className="chart"> PHABRICATOR </Header>
-                                {this.state.matchDetails.full_names.phab_full_name !== "no username provided" &&
-                                 this.state.matchDetails.full_names.phab_full_name !== "username does not exist" ? (
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('phabricator')}
-                                    options={chartOptions}
-                                  />
-                                ) : (
-                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
-                                  {this.state.matchDetails.full_names.phab_full_name}
-                                  </div>
-                                )}
-                              </span>
-                            </Card>
-                          )}
-                        </Grid.Column>
-                        <Grid.Column computer={8} mobile={16} tablet={8}>
-                          {this.state.loading ? (
-                            <Card className="graph_load">
-                              <Card.Content>
-                                <Placeholder fluid className="image_load">
-                                  <Placeholder.Line />
-                                </Placeholder>
-                              </Card.Content>
-                            </Card>
-                          ) : (
-                            <Card className="chart_container">
-                              <span style={{ textAlign: 'center' }}>
-                                <Header className="chart"> GERRIT </Header>
-                                {this.state.matchDetails.full_names.gerrit_full_name !== "no username provided" &&
-                                 this.state.matchDetails.full_names.gerrit_full_name !== "username does not exist" ? (
-                                  <Line
-                                    ref="chart"
-                                    data={this.getGraphData('gerrit')}
-                                    options={chartOptions}
-                                  />
-                                ) : (
-                                  <div style={{height:"34vh",fontSize:"1.8rem",fontWeight:"bold"}}>
-                                  {this.state.matchDetails.full_names.gerrit_full_name}
-                                  </div>
-                                )}
-                              </span>
-                            </Card>
-                          )}
-                        </Grid.Column>
-                      </Grid.Row>
-                    </Grid>
-                  </Grid.Column>
-                  <Grid.Column computer={2} mobile={1} tablet={1} />
+                  <div className="graphs">
+                            <div className="graph">
+                              {this.state.loading ? (
+                                <Card className="graph_load">
+                                  <Card.Content>
+                                    <Placeholder fluid className="image_load">
+                                      <Placeholder.Line />
+                                    </Placeholder>
+                                  </Card.Content>
+                                </Card>
+                              ) : (
+                                <Card className="chart_container">
+                                  <span style={{ textAlign: 'center' }}>
+                                    <Header className="chart"> PHABRICATOR </Header>
+                                    {this.state.meta.full_names.phab_full_name
+                                     !== "OOPS! We couldn't find a username in your request." &&
+                                     this.state.meta.full_names.phab_full_name
+                                     !== "OOPS! We couldn't find an account with that username." ? (
+                                      <Line
+                                        ref="chart"
+                                        data={this.getGraphData('phabricator')}
+                                        options={chartOptions}
+                                      />
+                                    ) : (
+                                      <div className="chart_message">
+                                      <h2>{this.state.meta.full_names.phab_full_name}</h2>
+                                      </div>
+                                    )}
+                                  </span>
+                                </Card>
+                              )}
+                            </div>
+                            <div className="graph">
+                              {this.state.loading ? (
+                                <Card className="graph_load">
+                                  <Card.Content>
+                                    <Placeholder fluid className="image_load">
+                                      <Placeholder.Line />
+                                    </Placeholder>
+                                  </Card.Content>
+                                </Card>
+                              ) : (
+                                <Card className="chart_container">
+                                  <span style={{ textAlign: 'center' }}>
+                                    <Header className="chart"> GERRIT </Header>
+                                    {this.state.meta.full_names.gerrit_full_name
+                                     !== "OOPS! We couldn't find a username in your request." &&
+                                     this.state.meta.full_names.gerrit_full_name
+                                     !== "OOPS! We couldn't find an account with that username." ? (
+                                      <Line
+                                        ref="chart"
+                                        data={this.getGraphData('gerrit')}
+                                        options={chartOptions}
+                                      />
+                                    ) : (
+                                      <div className="chart_message">
+                                      <h2>{this.state.meta.full_names.gerrit_full_name}</h2>
+                                      </div>
+                                    )}
+                                  </span>
+                                </Card>
+                              )}
+                            </div>
+                            <div className="graph">
+                              {this.state.loading ? (
+                                <Card className="graph_load">
+                                  <Card.Content>
+                                    <Placeholder fluid className="image_load">
+                                      <Placeholder.Line />
+                                    </Placeholder>
+                                  </Card.Content>
+                                </Card>
+                              ) : (
+                                <Card className="chart_container">
+                                  <span style={{ textAlign: 'center' }}>
+                                    <Header className="chart"> GITHUB </Header>
+                                    {this.state.meta.full_names.github_full_name
+                                     !== "OOPS! We couldn't find a username in your request." &&
+                                     this.state.meta.full_names.github_full_name
+                                     !== "OOPS! We couldn't find an account with that username." ? (
+                                      this.state.meta.rate_limits.github_rate_limit_message === "" ? (
+                                        <Line
+                                          ref="chart"
+                                          data={this.getGraphData('github')}
+                                          options={chartOptions}
+                                        />
+                                    ) : (
+                                      <div className="chart_message">
+                                      <h2>{this.state.meta.rate_limits.github_rate_limit_message}</h2>
+                                      </div>
+                                    )
+                                    ) : (
+                                      <div className="chart_message">
+                                      <h2>{this.state.meta.full_names.github_full_name}</h2>
+                                      </div>
+                                    )}
+                                  </span>
+                                </Card>
+                              )}
+                            </div>
+                          </div>
                 </Grid.Row>
                 <Grid.Row>
                   <Grid.Column width={2} />
