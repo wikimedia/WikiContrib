@@ -365,8 +365,8 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
 
             if data['status'] != commit_status:
-                if commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()\
-                        or commit_end != datetime.strptime(data['end_time'], "%Y-%m-%d").date():
+                if (commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()
+                    or commit_end != datetime.strptime(data['end_time'], "%Y-%m-%d").date()):
                     return UserUpdateTimeStamp(rv)
                 else:
                     return UserUpdateStatus(rv)
