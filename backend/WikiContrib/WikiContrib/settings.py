@@ -171,14 +171,6 @@ ORGS = [
 "counterVandalism"
 ]
 
-API_ENDPOINTS = [
-    ["""https://phabricator.wikimedia.org/api/maniphest.search""",
-    """https://phabricator.wikimedia.org/api/user.search"""],
-    """https://gerrit.wikimedia.org/r/changes/?q=owner:{gerrit_username}&o=DETAILED_ACCOUNTS""",
-    ["""https://api.github.com/search/commits?per_page=100&q=author:{github_username}""",
-    """https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:{github_username}"""]
-]
-
 try:
     from .local_settings import *
 except ImportError:

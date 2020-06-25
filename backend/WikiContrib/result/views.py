@@ -17,7 +17,7 @@ from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
 from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-ORGS, GITHUB_API_LIMIT, API_ENDPOINTS
+ORGS, GITHUB_API_LIMIT
 from .helper import get_prev_user, get_next_user
 import sys
 from rapidfuzz import fuzz
@@ -266,9 +266,7 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
             pass
         return url
 
-    count = 0
     while loopCount > 0:
-        count += 1
         newURL = query.format(url=url, orgs_filter=orgs_filter,
                  dateRangeStartIsoFormat=dateRangeStart.isoformat()+"Z",
                  dateRangeEndIsoFormat=dateRangeEnd.isoformat()+"Z")
@@ -458,7 +456,6 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                     ghd_rate_limit_message[0] = ghd[i]['rate-limit-message']
                     ghd.clear()
 
-
     return resp
 
 
@@ -519,9 +516,13 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     full_names = {"phab_full_name":""}
     github_rate_limit_message = ['']
 
-    API_ENDPOINTS[1] = API_ENDPOINTS[1].format(gerrit_username=gerrit_username)
-    API_ENDPOINTS[2][0] = API_ENDPOINTS[2][0].format(github_username=github_username)
-    API_ENDPOINTS[2][1] = API_ENDPOINTS[2][1].format(github_username=github_username)
+    api_endpoints = [
+        ["https://phabricator.wikimedia.org/api/maniphest.search",
+        "https://phabricator.wikimedia.org/api/user.search"],
+        "https://gerrit.wikimedia.org/r/changes/?q=owner:"+gerrit_username+"&o=DETAILED_ACCOUNTS",
+        ["https://api.github.com/search/commits?per_page=100&q=author:"+github_username,
+        "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username]
+    ]
 
     request_data = [
         {
@@ -549,7 +550,7 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     ]
 
     start_time = time.time()
-    loop.run_until_complete(get_data(urls=API_ENDPOINTS, request_data=request_data,
+    loop.run_until_complete(get_data(urls=api_endpoints, request_data=request_data,
                                      loop=loop,gerrit_response=gerrit_response,
                                      phab_response=phab_response,
                                      github_response=github_response,
