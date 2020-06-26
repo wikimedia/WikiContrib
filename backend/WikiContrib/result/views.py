@@ -412,8 +412,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                     if ghdRateLimitTriggered is not True:
                         if GITHUB_FALLBACK_TO_PR == False:
                             date_time = utc.localize(datetime.strptime(
-                            ghd[i]['commit']['committer']['date']
-                            .split(".")[0],"%Y-%m-%d %H:%M:%S")
+                            ghd[i]['commit']['committer']['date'].split(".")[0],"%Y-%m-%dT%H:%M:%S")
                             .replace(minute=0, second=0, microsecond=0))
 
                             rv = {
@@ -433,7 +432,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                         else:
                             date_time = utc.localize(datetime.strptime(
                             ghd[i]['closed_at']
-                            .split(".")[0],"%Y-%m-%d %H:%M:%S")
+                            .split(".")[0],"%Y-%m-%dT%H:%M:%S")
                             .replace(minute=0, second=0, microsecond=0))
 
                             rv = {

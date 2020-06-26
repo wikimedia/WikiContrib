@@ -175,8 +175,6 @@ class QueryResult extends React.Component {
       filters = data.filters;
     }
 
-    console.log("this is insider constructor: filters = ",filters);
-
     this.state = {
       query: this.props.match.params.hash,
       loading: data === false,
@@ -337,7 +335,6 @@ class QueryResult extends React.Component {
      */
     if (response.error !== 1) {
       let filters = response.filters;
-      console.log("inside callback. filters == ",filters);
       this.setState({
         data: response.result,
         meta: response !== false ? response.meta : {},
@@ -474,8 +471,6 @@ class QueryResult extends React.Component {
       start_time: new Date(time - one_year).toISOString(),
       username: this.state.current,
     };
-
-    console.log("inside handle reset,filters == ",filters);
 
     this.setState({
       loading: true,
@@ -640,8 +635,6 @@ class QueryResult extends React.Component {
 
                             filters.start_time = start_time.toISOString();
 
-                            console.log("inside filter 'from' onchange,filters == ",filters);
-
                             this.setState({
                               update_filters: filters,
                             });
@@ -673,8 +666,6 @@ class QueryResult extends React.Component {
 
                             let filters = Object.assign({}, uf);
                             filters.start_time = date.toISOString();
-
-                            console.log("inside filters 'to' onchange,filters == ",filters);
 
                             this.setState({ update_filters: filters });
                           }}
