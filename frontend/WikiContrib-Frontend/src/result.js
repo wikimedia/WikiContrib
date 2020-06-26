@@ -704,10 +704,9 @@ class QueryResult extends React.Component {
                 warning
                 header="Warning! It seems like the Provided Usernames doesn't belong to the same user"
                 content={`This can happen when the provided fullname is too different from the retrieved
-                        fullname(s), when there is no existing user for the provided username(s) or
-                        when any of the query form fields is left blank. If the submitted usernames are
-                        yours, try updating the fullname used to register the different accounts to
-                        be similar to the fullname provided during query`}
+                        fullname(s) or when there is no existing user for the provided username(s).
+                        If the submitted usernames are yours, try updating the fullname used to register
+                        the different accounts to be similar to the fullname provided during query`}
               />
               <Button
                 color="yellow"

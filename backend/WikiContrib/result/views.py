@@ -74,11 +74,12 @@ def fuzzyMatching(control, full_names):
     _list = []
     ave = 0
     for key in full_names:
-        if (full_names[key] != username_does_not_exist and
-        full_names[key] != no_username_provided):
-            _list.append(fuzz.WRatio(control, full_names[key]))
+        if full_names[key] != username_does_not_exist:
+            if full_names[key] != no_username_provided:
+                _list.append(fuzz.WRatio(control, full_names[key],score_cutoff=60))
         else:
             return 0
+
     for each in _list:
         ave += each
 
@@ -516,7 +517,7 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     phab_response = []
     gerrit_response = []
     github_response = []
-    full_names = {"phab_full_name":""}
+    full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
     github_rate_limit_message = ['']
 
     API_ENDPOINTS[1] = API_ENDPOINTS[1].format(gerrit_username=gerrit_username)
