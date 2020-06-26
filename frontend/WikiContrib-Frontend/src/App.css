@@ -405,6 +405,7 @@ h3.accounts  {
 }
 
 .activity_wrapper {
+  width: 100%;
   margin-left: 15%;
   margin-right: 15%;
 }
