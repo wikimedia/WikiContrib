@@ -74,11 +74,12 @@ def fuzzyMatching(control, full_names):
     _list = []
     ave = 0
     for key in full_names:
-        if (full_names[key] != username_does_not_exist and
-        full_names[key] != no_username_provided):
-            _list.append(fuzz.WRatio(control, full_names[key]))
+        if full_names[key] != username_does_not_exist:
+            if full_names[key] != no_username_provided:
+                _list.append(fuzz.WRatio(control, full_names[key],score_cutoff=60))
         else:
             return 0
+
     for each in _list:
         ave += each
 
@@ -360,14 +361,13 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
             if i < len_pd:
                 if pd[i]['phid'] not in temp:
                     temp.append(pd[i]['phid'])
-                    date_time = datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
-                    date_time = choose_time_format_method(date_time.replace(hour=0,
-                                minute=0, second=0), "str")
+                    date_time = utc.localize(datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
+                                             .replace(hour=0, minute=0, second=0, microsecond=0))
                     status = pd[i]['fields']['status']['name'].lower()
                     if (status_name is True or status in status_name
                     or (status == "open" and "p-open" in status_name)):
                         rv = {
-                            "time": date_time,
+                            "time": date_time.isoformat(),
                             "phabricator": True,
                             "status": pd[i]['fields']['status']['name'],
                             "owned": pd[i]['fields']['authorPHID'] == phid,
@@ -385,18 +385,15 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                         or phid == pd[i]['fields']['ownerPHID']
                     )
             if i < len_gd:
-                date_time = utc.localize(
-                 datetime.strptime(gd[i]['created'].split(".")[0].split(" ")[0],
-                                                           "%Y-%m-%d"))
-                if (date_time.date() < query.queryfilter.end_time
-                and date_time.date() > query.queryfilter.start_time):
-                    epouch = choose_time_format_method(date_time.replace(hour=0,
-                     minute=0, second=0), "int")
+                date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0],"%Y-%m-%d %H:%M:%S")
+                                        .replace(minute=0, second=0, microsecond=0))
+                if date_time <= query.queryfilter.end_time and date_time >= query.queryfilter.start_time:
+                    date_time = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
                     status = gd[i]['status'].lower()
                     if (status_name is True or status in status_name
                     or (status == "open" in status_name)):
                         rv = {
-                           "time": epouch,
+                           "time": date_time.isoformat(),
                            "gerrit": True,
                            "status": gd[i]['status'],
                            "owned": True
@@ -404,7 +401,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                         resp.append(rv)
                     ListCommit.objects.create(
                         query=query, heading=gd[i]['subject'],
-                        platform="Gerrit", created_on=epouch,
+                        platform="Gerrit", created_on=date_time,
                         redirect=gd[i]['change_id'], status=gd[i]['status'],
                         owned=True, assigned=True
                     )
@@ -413,13 +410,12 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                 try:
                     if ghdRateLimitTriggered is not True:
                         if GITHUB_FALLBACK_TO_PR == False:
-                            date_time = utc.localize(
-                            datetime.strptime(ghd[i]["commit"]["committer"]["date"].split("T")[0],
-                             "%Y-%m-%d"))
-                            epouch = choose_time_format_method(date_time.replace(hour=0,
-                             minute=0, second=0), "int")
+                            date_time = utc.localize(datetime.strptime(
+                            ghd[i]['commit']['committer']['date'].split(".")[0],"%Y-%m-%dT%H:%M:%S")
+                            .replace(minute=0, second=0, microsecond=0))
+
                             rv = {
-                            "time": epouch,
+                            "time": date_time.isoformat(),
                             "github":True,
                             "status":"merged",
                             "owned":"True"
@@ -428,17 +424,18 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
 
                             ListCommit.objects.create(
                             query=query, heading = ghd[i]["commit"]["message"],
-                            platform="Github", created_on=epouch,
+                            platform="Github", created_on=date_time,
                             redirect=ghd[i]["html_url"], status="merged", owned=True,
                             assigned=True
                             )
                         else:
-                            date_time = utc.localize(
-                            datetime.strptime(ghd[i]["closed_at"].split("T")[0], "%Y-%m-%d"))
-                            epouch = choose_time_format_method(date_time.replace(hour=0,
-                             minute=0, second=0), "int")
+                            date_time = utc.localize(datetime.strptime(
+                            ghd[i]['closed_at']
+                            .split(".")[0],"%Y-%m-%dT%H:%M:%S")
+                            .replace(minute=0, second=0, microsecond=0))
+
                             rv = {
-                            "time": epouch,
+                            "time": date_time.isoformat(),
                             "github":True,
                             "status":"merged",
                             "owned":"True"
@@ -447,7 +444,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
 
                             ListCommit.objects.create(
                             query=query, heading = ghd[i]["title"],
-                            platform="Github", created_on=epouch,
+                            platform="Github", created_on=date_time,
                             redirect=ghd[i]["html_url"], status="merged", owned=True,
                             assigned=True
                             )
@@ -513,16 +510,17 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     phab_response = []
     gerrit_response = []
     github_response = []
-    full_names = {"phab_full_name":""}
+    full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
     github_rate_limit_message = ['']
 
     api_endpoints = [
-        ["https://phabricator.wikimedia.org/api/maniphest.search",
-        "https://phabricator.wikimedia.org/api/user.search"],
-        "https://gerrit.wikimedia.org/r/changes/?q=owner:"+gerrit_username+"&o=DETAILED_ACCOUNTS",
-        ["https://api.github.com/search/commits?per_page=100&q=author:"+github_username,
-        "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username]
-    ]
+         ["https://phabricator.wikimedia.org/api/maniphest.search",
+          "https://phabricator.wikimedia.org/api/user.search"],
+          "https://gerrit.wikimedia.org/r/changes/?q=owner:"+gerrit_username+"&o=DETAILED_ACCOUNTS",
+         ["https://api.github.com/search/commits?per_page=100&q=author:"+github_username,
+          "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username]
+        ]
+
 
     request_data = [
         {
@@ -686,15 +684,13 @@ class DisplayResult(APIView):
             gerrit_username = user.gerrit_username
             github_username = user.github_username
             paginate = [prev_user, user.fullname, next_user]
-        # Any date object needs to be converted to datetime because \
-        # choose_time_format_method only works with datetime
-        createdStart = choose_time_format_method(datetime.strptime(
-                    str(query.queryfilter.start_time), "%Y-%m-%d"), "str")
-        createdEnd = choose_time_format_method(datetime.strptime(
-                     str(query.queryfilter.end_time), "%Y-%m-%d"), "str")
+        # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
+        createdStart = choose_time_format_method(query.queryfilter.start_time, "str")
+        createdEnd = choose_time_format_method(query.queryfilter.end_time, "str")
+
         return getDetails(username=username, gerrit_username=gerrit_username,
-               github_username=github_username, createdStart=createdStart,
-               createdEnd=createdEnd, phid=phid, query=query, users=paginate)
+                    github_username=github_username, createdStart=createdStart,
+                    createdEnd=createdEnd, phid=phid, query=query, users=paginate)
 
 
 class GetUserCommits(ListAPIView):
@@ -708,11 +704,9 @@ class GetUserCommits(ListAPIView):
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
 
         try:
-            date = datetime.strptime(request.GET['created'], "%Y-%m-%d")
-            date = int((date - datetime(1970, 1, 1)).total_seconds())
+            date = utc.localize(datetime.strptime(request.GET['created'], "%Y-%m-%d"))
         except KeyError:
-            date = choose_time_format_method(
-                   datetime.now().replace(hour=0, minute=0, second=0), "str")
+            date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
         self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
@@ -787,10 +781,8 @@ def UserUpdateTimeStamp(data):
         gerrit_username =  user[0].gerrit_username
         github_username =  user[0].github_username
     # Any date object needs to be converted to datetime because choose_time_format_method only works with datetime
-    createdStart = choose_time_format_method(datetime.strptime(
-                   str(data["query"].queryfilter.start_time), "%Y-%m-%d"), "str")
-    createdEnd = choose_time_format_method(datetime.strptime(
-                 str(data["query"].queryfilter.end_time), "%Y-%m-%d"), "str")
+    createdStart = choose_time_format_method(data["query"].queryfilter.start_time, "str")
+    createdEnd = choose_time_format_method(data["query"].queryfilter.end_time, "str")
     phid = [False]
     return getDetails(username=username, gerrit_username=gerrit_username,
             github_username=github_username, createdStart=createdStart,
@@ -837,7 +829,7 @@ def UserUpdateStatus(data):
         elif i.platform == 'Gerrit':
             obj['gerrit'] = True
         else:
-            obj['Github'] = True
+            obj['github'] = True
         result.append(obj)
 
     return Response({"result": result})
