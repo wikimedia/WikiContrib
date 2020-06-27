@@ -8,7 +8,8 @@ import {
   Placeholder,
   Transition,
   Header,
-  Message
+  Message,
+  Icon
 } from 'semantic-ui-react';
 import { fetchAsynchronous } from './components/fetch';
 import { Link } from 'react-router-dom';
@@ -69,6 +70,44 @@ const chartOptions = {
   },
 };
 
+
+
+class GoToTop extends React.Component {
+  state = {
+       showButton: false
+   };
+
+  componentDidMount() {
+      document.addEventListener("scroll", () => {
+          if (window.scrollY > 170) {
+              this.setState({ showButton: true })
+          } else {
+              this.setState({ showButton: false })
+          }
+      });
+      window.scrollTo(0, 0);
+  }
+
+
+  scrollToTop = () => {
+      window.scrollTo(0,0);
+  }
+
+  render(){
+      return (
+          <React.Fragment>
+              { this.state.showButton ?
+                <Button className="go-top" onClick={this.scrollToTop}>
+                  <Icon name="caret up" size="big" inverted />
+                </Button>
+                :
+                null
+              }
+          </React.Fragment>
+      )
+  }
+}
+
 /**
  * Display Fullname, Phabricator Username, Gerrit Username and Github Username of the user.
  */
@@ -90,6 +129,7 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
+              <GoToTop/>
               <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
               <span>
                 <h3 className="accounts">
