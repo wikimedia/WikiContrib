@@ -2,15 +2,13 @@ import React from 'react';
 import { Placeholder } from 'semantic-ui-react';
 import {
   months,
+  getDaysInMonth,
   contribution_color,
-  get_timestamp,
+  get_num_days,
+  get_num_months,
   contributionColors,
-  UserActivityBreakPoint,
   getPadding,
 } from './api';
-
-const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
 /**
  * Generate a Single Day in the User Contribution Activity.
  */
@@ -56,27 +54,9 @@ class GenerateDay extends React.Component {
  * Generate a Month given in the time span.
  */
 class GenerateMonth extends React.Component {
-  getDays = (year, month) => {
-    /**
-     * Caluclate the number of days of a month in an year.
-     * @param {Integer} year
-     * @param {String} month
-     * @returns {Integer} Number of days.
-     */
-    let day = days[months.indexOf(month)];
-    if (month === 'Feb') {
-      if (year % 4 === 0) {
-        day = 29;
-        if (year % 100 === 0 && year % 400 !== 0) {
-          day = 28;
-        }
-      }
-    }
-    return day;
-  };
 
   render = () => {
-    let days = this.getDays(this.props.year, this.props.month);
+    let days = getDaysInMonth(this.props.year, this.props.month);
     let items = [];
     for (let i = 1; i <= days; i++) {
       let item = [];
@@ -132,7 +112,7 @@ class UserContribution extends React.Component {
      */
     var rv = {};
     for (let i of this.props.data) {
-      let date = new Date(parseInt(i.time + '000'));
+      let date = new Date(i.time);
       let year = date.getFullYear();
       if (!(year in rv)) {
         rv[year] = {};
@@ -147,6 +127,7 @@ class UserContribution extends React.Component {
       }
       rv[year][month][day] += 1;
     }
+
     return rv;
   };
 
@@ -154,50 +135,40 @@ class UserContribution extends React.Component {
     var render_months = [];
     if (!this.props.loading) {
       let data = this.format();
-      let approx_days = get_timestamp(
+      let approx_days = get_num_days(
         new Date(this.props.start_time),
         new Date(this.props.end_time)
       );
-      let numb_months =
-        approx_days === 30
-          ? 1
-          : approx_days === 60
-            ? 2
-            : approx_days === 90
-              ? 3
-              : approx_days === 180
-                ? 6
-                : 12;
-      let start_month = new Date(this.props.end_time).getUTCMonth() - 1;
-      let year = new Date(this.props.end_time).getFullYear();
-      if (start_month === -1) {
-        start_month = 11;
-        year -= 1;
-      }
-      let breakpoint = UserActivityBreakPoint(),
-        items = [];
-      while (numb_months !== 0) {
-        if ((numb_months - 1) % breakpoint === 0) {
-          items.unshift(
-            <GenerateMonth
-              month={months[start_month]}
-              key={numb_months}
-              year={year}
-              data={data}
-              set={this.props.set}
-            />
-          );
+
+      let numb_months = get_num_months(approx_days);
+      let count_month = numb_months + 1;
+
+      let shouldNotRemoveFirstMonthInArr = true,
+      year = new Date(this.props.end_time),
+      end_month = year.getMonth();
+      year = year.getFullYear();
+
+      while (count_month > 0) {
+
+        try{
+
+          //########### decide if we should remove the first month in render_months or not #########
+          shouldNotRemoveFirstMonthInArr = count_month !== 1 && render_months.length !== numb_months;
+
+          let monthHasContribution = Object.getOwnPropertyNames(data[year][end_month]).length !== 0;
+
+          shouldNotRemoveFirstMonthInArr = shouldNotRemoveFirstMonthInArr || monthHasContribution;
+          //######################################################################################
+
+        }catch{
+          // Do nothing
+        }
+
+        if(shouldNotRemoveFirstMonthInArr){
           render_months.unshift(
-            <div className="flex-row" key={render_months.length}>
-              {items}
-            </div>
-          );
-          items = [];
-        } else {
-          items.unshift(
             <GenerateMonth
-              month={months[start_month]}
-              key={numb_months}
+              month={months[end_month]}
+              key={count_month}
               year={year}
               data={data}
               set={this.props.set}
@@ -205,10 +176,10 @@ class UserContribution extends React.Component {
           );
         }
 
-        numb_months -= 1;
-        start_month -= 1;
-        if (start_month === -1) {
-          start_month = 11;
+        count_month -= 1;
+        end_month -= 1;
+        if (end_month === -1) {
+          end_month = 11;
           year = new Date(this.props.start_time).getFullYear();
         }
       }

@@ -24,6 +24,9 @@ export const getUsers = BASE_API_URI + 'result/<hash>/users/';
 export const commits_by_date = BASE_API_URI + 'result/<hash>/commits/';
 
 export const BASE_YEAR = 2013;
+
+export const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
 export const months = [
   'Jan',
   'Feb',
@@ -83,20 +86,48 @@ export const filter_2 = [
   { key: 365, value: 365, text: 'Last 1 year' },
 ];
 
-export const get_dates = () => {
-  let current_year = new Date().getFullYear();
-  let current_month = new Date().getMonth();
+export const zero_pad = value=>value >= 10 ? value : "0" + value;
+
+export const time_delta = days => new Date(days*86400000);
+
+export const getDaysInMonth = (year, month) => {
+  /**
+   * Caluclate the number of days of a month in an year.
+   * @param {Integer} year
+   * @param {String} month
+   * @returns {Integer} Number of days.
+   */
+  let day = days[months.indexOf(month)];
+  if (month === 'Feb') {
+    if (year % 4 === 0) {
+      day = 29;
+      if (year % 100 === 0 && year % 400 !== 0) {
+        day = 28;
+      }
+    }
+  }
+  return day;
+};
+
+export const get_dates = (time_string) => {
+
+  let current_date = new Date(time_string);
+  let current_year = current_date.getFullYear();
+  let current_month = current_date.getMonth();
   let rv = [];
 
-  for (let i = current_year; i >= BASE_YEAR; i--) {
-    for (let j = 11; j >= 0; j--) {
-      if (i === current_year && j > current_month) {
+  for (let year = current_year; year >= BASE_YEAR; year--) {
+    for (let month = 11; month >= 0; month--) {
+      if (year === current_year && month > current_month) {
         continue;
       }
+
+      let iso_string = new Date(`${year}-${zero_pad(month+1)}-${getDaysInMonth(year,months[month])}`);
+      iso_string = iso_string.toISOString();
       rv.push({
-        key: full_months[j] + ', ' + i,
-        value: full_months[j] + ', ' + i,
-        text: full_months[j] + ', ' + i,
+        key: iso_string,
+        value: iso_string,
+        text: full_months[month] + ', ' + year,
       });
     }
   }
@@ -104,7 +135,7 @@ export const get_dates = () => {
 };
 
 
-export const get_timestamp = (date1, date2) => {
+export const get_num_days = (date1, date2) => {
   let days = Math.abs((date2 - date1) / 86400000);
 
   if (days >= 365) {
@@ -120,6 +151,18 @@ export const get_timestamp = (date1, date2) => {
   }
   return days;
 };
+
+export const get_num_months = (days) => {
+  return days === 30
+         ? 1
+          : days === 60
+            ? 2
+            : days === 90
+              ? 3
+              : days === 180
+                ? 6
+                : 12;
+}
 
 export const UserActivityBreakPoint = () => {
   let width = window.innerWidth;
