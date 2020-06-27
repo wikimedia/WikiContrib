@@ -800,7 +800,7 @@ export class Query extends Component {
                             <Popup
                               content=<a href="https://github.com/wikimedia/WikiContrib"
                                 rel="noopener noreferrer" target="_blank">
-                                Contact The maintainers of this Project to learn more about this feature
+                              This feature is currently disabled. Contact the tool maintainers to learn more.
                               </a>
                               position="top center"
                               pinned
@@ -847,10 +847,10 @@ export class Query extends Component {
                               </Button>
                             }
                           />
-                          <Popup
+                        {/*<Popup
                             content=<a href="https://github.com/wikimedia/WikiContrib"
                               rel="noopener noreferrer" target="_blank">
-                              Contact The maintainers of this Project to learn more about this feature
+                              This feature is currently disabled. Contact the tool maintainers to learn more.
                             </a>
                             position="top center"
                             pinned
@@ -865,7 +865,7 @@ export class Query extends Component {
                               <Icon name="user plus" />
                               </Button>
                             }
-                          />
+                          />*/}
                           <Popup
                             content="Search"
                             position="top center"
