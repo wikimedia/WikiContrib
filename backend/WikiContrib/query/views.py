@@ -5,6 +5,7 @@ from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
+from pytz import utc
 from rest_framework import status
 from .models import Query, QueryFilter, QueryUser
 from datetime import timedelta, datetime
@@ -98,12 +99,13 @@ class AddQueryUser(CreateAPIView):
                     if int(request.data['complete']) == 0:
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
-                        filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
+                        end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
+                        start_time = end_time - timedelta(days=365)
+
                         QueryFilter.objects.create(
                             query=query_obj,
-                            start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time,
+                            start_time=start_time,
+                            end_time=end_time,
                             status=','.join(COMMIT_STATUS)
                         )
                 else:
@@ -117,13 +119,13 @@ class AddQueryUser(CreateAPIView):
                         rename(BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part",
                                BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv")
                         query_obj.csv_file = query_obj.hash_code + ".csv"
-                        filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
+                        end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
+                        start_time = end_time - timedelta(days=365)
                         query_obj.save()
                         QueryFilter.objects.create(
                             query=query_obj,
-                            start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time,
+                            start_time=start_time,
+                            end_time=end_time,
                             status=','.join(COMMIT_STATUS)
                         )
 
@@ -137,12 +139,13 @@ class AddQueryUser(CreateAPIView):
                     with transaction.atomic():
                         # Add the Query
                         query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                        filter_time = timezone.now().date()
-                        filter_time = filter_time.replace(day=1, month=(filter_time.month%12)+1)
+                        end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
+                        start_time = end_time - timedelta(days=365)
+
                         QueryFilter.objects.create(
                             query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                            start_time=filter_time - timedelta(days=365),
-                            end_time=filter_time,
+                            start_time=start_time,
+                            end_time=end_time,
                             status=','.join(COMMIT_STATUS)
                         )
 
@@ -332,6 +335,14 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
         """
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if QueryFilter.objects.filter(query=query).exists():
+            if "start_time" in request.data:
+                request.data['start_time'] = utc.localize(datetime.strptime(
+                       request.data["start_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+
+            if "end_time" in request.data:
+                request.data['end_time'] = utc.localize(datetime.strptime(
+                       request.data["end_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+
             return super(QueryFilterView, self).get(request, *args, **kwargs)
         else:
             return Response({
@@ -362,11 +373,20 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             if 'username' not in request.data:
                 return Response({'message': 'Fill the form completely', 'error': 1},
                                 status=status.HTTP_400_BAD_REQUEST)
+
+            if "start_time" in request.data:
+                request.data['start_time'] = utc.localize(datetime.strptime(
+                       request.data["start_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+
+            if "end_time" in request.data:
+                request.data['end_time'] = utc.localize(datetime.strptime(
+                       request.data["end_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+
             data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
 
             if data['status'] != commit_status:
-                if (commit_start != datetime.strptime(data['start_time'], "%Y-%m-%d").date()
-                    or commit_end != datetime.strptime(data['end_time'], "%Y-%m-%d").date()):
+                if commit_start != data['start_time']\
+                        or commit_end != data['end_time']:
                     return UserUpdateTimeStamp(rv)
                 else:
                     return UserUpdateStatus(rv)

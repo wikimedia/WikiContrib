@@ -15,10 +15,13 @@ import { Link } from 'react-router-dom';
 import {
   filter_2,
   get_dates,
+  time_delta,
+  zero_pad,
+  getDaysInMonth,
   months,
   fetchDetails,
   full_months,
-  get_timestamp,
+  get_num_days,
   filterDetailApi,
 } from './api';
 import UserSearch from './components/dropdown';
@@ -73,9 +76,9 @@ class DisplayUser extends React.Component {
   render = () => {
     let { start_time: st, end_time: et } = this.props.filters;
     st = new Date(st);
-    let st_m = st.getUTCMonth();
+    let st_m = st.getMonth();
     et = new Date(et);
-    let et_m = et.getUTCMonth();
+    let et_m = et.getMonth();
     return (
       <div>
         {this.props.loading ? (
@@ -141,7 +144,7 @@ class DisplayUser extends React.Component {
                 <h3 className="accounts">
                   {full_months[st_m] + " " + st.getFullYear()}
                   -
-                  {full_months[(et_m + 11) % 12] + " " + (et_m - 1 > 0 ? et.getFullYear() : et.getFullYear() - 1)}
+                  {full_months[et_m] + " " + et.getFullYear()}
                 </h3>
               </span>
             </React.Fragment>
@@ -249,22 +252,52 @@ class QueryResult extends React.Component {
         ],
       };
     }
+
+    let current_month = [0,0,0];
     this.state.data.forEach(e => {
-      let index = new Date(parseInt(e.time) * 1000).getMonth();
+      let index = new Date(e.time);
+      let index_year = index.getFullYear();
+      index = index.getMonth();
+
+      let et = this.state.current_filters.end_time;
+      et = new Date(et);
+      let et_m = et.getMonth();
+      let et_y = et.getFullYear();
+
       if (platform === 'phabricator' && platform in e) {
         if (e.assigned && !e.owned) {
-          data.datasets[0].data[index] += 1;
-          data.datasets[2].data[index] += 1;
+            if(index === et_m && index_year === et_y){
+              current_month[0] += 1;
+              current_month[2] += 1;
+            }else{
+              data.datasets[0].data[index] += 1;
+              data.datasets[2].data[index] += 1;
+            }
         } else if (e.owned && !e.assigned) {
-          data.datasets[1].data[index] += 1;
-          data.datasets[2].data[index] += 1;
+          if(index === et_m && index_year === et_y){
+            current_month[1] += 1;
+            current_month[2] += 1;
+          }else{
+            data.datasets[1].data[index] += 1;
+            data.datasets[2].data[index] += 1;
+          }
         } else {
-          data.datasets[0].data[index] += 1;
-          data.datasets[1].data[index] += 1;
-          data.datasets[2].data[index] += 1;
+          if(index === et_m && index_year === et_y){
+            current_month[0] += 1;
+            current_month[1] += 1;
+            current_month[2] += 1;
+          }else{
+            data.datasets[0].data[index] += 1;
+            data.datasets[1].data[index] += 1;
+            data.datasets[2].data[index] += 1;
+          }
         }
       } else if (platform !== 'phabricator' && platform in e) {
-        data.datasets[0].data[index] += 1;
+          if(index === et_m && index_year === et_y){
+            current_month[0] += 1;
+          }else{
+            data.datasets[0].data[index] += 1;
+          }
       }
     });
 
@@ -276,19 +309,19 @@ class QueryResult extends React.Component {
      */
 
     let data_len = data.datasets.length,
-      start_time = this.state.current_filters.start_time,
-      m_index = new Date(start_time).getUTCMonth(),
+      end_time = this.state.current_filters.end_time,
+      m_index = new Date(end_time).getMonth(),
       lbl_a = months.slice(0, m_index),
       lbl_b = months.slice(m_index);
 
-    data.labels = lbl_b.concat(lbl_a);
+    data.labels = lbl_b.concat(lbl_a,lbl_b[0]);
 
     for (var i = 0; i < data_len; i++) {
       if (data.datasets[i]) {
         let set_a = data.datasets[i].data,
           set_b = set_a.splice(m_index);
 
-        data.datasets[i].data = set_b.concat(set_a);
+        data.datasets[i].data = set_b.concat(set_a,[current_month[i]]);
       }
     }
 
@@ -430,18 +463,22 @@ class QueryResult extends React.Component {
      * Restore the initial filters.
      */
     let time = new Date();
-    let month = time.getMonth() + 2;
+    time.setMinutes(0,0,0);
+    let one_year = time_delta(365);
+
     let filters = {
-      end_time: time.getFullYear() + '-' + month + '-01',
-      start_time: time.getFullYear() - 1 + '-' + month + '-01',
+      end_time: time.toISOString(),
+      start_time: new Date(time - one_year).toISOString(),
       username: this.state.current,
     };
+
     this.setState({
       loading: true,
       activity: undefined,
       update_filters: Object.assign(filters),
       notFound: false,
     });
+
     let data = Object.assign({}, filters);
     fetchAsynchronous(
       filterDetailApi.replace('<hash>', this.state.query),
@@ -454,15 +491,12 @@ class QueryResult extends React.Component {
 
   func = () => {
     let { update_filters: uf } = this.state;
-    let month = new Date(uf.end_time).getUTCMonth();
+    if(uf.end_time !== "" && uf.start_time !== ""){
+    let month = new Date(uf.end_time).getMonth();
     let year = new Date(uf.end_time).getFullYear();
-    if (month === 0) {
-      month = 11;
-      year -= 1;
-    } else {
-      month -= 1;
+
+    return new Date(`${year}-${zero_pad(month+1)}-${getDaysInMonth(year,months[month])}`).toISOString();
     }
-    return full_months[month] + ", " + year;
   }
 
   render = () => {
@@ -586,41 +620,21 @@ class QueryResult extends React.Component {
                           selection
                           icon={false}
                           value={this.func()}
-                          options={get_dates()}
+                          options={get_dates(cf.end_time)}
                           onChange={(e, obj) => {
-                            let date = obj.value.split(',');
-                            date[1] = date[1].substr(1);
-                            date[0] = full_months.indexOf(date[0]) + 2;
-                            if (date[0] === 13) {
-                              date[1] = parseInt(date[1]) + 1;
-                              date[0] = 1;
-                            }
                             let filters = Object.assign({}, uf);
-                            filters.end_time = date[1] + '-' + date[0] + '-01';
-                            let days = get_timestamp(
+                            filters.end_time = obj.value;
+                            let days = get_num_days(
                               new Date(uf.end_time),
                               new Date(uf.start_time)
                             );
-                            let incr =
-                              days === 30
-                                ? 1
-                                : days === 60
-                                ? 2
-                                : days === 90
-                                ? 3
-                                : days === 180
-                                ? 6
-                                : 12;
 
                             let updated_val = new Date(filters.end_time);
-                            let start_time = new Date(
-                              updated_val.getFullYear(),
-                              updated_val.getUTCMonth() - incr,
-                              1
-                            );
-                            let month = start_time.getUTCMonth() + 1;
-                            filters.start_time =
-                              start_time.getFullYear() + '-' + month + '-01';
+
+                            let start_time = new Date(updated_val - time_delta(days));
+
+                            filters.start_time = start_time.toISOString();
+
                             this.setState({
                               update_filters: filters,
                             });
@@ -638,7 +652,7 @@ class QueryResult extends React.Component {
                           selection
                           icon={false}
                           options={filter_2}
-                          value={get_timestamp(
+                          value={get_num_days(
                             new Date(uf.start_time),
                             new Date(uf.end_time)
                           )}
@@ -646,26 +660,13 @@ class QueryResult extends React.Component {
                             let date = new Date(
                               this.state.update_filters.end_time
                             );
-                            let value = obj.value;
-                            let incr =
-                              value <= 31
-                                ? 1
-                                : value <= 61
-                                ? 2
-                                : value <= 92
-                                ? 3
-                                : value <= 183
-                                ? 6
-                                : 12;
-                            date = new Date(
-                              date.getFullYear(),
-                              date.getUTCMonth() - incr,
-                              1
-                            );
-                            let month = date.getUTCMonth() + 1;
+                            let days = obj.value;
+
+                            date = new Date(date - time_delta(days));
+
                             let filters = Object.assign({}, uf);
-                            filters.start_time =
-                              date.getFullYear() + '-' + month + '-' + 1;
+                            filters.start_time = date.toISOString();
+
                             this.setState({ update_filters: filters });
                           }}
                           placeholder="Get by date"

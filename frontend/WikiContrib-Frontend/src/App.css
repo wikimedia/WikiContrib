@@ -393,7 +393,6 @@ h3.accounts  {
   }
 }
 
-
 .flex-row {
   display: flex;
   padding: 5px;
@@ -657,9 +656,9 @@ h3.accounts  {
 }
 
 .render_activity {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .contribution_text {
