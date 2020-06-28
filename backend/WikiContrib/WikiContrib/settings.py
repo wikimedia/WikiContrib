@@ -156,20 +156,6 @@ GITHUB_ACCESS_TOKEN = env('GITHUB_ACCESS_TOKEN')
 CORS_ORIGIN_ALLOW_ALL = True
 GITHUB_FALLBACK_TO_PR = False
 GITHUB_API_LIMIT = 30
-ORGS = [
-"wikimedia",
-"wmde",
-"DataValues",
-"commons-app",
-"wikidata",
-"openzim",
-"mediawiki-utilities",
-"wiki-ai",
-"wikimedia-research",
-"toollabs",
-"toolforge",
-"counterVandalism"
-]
 
 try:
     from .local_settings import *

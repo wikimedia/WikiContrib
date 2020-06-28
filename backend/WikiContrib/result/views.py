@@ -9,6 +9,7 @@ from json import loads, dumps, JSONDecodeError
 from aiohttp import ClientSession
 import time
 from math import ceil
+from copy import deepcopy
 from query.models import Query
 from django.shortcuts import get_object_or_404
 from pandas import read_csv, isnull
@@ -16,9 +17,8 @@ from datetime import datetime, timedelta
 from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
-from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-ORGS, GITHUB_API_LIMIT
-from .helper import get_prev_user, get_next_user
+from WikiContrib.settings import GITHUB_FALLBACK_TO_PR, GITHUB_API_LIMIT
+from .helper import get_prev_user, get_next_user, ORGS, API_ENDPOINTS, REQUEST_DATA
 import sys
 from rapidfuzz import fuzz
 if GITHUB_FALLBACK_TO_PR:
@@ -513,39 +513,26 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
     github_rate_limit_message = ['']
 
-    api_endpoints = [
-         ["https://phabricator.wikimedia.org/api/maniphest.search",
-          "https://phabricator.wikimedia.org/api/user.search"],
-          "https://gerrit.wikimedia.org/r/changes/?q=owner:"+gerrit_username+"&o=DETAILED_ACCOUNTS",
-         ["https://api.github.com/search/commits?per_page=100&q=author:"+github_username,
-          "https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:"+github_username]
-        ]
+    api_endpoints = deepcopy(API_ENDPOINTS)
+    request_data = deepcopy(REQUEST_DATA)
 
+    api_endpoints[1] = api_endpoints[1].format(gerrit_username=gerrit_username)
+    api_endpoints[2][0] = api_endpoints[2][0].format(github_username=github_username)
+    api_endpoints[2][1] = api_endpoints[2][1].format(github_username=github_username)
 
-    request_data = [
-        {
-            'constraints[authorPHIDs][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[assigned][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[usernames][0]':username,
-            'api.token': API_TOKEN
-        },
-        {
-            'github_username':github_username,
-            'github_access_token':GITHUB_ACCESS_TOKEN,
-            'createdStart':int(createdStart),
-            'createdEnd':int(createdEnd)
-        }
-    ]
+    request_data[0]['constraints[authorPHIDs][0]'] = username
+    request_data[0]['constraints[createdStart]'] = int(createdStart)
+    request_data[0]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[1]['constraints[assigned][0]'] = username
+    request_data[1]['constraints[createdStart]'] = int(createdStart)
+    request_data[1]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[2]['constraints[usernames][0]'] = username
+
+    request_data[3]['github_username'] = github_username
+    request_data[3]['createdStart'] = int(createdStart)
+    request_data[3]['createdEnd'] = int(createdEnd)
 
     start_time = time.time()
     loop.run_until_complete(get_data(urls=api_endpoints, request_data=request_data,
