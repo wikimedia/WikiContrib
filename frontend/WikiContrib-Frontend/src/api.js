@@ -11,6 +11,8 @@ export const QueryCreateApi = BASE_API_URI + 'query/add/user/';
 // method: GET, PATCH, DELETE
 export const QueryDetailApi = BASE_API_URI + 'query/<hash>/update/user/';
 // method: POST
+export const matchFullNamesApi = BASE_API_URI + 'result/match-fullnames/';
+// method: POST
 export const filterCreateApi = BASE_API_URI + 'query/<hash>/add/filter/';
 // method: GET, PATCH, DELETE
 export const filterDetailApi = BASE_API_URI + 'query/<hash>/update/filter/';

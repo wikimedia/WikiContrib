@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { fetchAsynchronous } from './components/fetch';
 import fetchFileAsynchronous from './components/fetchFile';
 import MessageDisplay from './components/message';
-import { QueryCreateApi, QueryDetailApi } from './api';
+import { QueryCreateApi, QueryDetailApi, matchFullNamesApi } from './api';
 import csv from './img/csv.png';
 import format from './img/format.png';
 import {
@@ -18,6 +18,7 @@ import {
   Transition,
   Loader,
   Header,
+  Message
 } from 'semantic-ui-react';
 import { NavBar } from './components/nav';
 
@@ -43,6 +44,7 @@ export class Query extends Component {
         : false;
 
     this.state = {
+      showMismatch: true,
       step: 1,
       rows:
         localStorage.getItem('users') !== null && type
@@ -253,7 +255,16 @@ export class Query extends Component {
     });
   };
 
-  createQuery = () => {
+  matchFullNames = () => {
+    this.setState({
+      loadData:true,
+      showMismatch:false
+    });
+
+    this.createQuery(true)
+  }
+
+  createQuery = (match_fullnames) => {
     /**
      * fetch the API to create / update Query.
      */
@@ -326,41 +337,81 @@ export class Query extends Component {
       localStorage.removeItem('res_users');
       localStorage.removeItem('res_query');
       this.setState({ loading: true, notfound: false });
-      let uri = this.state.operation
-        ? QueryCreateApi
-        : QueryDetailApi.replace('<hash>', this.props.match.params.hash);
-      if (this.state.file !== false) {
-        fetchFileAsynchronous(
-          this.state.file,
-          this.state.operation ? 'POST' : 'PATCH',
+
+      if(match_fullnames){
+        let uri = matchFullNamesApi;
+        let data = {};
+        data['users'] = this.getExactRows();
+        fetchAsynchronous(
           uri,
-          this.callback,
-          (chunk, chunks) => {
-            this.setState({ chunk: chunk, chunks: chunks });
-          },
-          this.errorCallback
+          'POST',
+          data,
+          { 'Content-Type': 'application/json' },
+          this.matchFullNamesCallback
         );
-      } else {
-        if (
-          this.state.original_users === this.state.rows &&
-          !this.state.operation
-        ) {
-          this.callback('');
-        } else {
-          let data = { file: -1 };
-          data['users'] = this.getExactRows();
-          this.setState({ loadData: true, notfound: false });
-          fetchAsynchronous(
-            uri,
+
+      }else{
+        let uri = this.state.operation
+          ? QueryCreateApi
+          : QueryDetailApi.replace('<hash>', this.props.match.params.hash);
+        if (this.state.file !== false) {
+          fetchFileAsynchronous(
+            this.state.file,
             this.state.operation ? 'POST' : 'PATCH',
-            data,
-            { 'Content-Type': 'application/json' },
-            this.callback
+            uri,
+            this.callback,
+            (chunk, chunks) => {
+              this.setState({ chunk: chunk, chunks: chunks });
+            },
+            this.errorCallback
           );
-        }
+        } else {
+          if (
+            this.state.original_users === this.state.rows &&
+            !this.state.operation
+          ) {
+            this.callback('');
+          } else {
+            let data = { file: -1 };
+            data['users'] = this.getExactRows();
+            this.setState({ loadData: true, notfound: false });
+            fetchAsynchronous(
+              uri,
+              this.state.operation ? 'POST' : 'PATCH',
+              data,
+              { 'Content-Type': 'application/json' },
+              this.callback
+            );
+          }
+      }
       }
     }
   };
+
+  matchFullNamesCallback = response => {
+    if(response !== '' &&
+    response !== 'error' in response &&
+    response.error === 1){
+      this.setState({
+        loading: false,
+        loadData: false,
+        message: {
+          message: response.message,
+          trigger: true,
+          type: 1,
+          update: !this.state.message.update,
+        },
+      });
+    }
+    else{
+      if(response.match_percent > 60){
+        this.createQuery(false)
+      }
+      else{
+        this.setState({loading:false,loadData:false})
+      }
+    }
+  }
 
   callback = response => {
     /**
@@ -457,6 +508,34 @@ export class Query extends Component {
                       duration={500}
                       animation="fade"
                     >
+                    {!this.state.showMismatch ?
+                      <div id="warning">
+                      <div id="content">
+                        <Message
+                          size="big"
+                          attached
+                          warning
+                          header="Warning!"
+                          content={`The usernames you have provided does not seem
+                                 to belong to the same user. Do you still want to proceed ?`}
+                        />
+                      <Button
+                          basic
+                          size="big"
+                          onClick={() => this.setState({showMismatch:true,loading:false})}
+                          >
+                          No
+                        </Button>
+                        <Button
+                          size="big"
+                          color="yellow"
+                          onClick={()=>this.createQuery(false)}
+                          >
+                          Yes
+                        </Button>
+                      </div>
+                      </div>
+                      :
                       <React.Fragment>
                         <h1><Header className="title">WikiContrib</Header></h1>
                         <h2 className="accounts">
@@ -858,7 +937,7 @@ export class Query extends Component {
                               <Button
                                 className="continue"
                                 aria-label="search"
-                                onClick={this.createQuery}
+                                onClick={this.matchFullNames}
                                 disabled={this.state.loading}
                                 loading={this.state.loading}
                               >
@@ -871,6 +950,7 @@ export class Query extends Component {
                           />
                         </div>
                       </React.Fragment>
+                      }
                     </Transition>
                   )}
                 </Grid.Column>

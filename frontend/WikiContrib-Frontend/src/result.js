@@ -7,8 +7,7 @@ import {
   Dropdown,
   Placeholder,
   Transition,
-  Header,
-  Message
+  Header
 } from 'semantic-ui-react';
 import { fetchAsynchronous } from './components/fetch';
 import { Link } from 'react-router-dom';
@@ -180,7 +179,6 @@ class QueryResult extends React.Component {
       loading: data === false,
       data: data !== false ? data.result : [],
       meta: data !== false ? data.meta : {},
-      showMismatch: data === false ? false : (data.meta.match_percent > 60 ? true : false),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
@@ -338,7 +336,6 @@ class QueryResult extends React.Component {
       this.setState({
         data: response.result,
         meta: response !== false ? response.meta : {},
-        showMismatch: response === false ? false : (response.meta.match_percent > 60 ? true : false),
         current: response.current,
         prev: response.previous,
         gerrit_username: response.current_gerrit,
@@ -412,7 +409,6 @@ class QueryResult extends React.Component {
       this.setState({
         data: response.result,
         meta: response !== false ? response.meta : {},
-        showMismatch: response === false ? false : (response.meta.match_percent > 60 ? true : false),
         current_filters: this.state.update_filters,
         loading: false,
       });
@@ -695,28 +691,6 @@ class QueryResult extends React.Component {
           {this.state.notFound ? (
             <NotFound />
           ) : (
-            !this.state.showMismatch && !this.state.page_load? (
-              <Grid.Row>
-              <Grid.Column width={2} />
-              <Grid.Column width={12}>
-              <Card className="graph_load">
-              <Message
-                attached
-                warning
-                header="Warning! It seems like the Provided Usernames doesn't belong to the same user"
-                content={`This can happen when the provided fullname is too different from the retrieved
-                        fullname(s) or when there is no existing user for the provided username(s).
-                        If the submitted usernames are yours, try updating the fullname used to register
-                        the different accounts to be similar to the fullname provided during query`}
-              />
-              <Button
-                color="yellow"
-                onClick={() => this.setState({showMismatch:true})}
-                >Proceed</Button>
-              </Card>
-              </Grid.Column>
-              </Grid.Row>
-            ) : (
               <React.Fragment>
                 <Grid.Row>
                   <Grid.Column width={2} />
@@ -863,7 +837,6 @@ class QueryResult extends React.Component {
                   ''
                 )}
               </React.Fragment>
-            )
           )}
         </Grid>
       </React.Fragment>

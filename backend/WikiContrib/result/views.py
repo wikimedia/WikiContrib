@@ -9,6 +9,7 @@ from json import loads, dumps, JSONDecodeError
 from aiohttp import ClientSession
 import time
 from math import ceil
+from copy import deepcopy
 from query.models import Query
 from django.shortcuts import get_object_or_404
 from pandas import read_csv, isnull
@@ -17,7 +18,7 @@ from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
 from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-ORGS, GITHUB_API_LIMIT, API_ENDPOINTS
+ORGS, GITHUB_API_LIMIT, API_ENDPOINTS, REQUEST_DATA
 from .helper import get_prev_user, get_next_user
 import sys
 from rapidfuzz import fuzz
@@ -93,9 +94,9 @@ async def get_full_name(data):
     """
     if data["platform"] == "phab":
         if data["full_names"]["phab_full_name"] == "":
-            if data["request_data"][2]['constraints[usernames][0]'] != "":
-                async with data["session"].post(data["url"][1],
-                data=data["request_data"][2]) as response:
+            if data["request_data"]['constraints[usernames][0]'] != "":
+                async with data["session"].post(data["url"],
+                data=data["request_data"]) as response:
                     realname  = await response.read()
                     _data = loads(realname.decode("utf-8"))['result']['data']
                     if(len(_data) != 0):
@@ -108,12 +109,14 @@ async def get_full_name(data):
 
     if data["platform"] == "gerrit":
         if data["url"].split("?")[1].split("&")[0].split(":")[1] != "":
-            try:
-                data["full_names"]["gerrit_full_name"] = data["gerrit_response"][0]["owner"]["name"]
-            except:
-                data["full_names"]["gerrit_full_name"] = username_does_not_exist
+            async with data["session"].get(data["url"]) as response:
+                realname = await response.read()
+                try:
+                    data["full_names"]["gerrit_full_name"] = loads(realname[4:].decode("utf-8"))[0]["name"]
+                except:
+                    data["full_names"]["gerrit_full_name"] = "username does not exist"
         else:
-            data["full_names"]["gerrit_full_name"] = no_username_provided
+            data["full_names"]["gerrit_full_name"] = "no username provided"
 
     if data["platform"] == "github":
         if data["request_data"]["github_username"] != "":
@@ -131,6 +134,66 @@ async def get_full_name(data):
                     data["full_names"]["github_full_name"] = username_does_not_exist
         else:
             data["full_names"]["github_full_name"] = no_username_provided
+
+
+class MatchFullNames(APIView):
+
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+
+        async def concurrent_get_fullnames(urls, request_data, loop, full_names):
+            tasks = []
+            async with ClientSession() as session:
+                tasks.append(loop.create_task((get_full_name(data={"platform":"phab", "session":session,
+                 "full_names":full_names, "url":urls[0], "request_data":request_data[0]}))))
+                tasks.append(loop.create_task((get_full_name(data={"platform":"gerrit", "session":session,
+                 "full_names":full_names, "url":urls[1]}))))
+                tasks.append(loop.create_task((get_full_name(data={"platform":"github", "session":session,
+                 "full_names":full_names, "request_data":request_data[1]}))))
+
+                await asyncio.gather(*tasks)
+
+        user = request.data['users'][0].copy()
+        fullname = user['fullname']
+        phabricator_username = user['phabricator_username']
+        gerrit_username = user['gerrit_username']
+        github_username = user['github_username']
+
+        if isinstance(phabricator_username, float):
+            phabricator_username = ''
+
+        if isinstance(gerrit_username, float):
+            gerrit_username = ''
+
+        if isinstance(github_username, float):
+            github_username = ''
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
+
+        request_data = []
+        urls = []
+        request_data.append(deepcopy(REQUEST_DATA[2]))
+        request_data.append(deepcopy(REQUEST_DATA[3]))
+
+        urls.append(API_ENDPOINTS[0][1])
+        urls.append(API_ENDPOINTS[1][1].format(gerrit_username=gerrit_username))
+
+        request_data[0]['constraints[usernames][0]'] = phabricator_username
+
+        request_data[1]['github_username'] = github_username
+
+        loop.run_until_complete(concurrent_get_fullnames(urls=urls, request_data=request_data,
+                                         loop=loop,full_names=full_names))
+
+        match_percent = fuzzyMatching(control=fullname, full_names=full_names)
+
+        return Response({
+            'match_percent':match_percent
+        })
 
 
 async def get_task_authors(url, request_data, session, resp, phid, full_names):
@@ -163,7 +226,7 @@ async def get_task_authors(url, request_data, session, resp, phid, full_names):
                     request_data[0]['after'] = after
 
     await get_full_name(data={"platform":"phab", "session":session,
-     "full_names":full_names, "url":url, "request_data":request_data})
+     "full_names":full_names, "url":url[1], "request_data":request_data[2]})
 
 async def get_task_assigner(url, request_data, session, resp, full_names):
     """
@@ -189,7 +252,7 @@ async def get_task_assigner(url, request_data, session, resp, full_names):
                     request_data[1]['after'] = after
 
     await get_full_name(data={"platform":"phab", "session":session,
-     "full_names":full_names, "url":url, "request_data":request_data})
+     "full_names":full_names, "url":url[1], "request_data":request_data[2]})
 
 
 async def get_gerrit_data(url, session, gerrit_resp,full_names):
@@ -202,8 +265,8 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
     :return: None
     """
     data = []
-    if url.split("?")[1].split("&")[0].split(":")[1] != "":
-        async with session.get(url) as response:
+    if url[0].split("?")[1].split("&")[0].split(":")[1] != "":
+        async with session.get(url[0]) as response:
             data = await response.read()
             try:
                 data = loads(data[4:].decode("utf-8"))
@@ -213,7 +276,7 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
             gerrit_resp.extend(data)
 
     await get_full_name(data={"platform":"gerrit", "full_names":full_names,
-     "url":url, "gerrit_response":data})
+     "session":session,"url":url[1], "gerrit_response":data})
 
 
 async def get_github_commit_by_org(orgs, url, request_data, session, github_resp,
@@ -516,37 +579,31 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
     github_rate_limit_message = ['']
 
-    API_ENDPOINTS[1] = API_ENDPOINTS[1].format(gerrit_username=gerrit_username)
-    API_ENDPOINTS[2][0] = API_ENDPOINTS[2][0].format(github_username=github_username)
-    API_ENDPOINTS[2][1] = API_ENDPOINTS[2][1].format(github_username=github_username)
+    api_endpoints = deepcopy(API_ENDPOINTS)
+    request_data = deepcopy(REQUEST_DATA)
 
-    request_data = [
-        {
-            'constraints[authorPHIDs][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[assigned][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[usernames][0]':username,
-            'api.token': API_TOKEN
-        },
-        {
-            'github_username':github_username,
-            'github_access_token':GITHUB_ACCESS_TOKEN,
-            'createdStart':int(createdStart),
-            'createdEnd':int(createdEnd)
-        }
-    ]
+    api_endpoints[1][0] = api_endpoints[1][0].format(gerrit_username=gerrit_username)
+    api_endpoints[1][1] = api_endpoints[1][1].format(gerrit_username=gerrit_username)
+    api_endpoints[2][0] = api_endpoints[2][0].format(github_username=github_username)
+    api_endpoints[2][1] = api_endpoints[2][1].format(github_username=github_username)
+
+    request_data[0]['constraints[authorPHIDs][0]'] = username
+    request_data[0]['constraints[createdStart]'] = int(createdStart)
+    request_data[0]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[1]['constraints[assigned][0]'] = username
+    request_data[1]['constraints[createdStart]'] = int(createdStart)
+    request_data[1]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[2]['constraints[usernames][0]'] = username
+
+    request_data[3]['github_username'] = github_username
+    request_data[3]['createdStart'] = int(createdStart)
+    request_data[3]['createdEnd'] = int(createdEnd)
+
 
     start_time = time.time()
-    loop.run_until_complete(get_data(urls=API_ENDPOINTS, request_data=request_data,
+    loop.run_until_complete(get_data(urls=api_endpoints, request_data=request_data,
                                      loop=loop,gerrit_response=gerrit_response,
                                      phab_response=phab_response,
                                      github_response=github_response,
