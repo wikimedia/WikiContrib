@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { fetchAsynchronous } from './components/fetch';
 import fetchFileAsynchronous from './components/fetchFile';
 import MessageDisplay from './components/message';
-import { Redirect } from 'react-router-dom';
 import { QueryCreateApi, QueryDetailApi } from './api';
 import csv from './img/csv.png';
 import format from './img/format.png';
@@ -36,7 +35,7 @@ export class Query extends Component {
   constructor(props) {
     super(props);
     let type;
-    
+
     type =
       this.props.location.pathname === '/' ||
       this.props.location.pathname === ''
@@ -268,7 +267,8 @@ export class Query extends Component {
         }
         if (
           this.state.rows[i].gerrit_username.length === 0 &&
-          this.state.rows[i].phabricator_username.length === 0
+          this.state.rows[i].phabricator_username.length === 0 &&
+          this.state.rows[i].github_username.length === 0
         ) {
           usernameEmptyAtRow = parseInt(i);
         }
@@ -314,9 +314,8 @@ export class Query extends Component {
       usernameEmptyAtRow = usernameEmptyAtRow + 1;
       this.setState({
         message: {
-          message:
-            'Both Gerrit and Phabricator fields cannot be left blank. Provide username for one of these accounts in row ' +
-            usernameEmptyAtRow,
+          message:`OOPS, usernames are missing! Provide a username for at least
+           one of your Wikimedia accounts in row ${usernameEmptyAtRow} to see your contribution activity.`,
           update: !this.state.message.update,
           trigger: true,
           type: 1,
@@ -394,6 +393,14 @@ export class Query extends Component {
         redirect: hash,
         loading: false,
         loadData: response,
+      },()=>{
+        if(this.state.redirect !== false){
+        this.props.history.push({
+            pathname: '/' + this.state.redirect + '/',
+            data: this.state.loadData,
+          })
+        }
+
       });
     }
   };
@@ -402,17 +409,6 @@ export class Query extends Component {
     document.body.style.backgroundColor = '#f8f9fa';
     return (
       <React.Fragment>
-        {this.state.redirect !== false ? (
-          <Redirect
-            to={{
-              pathname: '/' + this.state.redirect + '/',
-              data: this.state.loadData,
-            }}
-          />
-        ) : (
-          ''
-        )}
-
         {this.state.loadData !== false ? (
           <Loader active>Loading</Loader>
         ) : (
@@ -427,8 +423,8 @@ export class Query extends Component {
             <div style={{ marginTop: '8%' }} />
             <Grid>
               <Grid.Row>
-                <Grid.Column computer={3} tablet={1} mobile={1} />
-                <Grid.Column computer={10} tablet={14} mobile={14}>
+                <Grid.Column computer={2} tablet={1} mobile={1} />
+                <Grid.Column computer={12} tablet={14} mobile={14}>
                   {this.state.progress ? (
                     <Card className="query_create">
                       {this.state.bulk ? (
@@ -745,6 +741,27 @@ export class Query extends Component {
                                       <Table.Cell
                                        style={{ textAlign: 'center' }}
                                       >
+
+                                      <label>
+                                        <div className="input_label">Github Username</div>
+                                        <input
+                                          className="user_input"
+                                          value={obj.github_username}
+                                          name="github_username"
+                                          placeholder="Github Username"
+                                          onChange={e =>
+                                            this.handlChange(
+                                              e.target.name,
+                                              e.target.value,
+                                              index
+                                            )
+                                          }
+                                        />
+                                      </label>
+                                    </Table.Cell>
+                                    <Table.Cell
+                                     style={{ textAlign: 'center' }}
+                                    >
                                       <Popup
                                         content="Remove User"
                                         position="top center"
@@ -857,7 +874,7 @@ export class Query extends Component {
                     </Transition>
                   )}
                 </Grid.Column>
-                <Grid.Column computer={3} tablet={1} mobile={1} />
+                <Grid.Column computer={2} tablet={1} mobile={1} />
               </Grid.Row>
             </Grid>
           </React.Fragment>
