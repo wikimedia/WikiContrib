@@ -4,10 +4,10 @@ become ${DEPLOY_BACKEND}
 cd ~/www/python/
 git clone https://github.com/wikimedia/WikiContrib/
 echo "Cloned the repository"
-mv src/WikiContrib/.env WikiContrib/backend/WikiContrib/WikiContrib/.env
+mv src/WikiContrib/.env wikicontrib/backend/WikiContrib/WikiContrib/.env
 cd src/
 rm -rf WikiContrib/ Install.md manage.py query/ result/ test_data/ requirements.txt db.sqlite3
-cp -r ../WikiContrib/backend/WikiContrib/* .
+cp -r ../wikicontrib/backend/WikiContrib/* .
 cd WikiContrib
 mv local_settings.py local_settings_sample.py
 cd ../
@@ -23,6 +23,7 @@ echo "Ran updated migrations"
 deactivate
 exit
 webservice --backend=kubernetes python3.7 restart
-rm -rf WikiContrib src/WikiContrib/.env.example
+cd ../
+rm -rf wikicontrib src/WikiContrib/.env.example
 echo "Updated backend"
 EOT
