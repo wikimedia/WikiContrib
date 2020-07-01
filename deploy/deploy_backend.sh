@@ -1,3 +1,4 @@
+
 ssh -o "StrictHostKeyChecking=no" -i deploy_rsa -A ${DEPLOY_USERNAME}@${DEPLOY_HOST} << EOT
 become ${DEPLOY_BACKEND}
 cd ~/www/python/
