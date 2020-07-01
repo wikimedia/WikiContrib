@@ -85,12 +85,12 @@ class GoToTop extends React.Component {
               this.setState({ showButton: false })
           }
       });
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
 
   scrollToTop = () => {
-      window.scrollTo(0,0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   render(){
