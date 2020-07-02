@@ -22,8 +22,8 @@ async def get_github_pr_by_org(orgs, url, request_data, session, github_resp):
     headers = {"Authorization":"token "+request_data["github_access_token"]}
     orgs_filter = """user:{org_0}+user:{org_1}""".format(org_0=orgs[0], org_1=orgs[1])
 
-    url = """{url}+{orgs_filter}+merged:{createdStartIsoFormat}..{createdEndIsoFormat}"""
-           .format(url=url, orgs_filter=orgs_filter,
+    url = """{url}+{orgs_filter}+merged:{createdStartIsoFormat}..{createdEndIsoFormat}""".format(url=url,
+            orgs_filter=orgs_filter,
             createdStartIsoFormat=createdStart.isoformat()+"Z",
             createdEndIsoFormat=createdEnd.isoformat()+"Z")
 

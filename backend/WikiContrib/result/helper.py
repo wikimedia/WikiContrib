@@ -5,6 +5,31 @@ from django.utils.crypto import get_random_string
 from query.models import Query
 
 
+ORGS = [
+"wikimedia",
+"wmde",
+"DataValues",
+"commons-app",
+"wikidata",
+"openzim",
+"mediawiki-utilities",
+"wiki-ai",
+"wikimedia-research",
+"toollabs",
+"toolforge",
+"counterVandalism"
+]
+
+API_ENDPOINTS = [
+    ["""https://phabricator.wikimedia.org/api/maniphest.search""",
+    """https://phabricator.wikimedia.org/api/user.search"""],
+    ["""https://gerrit.wikimedia.org/r/changes/?q=owner:{gerrit_username}&o=DETAILED_ACCOUNTS""",
+    """https://gerrit.wikimedia.org/r/accounts/?q=name:{gerrit_username}&o=DETAILS"""],
+    ["""https://api.github.com/search/commits?per_page=100&q=author:{github_username}""",
+    """https://api.github.com/search/issues?per_page=100&q=is:pr+is:merged+author:{github_username}"""]
+]
+
+
 def get_prev_user(file, ind):
     prev_user = None
     while True:
@@ -50,11 +75,12 @@ def create_hash(usersArr=None):
     else:
         fullname_slug = ""
         for dict in usersArr:
-            hash_code + dict["fullname"].lower() + dict["gerrit_username"].lower() + dict["phabricator_username"].lower()
+            hash_code = hash_code + dict["fullname"].lower() + dict["gerrit_username"].lower()\
+            + dict["phabricator_username"].lower() + dict["github_username"].lower()
+            print(hash_code)
         if len(usersArr) == 1:
             fullname_slug = slugify(usersArr[0]["fullname"].lower())
             hash_code = fullname_slug +"-"+ sha256(hash_code.encode("utf-8")).hexdigest()[:9]
         else:
             hash_code = sha256(hash_code.encode("utf-8")).hexdigest()
-
     return hash_code

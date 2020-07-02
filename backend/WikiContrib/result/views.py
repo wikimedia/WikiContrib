@@ -18,9 +18,9 @@ from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
 from django.core.serializers import serialize
-from .helper import get_prev_user, get_next_user, create_hash
+from .helper import get_prev_user, get_next_user, create_hash, API_ENDPOINTS, ORGS
 from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-ORGS, GITHUB_API_LIMIT, API_ENDPOINTS
+GITHUB_API_LIMIT
 import sys
 from rapidfuzz import fuzz
 if GITHUB_FALLBACK_TO_PR:
@@ -71,7 +71,7 @@ def fuzzyMatching(control, full_names):
     :full_names: A Dictionary containing a users full names as specified in the
               neccessary platforms
     :return: returns average parcentage similarity or zero if any of the
-             usernames doesn't exist or was not provided.
+             usernames doesn't exist.
     """
     _list = []
     ave = 0
@@ -95,9 +95,9 @@ async def get_full_name(data):
     """
     if data["platform"] == "phab":
         if data["full_names"]["phab_full_name"] == "":
-            if data["request_data"][2]['constraints[usernames][0]'] != "":
-                async with data["session"].post(data["url"][1],
-                data=data["request_data"][2]) as response:
+            if data["request_data"]['constraints[usernames][0]'] != "":
+                async with data["session"].post(data["url"],
+                data=data["request_data"]) as response:
                     realname  = await response.read()
                     _data = loads(realname.decode("utf-8"))['result']['data']
                     if(len(_data) != 0):
@@ -109,8 +109,8 @@ async def get_full_name(data):
                 data["full_names"]["phab_full_name"] = no_username_provided
 
     if data["platform"] == "gerrit":
-        if data["urls"][1].split("?")[1].split("&")[0].split(":")[1] != "":
-            async with data["session"].get(data["urls"][1]) as response:
+        if data["url"].split("?")[1].split("&")[0].split(":")[1] != "":
+            async with data["session"].get(data["url"]) as response:
                 realname = await response.read()
                 try:
                     data["full_names"]["gerrit_full_name"] = loads(realname[4:].decode("utf-8"))[0]["name"]
@@ -223,6 +223,8 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
                          the url string link headers
     :param github_resp: Global response array to which the response from the API
                         has to be appended.
+    :param rateLimitCount: An array to keep track of our request count so we
+                           don't exceed github rate limit
     :return: None
     """
 
@@ -289,7 +291,6 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
         loopCount -= 1
 
 
-
 async def get_github_data(url, request_data, session, github_resp, full_names):
     """
     :Summary: make concurrent requests to get the users contributions to wikimedia
@@ -300,6 +301,7 @@ async def get_github_data(url, request_data, session, github_resp, full_names):
                          the url string link headers
     :param github_resp: Global response array to which the response from the API
                         has to be appended.
+    :param full_names: Dictionary containing user's fullnames on various platforms
     :return: None
     """
     tasks = []
@@ -319,17 +321,22 @@ async def get_github_data(url, request_data, session, github_resp, full_names):
         await asyncio.gather(*tasks)
 
 
-def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
-               ghd = None, phid = None, cachedResults=None, ghd_rate_limit_message):
+def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = None,
+                ghd = None, query = None, phid = None, cachedResults=None):
 
     """
     :Summary: Format the data fetched, store the data to Databases and remove the
               irrelevant data.
+    :param ghd_rate_limit_message: Github rate limit will be stored on this list
+                                   if we ever hit the rate limit
+    :unique_user_hash: This contains a unique id that is generated from the
+                       user's usernames and fullname
     :param pd: Phabricator Data.
     :param gd: Gerrit Data
     :param ghd: Github Data
-    :param query: Query Modal Object
+    :param query: Query Model Object
     :param phid: Phabricator ID of the user.
+    :param cachedResults: A list of cached user's contributions if it exists
     :return: JSON response of all the tasks in which the user involved,
             in the specified time span.
     """
@@ -340,15 +347,13 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
     else:
         status_name = True
 
-    """ If there are matching results in the cache"""
+    """ If there are matching results in the cache """
     if cachedResults != None:
-        print("returning cached results---------------------")
         results = loads(serialize("json",cachedResults,fields=("created_on","platform","status","owned","assigned")))
         for result in results:
             status = result["fields"]["status"].lower()
             if (status_name is True or status in status_name or
             ((status == "open" and "p-open" in status_name) or (status == "open" in status_name))):
-                print("created_on ---------------------", result["fields"]["created_on"])
                 rv = {
                    "time": result["fields"]["created_on"],"platform":result["fields"]["platform"],
                    "staus":result["fields"]["status"],"owned":result["fields"]["owned"],
@@ -371,7 +376,6 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
 
     temp = []
     with transaction.atomic():
-        print("list commits where deleted----------------------------")
         ListCommit.objects.filter(user_hash=unique_user_hash).delete()
         for i in range(0, leng):
             if i < len_pd:
@@ -380,10 +384,6 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
                     date_time = utc.localize(datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
                                              .replace(hour=0, minute=0, second=0, microsecond=0))
                     status = pd[i]['fields']['status']['name'].lower()
-                    # qs = query.queryfilter.start_time
-                    # qe = query.queryfilter.end_time
-                    # cs = str(datetime(qs.year,qs.month,qs.day).timestamp())
-                    # ce = str(datetime(qe.year,qe.month,qe.day).timestamp())
 
                     contrib = ListCommit.objects.create(
                         query=query,
@@ -412,11 +412,6 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
                     date_time = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
                     status = gd[i]['status'].lower()
 
-                    # qs = query.queryfilter.start_time
-                    # qe = query.queryfilter.end_time
-                    # cs = str(datetime(qs.year,qs.month,qs.day).timestamp())
-                    # ce = str(datetime(qe.year,qe.month,qe.day).timestamp())
-
                     contrib = ListCommit.objects.create(
                         query=query,
                         user_hash = unique_user_hash,
@@ -443,15 +438,14 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
                     if ghdRateLimitTriggered is not True:
                         if GITHUB_FALLBACK_TO_PR == False:
                             date_time = utc.localize(datetime.strptime(
-                            ghd[i]['commit']['committer']['date'].split(".")[0],"%Y-%m-%dT%H:%M:%S")
-                            .replace(minute=0, second=0, microsecond=0))
-
+                            ghd[i]['commit']['committer']['date'].split("T")[0],"%Y-%m-%d")
+                            .replace(hour=0, minute=0, second=0, microsecond=0))
                             contrib = ListCommit.objects.create(
                                 query=query, user_hash = unique_user_hash,
                                 heading = ghd[i]["commit"]["message"], created_on=date_time,
                                 createdStart = query.queryfilter.start_time,
                                 createdEnd = query.queryfilter.end_time,
-                                platform="Github", status="merged", assigned=True
+                                platform="Github", status="merged", assigned=True,
                                 redirect=ghd[i]["html_url"], owned=True,
                             )
 
@@ -465,15 +459,15 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
                         else:
                             date_time = utc.localize(datetime.strptime(
                             ghd[i]['closed_at']
-                            .split(".")[0],"%Y-%m-%dT%H:%M:%S")
-                            .replace(minute=0, second=0, microsecond=0))
+                            .split("T")[0],"%Y-%m-%d")
+                            .replace(hour=0, minute=0, second=0, microsecond=0))
 
                             contrib = ListCommit.objects.create(
                                 query=query, user_hash = unique_user_hash,
                                 heading = ghd[i]["title"], created_on=date_time,
                                 createdStart = query.queryfilter.start_time,
                                 createdEnd = query.queryfilter.end_time,
-                                platform="Github", status="merged", assigned=True
+                                platform="Github", status="merged", assigned=True,
                                 redirect=ghd[i]["html_url"], owned=True,
                             )
 
@@ -490,46 +484,84 @@ def format_data(unique_user_hash = None, pd = None, gd = None, query = None,
 
     return resp
 
-////need to come back to this later and format the urls in the format they should be
-//////////////////////////////////////////////////////////////////////////////////////
+
+
+
 async def get_full_names(urls,request_data,full_names,loop):
+    """
+    :Summary: Start a session and fetch users fullname on various platforms concurrently.
+    :param urls: URLS to be fetched.
+    :param request_data: Request Payload to be sent.
+    :param full_names: Dictionary to store full names
+    :param loop: asyncio event loop.
+    :return:
+    """
     tasks = []
     async with ClientSession() as session:
-        tasks.append(loop.create_task((get_full_name(data={"platform":"phab","urls":urls[0],
-        "session":session,"request_data":request_data,"full_names":full_names}))))
-        tasks.append(loop.create_task((get_full_name(data={"platform":"gerrit","urls":urls[1],
+        tasks.append(loop.create_task((get_full_name(data={"platform":"phab","url":urls[0][1],
+        "session":session,"request_data":request_data[2],"full_names":full_names}))))
+        tasks.append(loop.create_task((get_full_name(data={"platform":"gerrit","url":urls[1][1],
         "session":session,"full_names":full_names}))))
-        tasks.append(loop.create_task((get_full_name(data={"platform":"github","urls":urls[2],
-        "session":session,"full_names":full_names}))))
+        tasks.append(loop.create_task((get_full_name(data={"platform":"github",
+        "session":session,"request_data":request_data[3],"full_names":full_names}))))
         await asyncio.gather(*tasks)
 
 
-def get_cache_or_request(query,unique_user_hash,urls,request_data,loop,createdStart,createdEnd,phid,gerrit_response,phab_response):
+def get_cache_or_request(query, unique_user_hash, urls, request_data, loop, createdStart,
+                        createdEnd, phid,gerrit_response, phab_response, github_response,
+                        full_names, ghd_rate_limit_message):
+    """
+    :Summary: This function gets the user's contributions from cache if any,
+              otherwise fetches it from network.
+    :param query: Query Model Object
+    :param unique_user_hash: This contains a unique id that is generated from the
+                             user's usernames and fullname
+    :param urls: URLS to be fetched.
+    :param request_data: Request Payload to be sent.
+    :param loop: asyncio event loop.
+    :param createdStart: Start timeStamp from which the contributions has to be fetched.
+    :param createdEnd: End timestamp till which the contributions has to be fetched.
+    :param phid: Phabricator ID of the user
+    :param gerrit_response: Gerrit Data
+    :param phab_response: Phabricator Data
+    :param github_response: Github Data
+    :param full_names: Dictionary to store full names
+    :param ghd_rate_limit_message: Github rate limit will be stored on this list
+                                   if we ever hit the rate limit
+    :return: JSON response of all the tasks in which the user involved,
+            in the specified time span
+    """
+
 
     cache = ListCommit.objects.filter(user_hash = unique_user_hash)
-    print(cache)
     if len(cache) > 0:
         cacheCreatedStart, cacheCreatedEnd = cache[:1][0].createdStart,cache[:1][0].createdEnd
-        print("cacheCreatedStart",cacheCreatedStart)
-        print("cacheCreatedEnd",cacheCreatedEnd)
-        # cs = str(datetime.fromtimestamp(int(createdStart)).replace(hour=0,minute=0,second=0).timestamp())
-        # ce = str(datetime.fromtimestamp(int(createdEnd)).replace(hour=0,minute=0,second=0).timestamp())
-        print("createdStart",createdStart)
-        print("createdEnd",createdEnd)
-        if (cacheCreatedStart <= createdStart) and (cacheCreatedEnd >= createdEnd):
+        createdStart = utc.localize(datetime.fromtimestamp(int(createdStart)))
+        createdEnd = utc.localize(datetime.fromtimestamp(int(createdEnd)))
+
+        """ If time range of cached contributions is within or same as the
+        requested time range"""
+        if ((cacheCreatedStart.date() <= createdStart.date())
+            and (cacheCreatedEnd.date() >= createdEnd.date())):
             cache = cache.filter(created_on__gte = createdStart, created_on__lte = createdEnd)
-            return format_data(query=query,cachedResults=cache)
+
+            return format_data(ghd_rate_limit_message = ghd_rate_limit_message,
+                              query = query, cachedResults = cache)
 
     start_time = time.time()
 
     loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
-                                     gerrit_response=gerrit_response, phab_response=phab_response,phid=phid))
+                                     gerrit_response=gerrit_response, phab_response=phab_response,
+                                     github_response = github_response,
+                                     full_names = full_names, phid=phid))
     print(time.time() - start_time)
-    return format_data(unique_user_hash = unique_user_hash, pd = phab_response, gd = gerrit_response, query = query, phid = phid[0])
+    return format_data(unique_user_hash = unique_user_hash, pd = phab_response,
+           gd = gerrit_response, ghd = github_response, query = query, phid = phid[0],
+           ghd_rate_limit_message = ghd_rate_limit_message)
 
 
 async def get_data(urls, request_data, loop, gerrit_response, phab_response,
-                  github_response, phid):
+                  github_response, phid, full_names):
     """
     :Summary: Start a session and fetch the data.
     :param urls: URLS to be fetched.
@@ -537,7 +569,9 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response,
     :param loop: asyncio event loop.
     :param gerrit_response: Store response data to the requests from Gerrit URLs
     :param phab_response: Store response data to the requests from Phabricator URLs
+    :param github_response: Store response data to the requests from Github URLS
     :param phid: Phabricator ID of the user
+    :param full_names: Dictionary to store full names
     :return:
     """
     tasks = []
@@ -555,11 +589,11 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response,
 
 def getDetails(username, gerrit_username, github_username, createdStart,
               createdEnd, phid, query, users):
-    print("calling getDetails-------------------")
     """
     :Summary: Get the contributions of the user
-    :param username: Fullname of the user.
+    :param username: Phabricator username of the user.
     :param gerrit_username: Gerrit username of the user.
+    :param github_username: Github username of the user
     :param createdStart: Start timeStamp from which the contributions has to be fetched.
     :param createdEnd: End timestamp till which the contributions has to be fetched.
     :param phid: Phabricator ID of the user.
@@ -585,7 +619,8 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     github_rate_limit_message = ['']
 
     api_endpoints = deepcopy(API_ENDPOINTS)
-    api_endpoints[1] = api_endpoints[1].format(gerrit_username=gerrit_username)
+    api_endpoints[1][0] = api_endpoints[1][0].format(gerrit_username=gerrit_username)
+    api_endpoints[1][1] = api_endpoints[1][1].format(gerrit_username=gerrit_username)
     api_endpoints[2][0] = api_endpoints[2][0].format(github_username=github_username)
     api_endpoints[2][1] = api_endpoints[2][1].format(github_username=github_username)
 
@@ -617,8 +652,9 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    loop.run_until_complete(get_full_names(urls=api_endpoints,request_data=request_data,full_names=full_names,loop=loop))
-    match_percent = fuzzyMatching(control=users[1],full_names=full_names)
+    loop.run_until_complete(get_full_names(urls=api_endpoints, request_data=request_data,
+                                          full_names=full_names, loop=loop))
+    match_percent = fuzzyMatching(control=users[1], full_names=full_names)
 
     unique_user_hash = create_hash([{"fullname":users[1], "github_username":github_username,
                        "gerrit_username":gerrit_username,"phabricator_username":username}])
@@ -627,14 +663,10 @@ def getDetails(username, gerrit_username, github_username, createdStart,
                             urls=api_endpoints, request_data=request_data, loop=loop,
                             gerrit_response=gerrit_response, phab_response=phab_response,
                             github_response=github_response, createdStart=createdStart,
-                            createdEnd=createdEnd, phid=phid)
-    # else:
-    #     start_time = time.time()
-    #     loop.run_until_complete(get_data(urls=urls, request_data=request_data, loop=loop,
-    #                                      gerrit_response=gerrit_response, phab_response=phab_response,phid=phid))
-    #     print(time.time() - start_time)
+                            createdEnd=createdEnd, phid=phid, full_names = full_names,
+                            ghd_rate_limit_message = github_rate_limit_message)
 
-        # formatted = format_data(unique_user_hash = unique_user_hash, pd = phab_response, gd = gerrit_response, query = query, phid = phid[0])
+
 
     return Response({
         'query': query.hash_code,
@@ -667,7 +699,6 @@ class DisplayResult(APIView):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        print("calling get in DisplayResult-------------------")
         phid = [False]
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if query.file:
@@ -780,7 +811,6 @@ class GetUserCommits(ListAPIView):
     serializer_class = UserCommitSerializer
 
     def get(self, request, *args, **kwargs):
-        print("calling get in GetUserCommits-------------------")
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
 
         try:
@@ -809,7 +839,6 @@ class GetUsers(APIView):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        print("calling get inside getusers-------------------")
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if not query.file:
             users = query.queryuser_set.all().values_list('fullname', flat=True)
@@ -835,7 +864,6 @@ class GetUsers(APIView):
 
 
 def UserUpdateTimeStamp(data):
-    print("calling UserUpdateTimeStamp-----------------------------")
     """
     :param data: Hash Code of the Query.
     :return: contributions of the user on updating Query Filter timestamp.
@@ -872,7 +900,6 @@ def UserUpdateTimeStamp(data):
 
 
 def UserUpdateStatus(data):
-    print("calling UserUpdateStatus----------------------------")
     """
     :param data: Hash Code of the Query.
     :return: contributions of the user on updating Query Filter commit status.

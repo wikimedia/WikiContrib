@@ -29,7 +29,6 @@ class CheckQuery(APIView):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        print("calling post in checkquery-------------------")
         """
         :param request: request Object.
         :param args: arguments passed to the function.
@@ -54,8 +53,8 @@ class AddQueryUser(CreateAPIView):
     serializer_class = QuerySerializer
 
     def post(self, request, *args, **kwargs):
-        print("calling post in AddQueryUser-------------------")
         """
+        Summary: This function creates a query
         :param request: request Object.
         :param args: arguments passed to the function.
         :param kwargs: Key, values passed to the function.
@@ -128,13 +127,13 @@ class AddQueryUser(CreateAPIView):
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
                 request.data['hash_code'] = create_hash(request.data['users'])
-                print("request.data[hash_code] ",request.data["hash_code"])
                 try:
                     with transaction.atomic():
                         query = ""
+
+                        # if query with the given hash already exists
                         if Query.objects.filter(hash_code=request.data['hash_code']).exists():
                             query = Query.objects.filter(hash_code=request.data['hash_code'])
-                            print("this is query after being fetched: ",query)
                             query[0].queryuser_set.all().delete()
                             query[0].queryfilter.delete()
 
@@ -146,7 +145,6 @@ class AddQueryUser(CreateAPIView):
                         else:
                             # Add the Query
                             query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                            print("this is query after being created through super: ",query)
 
                         end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
                         start_time = end_time - timedelta(days=365)
@@ -160,8 +158,6 @@ class AddQueryUser(CreateAPIView):
 
                         # Add username's & platform's to the query
                         temp = 1
-                        print("users in query -----------")
-                        print(request.data['users'])
                         for i in request.data['users']:
                             data = i.copy()
                             if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
@@ -208,20 +204,18 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch', 'delete']
 
     def get_object(self):
-        print("calling get_object in QueryRetrieveUpdateDeleteView-------------------")
         """
         :return: ModalObject of Query
         """
         return get_object_or_404(Query, hash_code=self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
-        print("calling get in QueryRetrieveUpdateDeleteView-------------------")
         """
         :Summary: GET request to view the query.
         :param request: request Object.
         :param args: arguments passed to the function.
         :param kwargs: Key, values passed to the function.
-        :return: Response Object containing the data of of all the users in the Query.
+        :return: Response Object containing the data of all the users in the Query.
         """
         if self.get_object().file:
             return Response({"uri": self.get_object().csv_file_uri, 'file': 0})
@@ -233,7 +227,6 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             return Response(data)
 
     def patch(self, request, *args, **kwargs):
-        print("calling patch in QueryRetrieveUpdateDeleteView-------------------")
         """
         :Summary: PATCH request to update the query.
         :param request: request Object.
@@ -242,12 +235,24 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         :return: HTTPRedirect with redirect location (to /result/<hash>/)
         """
         try:
+            # if a csv file is present in the update request
             if int(request.data['file']) is 0:
                 # Update the CSV file
                 try:
                     file_path = self.get_object().csv_file.path
                 except ValueError:
+                    initial = self.kwargs['hash']
+
+                    # if we changed input type during the query update on the frontend
+                    # (from single user or multiple users form to csv), the hash type
+                    # needs to change to the hash type used by csv inputs
+                    if(len(initial.split("-")) > 1 or initial.islower()):
+                        query = self.get_object()
+                        self.kwargs['hash'] = create_hash()
+                        query.hash_code = self.kwargs['hash']
+                        query.save()
                     file_path = BASE_DIR + "/uploads/" + self.kwargs['hash'] + ".csv"
+
                 if int(request.data['chunk']) is 1:
                     with open(file_path + ".part", 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
@@ -288,8 +293,32 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                         query.queryuser_set.all().delete()
                         temp = 0
                         if "users" in request.data:
-                            query.hash_code = create_hash(request.data['users'])
+
+                            new_hash = create_hash(request.data['users'])
+
+                            old_query = Query.objects.filter(hash_code = new_hash)
+
+                            # If there is an identical query in the database,
+                            if len(old_query) > 0:
+                                # check if the identical query and the new query where created on the same day and if not,
+                                if (old_query[0].created_on.date() <
+                                query.created_on.date()):
+                                # delete old query
+                                    old_query[0].delete()
+
+                                # if both queries where created on the same day
+                                else:
+                                    # use the old query instead
+                                    query = old_query[0]
+                                    query.queryuser_set.all().delete()
+                                    query.file = False
+                                    query.csv_file = ""
+
+                            query.hash_code = new_hash
                             query.save()
+                            self.kwargs['hash'] = query.hash_code
+
+                            # update the query user(s) with the usernames submitted
                             for i in request.data['users']:
                                 data = i.copy()
                                 if not (data['fullname'] == "" and data['gerrit_username'] == ""
@@ -317,7 +346,6 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
-        print("calling delete in QueryRetrieveUpdateDeleteView-------------------")
         """
          :Summary: DELETE request to delete the query.
          :param request: request Object.
@@ -340,11 +368,9 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch']
 
     def get_object(self):
-        print("calling get_object in queryfilterview----------------------")
         return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
-        print("calling get in queryfilterview--------------------")
         """
         :Summary: GET request to view the query filters.
         :param request: request Object.
@@ -354,6 +380,12 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
         """
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if QueryFilter.objects.filter(query=query).exists():
+
+
+            """ <----------------------------------------------------------------------
+            format the recieved datetime string to a timezone-aware datetime object
+             before saving to db """
+
             if "start_time" in request.data:
                 request.data['start_time'] = utc.localize(datetime.strptime(
                        request.data["start_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
@@ -361,6 +393,7 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             if "end_time" in request.data:
                 request.data['end_time'] = utc.localize(datetime.strptime(
                        request.data["end_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+            """---------------------------------------------------------------------/>"""
 
             return super(QueryFilterView, self).get(request, *args, **kwargs)
         else:
@@ -372,7 +405,6 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             })
 
     def patch(self, request, *args, **kwargs):
-        print("calling patch in query filter view---------------------")
         """
         :Summary: PATCH request to Update the query filters.
         :param request: request Object.
@@ -394,6 +426,10 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
                 return Response({'message': 'Fill the form completely', 'error': 1},
                                 status=status.HTTP_400_BAD_REQUEST)
 
+            """ <----------------------------------------------------------------------
+            format the recieved datetime string to a timezone-aware datetime object
+             before saving to db """
+
             if "start_time" in request.data:
                 request.data['start_time'] = utc.localize(datetime.strptime(
                        request.data["start_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
@@ -401,12 +437,9 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             if "end_time" in request.data:
                 request.data['end_time'] = utc.localize(datetime.strptime(
                        request.data["end_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+            """-----------------------------------------------------------------/>"""
 
-            data = super(QueryFilterView, self).patch(request, *args, **kwargs).data#an inconsistency with the how this method patches filters
-            # and how AddQueryUsers creates the first queryfilter still needs to be investigated as it might still exist and it causes the
-            # application to make network requests when it is supposed to fetch
-            # from the cache. this might have something to do with the way we handle time in the whole application. We might have to handle time
-            # properly before this issue can be solved
+            data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
 
             if data['status'] != commit_status:
                 if commit_start != data['start_time']\
