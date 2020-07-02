@@ -386,9 +386,8 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                     )
             if i < len_gd:
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0],"%Y-%m-%d %H:%M:%S")
-                                        .replace(minute=0, second=0, microsecond=0))
+                                        .replace(hour=0, minute=0, second=0, microsecond=0))
                 if date_time <= query.queryfilter.end_time and date_time >= query.queryfilter.start_time:
-                    date_time = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
                     status = gd[i]['status'].lower()
                     if (status_name is True or status in status_name
                     or (status == "open" in status_name)):
@@ -412,7 +411,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                         if GITHUB_FALLBACK_TO_PR == False:
                             date_time = utc.localize(datetime.strptime(
                             ghd[i]['commit']['committer']['date'].split(".")[0],"%Y-%m-%dT%H:%M:%S")
-                            .replace(minute=0, second=0, microsecond=0))
+                            .replace(hour=0, minute=0, second=0, microsecond=0))
 
                             rv = {
                             "time": date_time.isoformat(),
@@ -432,7 +431,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                             date_time = utc.localize(datetime.strptime(
                             ghd[i]['closed_at']
                             .split(".")[0],"%Y-%m-%dT%H:%M:%S")
-                            .replace(minute=0, second=0, microsecond=0))
+                            .replace(hour=0, minute=0, second=0, microsecond=0))
 
                             rv = {
                             "time": date_time.isoformat(),
@@ -694,7 +693,6 @@ class GetUserCommits(ListAPIView):
             date = utc.localize(datetime.strptime(request.GET['created'], "%Y-%m-%d"))
         except KeyError:
             date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
         self.queryset = ListCommit.objects.filter(Q(query=query), Q(created_on=date))
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
         data = []
