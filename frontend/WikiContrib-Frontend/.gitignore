@@ -13,8 +13,6 @@
 /build
 
 # misc
- migrations/
- __pycache__/
 .DS_Store
 .env.local
 .env.development.local

@@ -384,11 +384,6 @@ export class Query extends Component {
       });
     } else {
       let hash = response.query;
-      // if (this.state.operation) {
-      //   hash = response.query;
-      // } else {
-      //   hash = this.props.match.params.hash;
-      // }
       this.setState({
         redirect: hash,
         loading: false,
