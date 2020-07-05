@@ -18,9 +18,8 @@ from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
 from django.core.serializers import serialize
-from .helper import get_prev_user, get_next_user, create_hash, API_ENDPOINTS, ORGS
-from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-GITHUB_API_LIMIT
+from .helper import get_prev_user, get_next_user, create_hash, API_ENDPOINTS, ORGS, REQUEST_DATA
+from WikiContrib.settings import GITHUB_FALLBACK_TO_PR, GITHUB_API_LIMIT
 import sys
 from rapidfuzz import fuzz
 if GITHUB_FALLBACK_TO_PR:
@@ -265,9 +264,7 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
             pass
         return url
 
-    count = 0
     while loopCount > 0:
-        count += 1
         newURL = query.format(url=url, orgs_filter=orgs_filter,
                  dateRangeStartIsoFormat=dateRangeStart.isoformat()+"Z",
                  dateRangeEndIsoFormat=dateRangeEnd.isoformat()+"Z")
@@ -619,35 +616,26 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     github_rate_limit_message = ['']
 
     api_endpoints = deepcopy(API_ENDPOINTS)
+    request_data = deepcopy(REQUEST_DATA)
+
     api_endpoints[1][0] = api_endpoints[1][0].format(gerrit_username=gerrit_username)
     api_endpoints[1][1] = api_endpoints[1][1].format(gerrit_username=gerrit_username)
     api_endpoints[2][0] = api_endpoints[2][0].format(github_username=github_username)
     api_endpoints[2][1] = api_endpoints[2][1].format(github_username=github_username)
 
-    request_data = [
-        {
-            'constraints[authorPHIDs][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[assigned][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[usernames][0]':username,
-            'api.token': API_TOKEN
-        },
-        {
-            'github_username':github_username,
-            'github_access_token':GITHUB_ACCESS_TOKEN,
-            'createdStart':int(createdStart),
-            'createdEnd':int(createdEnd)
-        }
-    ]
+    request_data[0]['constraints[authorPHIDs][0]'] = username
+    request_data[0]['constraints[createdStart]'] = int(createdStart)
+    request_data[0]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[1]['constraints[assigned][0]'] = username
+    request_data[1]['constraints[createdStart]'] = int(createdStart)
+    request_data[1]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[2]['constraints[usernames][0]'] = username
+
+    request_data[3]['github_username'] = github_username
+    request_data[3]['createdStart'] = int(createdStart)
+    request_data[3]['createdEnd'] = int(createdEnd)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
