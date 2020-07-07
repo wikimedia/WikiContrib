@@ -893,3 +893,15 @@ h3.accounts  {
     flex-direction: row;
   }
 }
+
+/* ####################################################
+############# disable bulk add feature #############
+#################################################### */
+.ui.button#disable_bulk_add_feature {
+  pointer-events: auto!important;
+}
+
+.display_non {
+  display: none!important;
+}
+/* #################################################### */

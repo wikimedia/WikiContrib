@@ -767,7 +767,8 @@ export class Query extends Component {
                                         position="top center"
                                         trigger={
                                           <Button
-                                            className="remove"
+                                            className="remove display_non"
+                                            disabled
                                             aria-label="remove user"
                                             style={{backgroundColor:"inherit"}}
                                             tabIndex="0"
@@ -796,18 +797,26 @@ export class Query extends Component {
                           )}
                           <br />
                           <Card.Content extra>
-                            <div>
-                              <label>
+                            <Popup
+                              content=<a href="https://github.com/wikimedia/WikiContrib"
+                                rel="noopener noreferrer" target="_blank">
+                              This feature is currently disabled. Contact the tool maintainers to learn more.
+                              </a>
+                              position="top center"
+                              pinned
+                              on="click"
+                              trigger={
                                 <Checkbox
                                   toggle
-                                  onClick={() =>
+                                  disabled
+                                  label="Bulk Add"
+                                  onClick={null/*() =>
                                     this.setState({ bulk: !this.state.bulk })
-                                  }
-                                  checked={this.state.bulk}
+                                  */}
+                                  defaultChecked={null/*this.state.bulk*/}
                                 />
-                              <span className="checkbox_label">Bulk Add</span>
-                              </label>
-                            </div>
+                              }
+                            />
                           </Card.Content>
                         </Card>
                         <div className="reset_add_continue">
@@ -838,19 +847,25 @@ export class Query extends Component {
                               </Button>
                             }
                           />
-                          <Popup
-                            content="Add User"
+                        {/*<Popup
+                            content=<a href="https://github.com/wikimedia/WikiContrib"
+                              rel="noopener noreferrer" target="_blank">
+                              This feature is currently disabled. Contact the tool maintainers to learn more.
+                            </a>
                             position="top center"
+                            pinned
                             trigger={
                               <Button
                                 className="table_row_add"
+                                id="disable_bulk_add_feature"
                                 aria-label="add more user"
                                 onClick={this.addrow}
+                                disabled
                               >
                               <Icon name="user plus" />
                               </Button>
                             }
-                          />
+                          />*/}
                           <Popup
                             content="Search"
                             position="top center"
