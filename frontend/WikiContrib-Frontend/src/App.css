@@ -818,6 +818,20 @@ h3.accounts  {
   outline: 2px solid #9ABDF6 !important;
 }
 
+.go-top {
+  position: fixed;
+  bottom: 30px;
+  right: 0;
+  color: white;
+  background-color: #222!important;
+  z-index: 1;
+  width: 90px;
+  text-align: center;
+  height: 45px;
+  border-radius: 10px 0 0 10px!important;
+  margin: 0 0 0 0!important;
+}
+
 @media screen and (min-width: 900px) and (max-width: 1140px ){
   .ui.card.filter_view {
     width: 75%
@@ -904,3 +918,15 @@ h3.accounts  {
     flex-direction: row;
   }
 }
+
+/* ####################################################
+############# disable bulk add feature #############
+#################################################### */
+.ui.button#disable_bulk_add_feature {
+  pointer-events: auto!important;
+}
+
+.display_non {
+  display: none!important;
+}
+/* #################################################### */

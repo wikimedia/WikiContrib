@@ -17,9 +17,8 @@ from datetime import datetime, timedelta
 from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
-from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-ORGS, GITHUB_API_LIMIT, API_ENDPOINTS, REQUEST_DATA
-from .helper import get_prev_user, get_next_user
+from WikiContrib.settings import GITHUB_FALLBACK_TO_PR, GITHUB_API_LIMIT
+from .helper import get_prev_user, get_next_user, ORGS, API_ENDPOINTS, REQUEST_DATA
 import sys
 from rapidfuzz import fuzz
 if GITHUB_FALLBACK_TO_PR:
@@ -330,9 +329,7 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
             pass
         return url
 
-    count = 0
     while loopCount > 0:
-        count += 1
         newURL = query.format(url=url, orgs_filter=orgs_filter,
                  dateRangeStartIsoFormat=dateRangeStart.isoformat()+"Z",
                  dateRangeEndIsoFormat=dateRangeEnd.isoformat()+"Z")
@@ -517,7 +514,6 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                     ghdRateLimitTriggered = True
                     ghd_rate_limit_message[0] = ghd[i]['rate-limit-message']
                     ghd.clear()
-
 
     return resp
 
