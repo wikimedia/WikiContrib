@@ -9,6 +9,7 @@ from json import loads, dumps, JSONDecodeError
 from aiohttp import ClientSession
 import time
 from math import ceil
+from copy import deepcopy
 from query.models import Query
 from django.shortcuts import get_object_or_404
 from pandas import read_csv, isnull
@@ -16,9 +17,8 @@ from datetime import datetime, timedelta
 from pytz import utc
 from .models import ListCommit
 from .serializers import UserCommitSerializer
-from WikiContrib.settings import API_TOKEN, GITHUB_ACCESS_TOKEN,GITHUB_FALLBACK_TO_PR,\
-ORGS, GITHUB_API_LIMIT, API_ENDPOINTS
-from .helper import get_prev_user, get_next_user
+from WikiContrib.settings import GITHUB_FALLBACK_TO_PR, GITHUB_API_LIMIT
+from .helper import get_prev_user, get_next_user, ORGS, API_ENDPOINTS, REQUEST_DATA
 import sys
 from rapidfuzz import fuzz
 if GITHUB_FALLBACK_TO_PR:
@@ -74,11 +74,12 @@ def fuzzyMatching(control, full_names):
     _list = []
     ave = 0
     for key in full_names:
-        if (full_names[key] != username_does_not_exist and
-        full_names[key] != no_username_provided):
-            _list.append(fuzz.WRatio(control, full_names[key]))
+        if full_names[key] != username_does_not_exist:
+            if full_names[key] != no_username_provided:
+                _list.append(fuzz.WRatio(control, full_names[key],score_cutoff=60))
         else:
             return 0
+
     for each in _list:
         ave += each
 
@@ -266,9 +267,7 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
             pass
         return url
 
-    count = 0
     while loopCount > 0:
-        count += 1
         newURL = query.format(url=url, orgs_filter=orgs_filter,
                  dateRangeStartIsoFormat=dateRangeStart.isoformat()+"Z",
                  dateRangeEndIsoFormat=dateRangeEnd.isoformat()+"Z")
@@ -454,7 +453,6 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                     ghd_rate_limit_message[0] = ghd[i]['rate-limit-message']
                     ghd.clear()
 
-
     return resp
 
 
@@ -512,40 +510,32 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     phab_response = []
     gerrit_response = []
     github_response = []
-    full_names = {"phab_full_name":""}
+    full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
     github_rate_limit_message = ['']
 
-    API_ENDPOINTS[1] = API_ENDPOINTS[1].format(gerrit_username=gerrit_username)
-    API_ENDPOINTS[2][0] = API_ENDPOINTS[2][0].format(github_username=github_username)
-    API_ENDPOINTS[2][1] = API_ENDPOINTS[2][1].format(github_username=github_username)
+    api_endpoints = deepcopy(API_ENDPOINTS)
+    request_data = deepcopy(REQUEST_DATA)
 
-    request_data = [
-        {
-            'constraints[authorPHIDs][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[assigned][0]': username,
-            'api.token': API_TOKEN,
-            'constraints[createdStart]': int(createdStart),
-            'constraints[createdEnd]': int(createdEnd)
-        },
-        {
-            'constraints[usernames][0]':username,
-            'api.token': API_TOKEN
-        },
-        {
-            'github_username':github_username,
-            'github_access_token':GITHUB_ACCESS_TOKEN,
-            'createdStart':int(createdStart),
-            'createdEnd':int(createdEnd)
-        }
-    ]
+    api_endpoints[1] = api_endpoints[1].format(gerrit_username=gerrit_username)
+    api_endpoints[2][0] = api_endpoints[2][0].format(github_username=github_username)
+    api_endpoints[2][1] = api_endpoints[2][1].format(github_username=github_username)
+
+    request_data[0]['constraints[authorPHIDs][0]'] = username
+    request_data[0]['constraints[createdStart]'] = int(createdStart)
+    request_data[0]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[1]['constraints[assigned][0]'] = username
+    request_data[1]['constraints[createdStart]'] = int(createdStart)
+    request_data[1]['constraints[createdEnd]'] = int(createdEnd)
+
+    request_data[2]['constraints[usernames][0]'] = username
+
+    request_data[3]['github_username'] = github_username
+    request_data[3]['createdStart'] = int(createdStart)
+    request_data[3]['createdEnd'] = int(createdEnd)
 
     start_time = time.time()
-    loop.run_until_complete(get_data(urls=API_ENDPOINTS, request_data=request_data,
+    loop.run_until_complete(get_data(urls=api_endpoints, request_data=request_data,
                                      loop=loop,gerrit_response=gerrit_response,
                                      phab_response=phab_response,
                                      github_response=github_response,

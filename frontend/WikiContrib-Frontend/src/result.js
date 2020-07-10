@@ -8,7 +8,8 @@ import {
   Placeholder,
   Transition,
   Header,
-  Message
+  Message,
+  Icon
 } from 'semantic-ui-react';
 import { fetchAsynchronous } from './components/fetch';
 import { Link } from 'react-router-dom';
@@ -69,6 +70,44 @@ const chartOptions = {
   },
 };
 
+
+
+class GoToTop extends React.Component {
+  state = {
+       showButton: false
+   };
+
+  componentDidMount() {
+      document.addEventListener("scroll", () => {
+          if (window.scrollY > 170) {
+              this.setState({ showButton: true })
+          } else {
+              this.setState({ showButton: false })
+          }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+
+  scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  render(){
+      return (
+          <React.Fragment>
+              { this.state.showButton ?
+                <Button className="go-top" onClick={this.scrollToTop}>
+                  <Icon name="caret up" size="big" inverted />
+                </Button>
+                :
+                null
+              }
+          </React.Fragment>
+      )
+  }
+}
+
 /**
  * Display Fullname, Phabricator Username, Gerrit Username and Github Username of the user.
  */
@@ -90,6 +129,7 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
+              <GoToTop/>
               <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
               <span>
                 <h3 className="accounts">
@@ -705,10 +745,9 @@ class QueryResult extends React.Component {
                 warning
                 header="Warning! It seems like the Provided Usernames doesn't belong to the same user"
                 content={`This can happen when the provided fullname is too different from the retrieved
-                        fullname(s), when there is no existing user for the provided username(s) or
-                        when any of the query form fields is left blank. If the submitted usernames are
-                        yours, try updating the fullname used to register the different accounts to
-                        be similar to the fullname provided during query`}
+                        fullname(s) or when there is no existing user for the provided username(s).
+                        If the submitted usernames are yours, try updating the fullname used to register
+                        the different accounts to be similar to the fullname provided during query`}
               />
               <Button
                 color="yellow"
