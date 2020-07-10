@@ -503,7 +503,7 @@ class QueryResult extends React.Component {
      * Restore the initial filters.
      */
     let time = new Date();
-    time.setMinutes(0,0,0);
+    // time.setMinutes(0,0,0);
     let one_year = time_delta(365);
 
     let filters = {

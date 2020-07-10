@@ -99,7 +99,7 @@ class AddQueryUser(CreateAPIView):
                     if int(request.data['complete']) == 0:
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
-                        end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
+                        end_time = timezone.now().replace(microsecond=0)
                         start_time = end_time - timedelta(days=365)
 
                         QueryFilter.objects.create(
@@ -119,7 +119,7 @@ class AddQueryUser(CreateAPIView):
                         rename(BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part",
                                BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv")
                         query_obj.csv_file = query_obj.hash_code + ".csv"
-                        end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
+                        end_time = timezone.now().replace(microsecond=0)
                         start_time = end_time - timedelta(days=365)
                         query_obj.save()
                         QueryFilter.objects.create(
@@ -139,7 +139,7 @@ class AddQueryUser(CreateAPIView):
                     with transaction.atomic():
                         # Add the Query
                         query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                        end_time = timezone.now().replace(minute=0, second=0, microsecond=0)
+                        end_time = timezone.now().replace(microsecond=0)
                         start_time = end_time - timedelta(days=365)
 
                         QueryFilter.objects.create(
