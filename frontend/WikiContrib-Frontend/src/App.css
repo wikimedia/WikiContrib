@@ -172,28 +172,22 @@ h3.accounts  {
 }
 
 
-#warning {
-  width: 100%;
-  display: flex!important;
-  justify-content: center;
-  align-items: center;
+#fuzzy-warning .header {
+  background-color: #F0AD4D;
+  color: #856404;
 }
 
-#content {
-  width: 100%;
-  max-width: 600px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+#fuzzy-warning .actions {
+  background-color: white;
 }
 
-#warning #content .message{
-  display: block!important;
-  width: 100%!important;
+#fuzzy-warning .actions .no {
+  color: black!important;
 }
 
- #warning #content .button {
-  margin: 1em 0 0 1em!important
+#fuzzy-warning .actions .yes {
+  background-color: #F0AD4D;
+  color:  #856404;
 }
 
 .drag_drop {

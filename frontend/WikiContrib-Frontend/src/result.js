@@ -291,7 +291,7 @@ class QueryResult extends React.Component {
       };
     }
 
-    let current_month = [0,0,0];
+    let current_month = [0, 0, 0];
     this.state.data.forEach(e => {
       let index = new Date(e.time);
       let index_year = index.getFullYear();
@@ -304,36 +304,36 @@ class QueryResult extends React.Component {
 
       if (platform === 'phabricator' && platform in e) {
         if (e.assigned && !e.owned) {
-            if(index === et_m && index_year === et_y){
+            if (index === et_m && index_year === et_y) {
               current_month[0] += 1;
               current_month[2] += 1;
-            }else{
+            } else {
               data.datasets[0].data[index] += 1;
               data.datasets[2].data[index] += 1;
             }
         } else if (e.owned && !e.assigned) {
-          if(index === et_m && index_year === et_y){
+          if (index === et_m && index_year === et_y) {
             current_month[1] += 1;
             current_month[2] += 1;
-          }else{
+          } else {
             data.datasets[1].data[index] += 1;
             data.datasets[2].data[index] += 1;
           }
         } else {
-          if(index === et_m && index_year === et_y){
+          if (index === et_m && index_year === et_y) {
             current_month[0] += 1;
             current_month[1] += 1;
             current_month[2] += 1;
-          }else{
+          } else {
             data.datasets[0].data[index] += 1;
             data.datasets[1].data[index] += 1;
             data.datasets[2].data[index] += 1;
           }
         }
       } else if (platform !== 'phabricator' && platform in e) {
-          if(index === et_m && index_year === et_y){
+          if (index === et_m && index_year === et_y) {
             current_month[0] += 1;
-          }else{
+          } else {
             data.datasets[0].data[index] += 1;
           }
       }
@@ -352,14 +352,14 @@ class QueryResult extends React.Component {
       lbl_a = months.slice(0, m_index),
       lbl_b = months.slice(m_index);
 
-    data.labels = lbl_b.concat(lbl_a,lbl_b[0]);
+    data.labels = lbl_b.concat(lbl_a, lbl_b[0]);
 
     for (var i = 0; i < data_len; i++) {
       if (data.datasets[i]) {
         let set_a = data.datasets[i].data,
           set_b = set_a.splice(m_index);
 
-        data.datasets[i].data = set_b.concat(set_a,[current_month[i]]);
+        data.datasets[i].data = set_b.concat(set_a, [current_month[i]]);
       }
     }
 
@@ -499,7 +499,7 @@ class QueryResult extends React.Component {
      * Restore the initial filters.
      */
     let time = new Date();
-    time.setMinutes(0,0,0);
+    time.setMinutes(0, 0, 0);
     let one_year = time_delta(365);
 
     let filters = {
@@ -527,11 +527,11 @@ class QueryResult extends React.Component {
 
   func = () => {
     let { update_filters: uf } = this.state;
-    if(uf.end_time !== "" && uf.start_time !== ""){
+    if (uf.end_time !== "" && uf.start_time !== "") {
     let month = new Date(uf.end_time).getMonth();
     let year = new Date(uf.end_time).getFullYear();
 
-    return new Date(`${year}-${zero_pad(month+1)}-${getDaysInMonth(year,months[month])}`).toISOString();
+    return new Date(`${year}-${zero_pad(month+1)}-${getDaysInMonth(year, months[month])}`).toISOString();
     }
   }
 

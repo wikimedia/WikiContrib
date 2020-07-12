@@ -18,7 +18,7 @@ import {
   Transition,
   Loader,
   Header,
-  Message
+  Modal
 } from 'semantic-ui-react';
 import { NavBar } from './components/nav';
 
@@ -199,7 +199,7 @@ export class Query extends Component {
      * Add CSV file to the tool.
      * @param {file} file file added to upload.
      */
-    if(file.type === 'text/csv' ||
+    if (file.type === 'text/csv' ||
        file.type === "application/vnd.ms-excel" ||
        file.type === "text/plain" ||
        file.type === "text/x-csv" ||
@@ -249,7 +249,7 @@ export class Query extends Component {
       message: {
         message: 'Lost Internet connection, please re-upload the file',
         update: !this.state.message.update,
-        type: 1,
+         type: 1,
         trigger: true,
       },
     });
@@ -338,7 +338,7 @@ export class Query extends Component {
       localStorage.removeItem('res_query');
       this.setState({ loading: true, notfound: false });
 
-      if(match_fullnames){
+      if (match_fullnames) {
         let uri = matchFullNamesApi;
         let data = {};
         data['users'] = this.getExactRows();
@@ -350,7 +350,7 @@ export class Query extends Component {
           this.matchFullNamesCallback
         );
 
-      }else{
+      } else {
         let uri = this.state.operation
           ? QueryCreateApi
           : QueryDetailApi.replace('<hash>', this.props.match.params.hash);
@@ -389,9 +389,9 @@ export class Query extends Component {
   };
 
   matchFullNamesCallback = response => {
-    if(response !== '' &&
+    if (response !== '' &&
     response !== 'error' in response &&
-    response.error === 1){
+    response.error === 1) {
       this.setState({
         loading: false,
         loadData: false,
@@ -403,11 +403,11 @@ export class Query extends Component {
         },
       });
     }
-    else{
-      if(response.match_percent > 60){
+    else {
+      if (response.match_percent > 60) {
         this.createQuery(false)
       }
-      else{
+      else {
         this.setState({loading:false,loadData:false})
       }
     }
@@ -444,8 +444,8 @@ export class Query extends Component {
         redirect: hash,
         loading: false,
         loadData: response,
-      },()=>{
-        if(this.state.redirect !== false){
+      }, ()=>{
+        if (this.state.redirect !== false) {
         this.props.history.push({
             pathname: '/' + this.state.redirect + '/',
             data: this.state.loadData,
@@ -465,6 +465,35 @@ export class Query extends Component {
         ) : (
           <React.Fragment>
             <NavBar />
+            <Modal
+              id="fuzzy-warning"
+              open={!this.state.showMismatch}
+              onClose={()=> this.setState({showMismatch:true, loading:false})}
+              size='tiny'
+              >
+              <Modal.Header>Warning!</Modal.Header>
+              <Modal.Content>
+                <p>The usernames you have provided does not seem to belong to the same user.
+                Do you still want to proceed ?</p>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button
+                  basic
+                  className="no"
+                  size="medium"
+                  onClick={() => this.setState({showMismatch:true, loading:false})}
+                  >
+                  No
+                </Button>
+                <Button
+                  size="medium"
+                  className="yes"
+                  onClick={()=>this.createQuery(false)}
+                  >
+                  Yes
+                </Button>
+                </Modal.Actions>
+            </Modal>
             <MessageDisplay
               message={this.state.message.message}
               type={this.state.message.type}
@@ -508,34 +537,6 @@ export class Query extends Component {
                       duration={500}
                       animation="fade"
                     >
-                    {!this.state.showMismatch ?
-                      <div id="warning">
-                      <div id="content">
-                        <Message
-                          size="big"
-                          attached
-                          warning
-                          header="Warning!"
-                          content={`The usernames you have provided does not seem
-                                 to belong to the same user. Do you still want to proceed ?`}
-                        />
-                      <Button
-                          basic
-                          size="big"
-                          onClick={() => this.setState({showMismatch:true,loading:false})}
-                          >
-                          No
-                        </Button>
-                        <Button
-                          size="big"
-                          color="yellow"
-                          onClick={()=>this.createQuery(false)}
-                          >
-                          Yes
-                        </Button>
-                      </div>
-                      </div>
-                      :
                       <React.Fragment>
                         <h1><Header className="title">WikiContrib</Header></h1>
                         <h2 className="accounts">
@@ -566,7 +567,7 @@ export class Query extends Component {
                                   onClose={(event) => {
                                     // in case of bulkTooltipShown being false (currently open)
                                     // the event fired when click would be onClose
-                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
+                                    if (this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
                                       // if tooltip already finished, close normally
                                       this.setState({ bulkShown: false, bulkTooltipShown: true })
                                     else
@@ -965,7 +966,6 @@ export class Query extends Component {
                           />
                         </div>
                       </React.Fragment>
-                      }
                     </Transition>
                   )}
                 </Grid.Column>
