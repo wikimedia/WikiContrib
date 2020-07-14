@@ -31,6 +31,7 @@ import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
 import { NavBar } from './components/nav';
+import emptyAvatar from './img/empty_avatar.png';
 
 /**
  * Styles to the Line Graphs.
@@ -113,11 +114,6 @@ class GoToTop extends React.Component {
  */
 class DisplayUser extends React.Component {
   render = () => {
-    let { start_time: st, end_time: et } = this.props.filters;
-    st = new Date(st);
-    let st_m = st.getMonth();
-    et = new Date(et);
-    let et_m = et.getMonth();
     return (
       <div>
         {this.props.loading ? (
@@ -129,64 +125,74 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <GoToTop/>
-              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
-              <span>
-                <h3 className="accounts">
-                  Gerrit:{' '}
-                  {this.props.gerrit_username !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        'https://gerrit.wikimedia.org/r/#/q/' +
-                        this.props.gerrit_username
-                      }
-                    >
-                      {this.props.gerrit_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}{' '}
-                  | Phabricator:{' '}
-                  {this.props.phabricator_username !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        'https://phabricator.wikimedia.org/p/' +
-                        this.props.phabricator_username +
-                        '/'
-                      }
-                    >
-                      {this.props.phabricator_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}{' '}
-                  | Github:{' '}
-                  {this.props.github_username !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        'https://github.com/' +
-                        this.props.github_username +
-                        '/'
-                      }
-                    >
-                      {this.props.github_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}
-                </h3>
-                <h3 className="accounts">
-                  {full_months[st_m] + " " + st.getFullYear()}
-                  -
-                  {full_months[et_m] + " " + et.getFullYear()}
-                </h3>
-              </span>
+              <div className="profile">
+                <div className="avatar">
+                <img src={this.props.avatar || emptyAvatar}/>
+                </div>
+                <div className="contact_me">
+                  <h2 className="name">{this.props.username}</h2>
+                  <h3 className="email"><span>Email:{' '}{this.props.email}</span></h3>
+                  <h3 className="gerrit">
+                    Gerrit:{' '}
+                    {this.props.gerrit_username !== '' ? (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={
+                          'https://gerrit.wikimedia.org/r/#/q/' +
+                          this.props.gerrit_username
+                        }
+                      >
+                        {this.props.gerrit_username}
+                      </a>
+                    ) : (
+                        'None'
+                      )}
+                    </h3>
+                    <h3 className="phabricator">Phabricator:{' '}
+                    {this.props.phabricator_username !== '' ? (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={
+                          'https://phabricator.wikimedia.org/p/' +
+                          this.props.phabricator_username +
+                          '/'
+                        }
+                      >
+                        {this.props.phabricator_username}
+                      </a>
+                    ) : (
+                        'None'
+                      )}
+                    </h3>
+                    <h3 className="github">Github:{' '}
+                    {this.props.github_username !== '' ? (
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={
+                          'https://github.com/' +
+                          this.props.github_username +
+                          '/'
+                        }
+                      >
+                        {this.props.github_username}
+                      </a>
+                    ) : (
+                        'None'
+                      )}
+                  </h3>
+                </div>
+                {this.props.bio ?
+                (<div className="bio">
+                  <h2>About me</h2>
+                  <div>
+                  <p>{this.props.bio}</p>
+                  </div>
+                </div>):''
+                }
+              </div>
             </React.Fragment>
           )}
       </div>
@@ -219,7 +225,7 @@ class QueryResult extends React.Component {
       query: this.props.match.params.hash,
       loading: data === false,
       data: data !== false ? data.result : [],
-      meta: data !== false ? data.meta : {},
+      meta: data !== false ? data.meta : {user_profiles:{phab_profile:{},gerrit_profile:{},github_profile:{}}},
       showMismatch: data === false ? false : (data.meta.match_percent > 60 ? true : false),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
@@ -542,6 +548,17 @@ class QueryResult extends React.Component {
   render = () => {
     document.body.style.backgroundColor = '#f8f9fa';
     let { update_filters: uf, current_filters: cf } = this.state;
+    let { start_time: st, end_time: et } = this.state.current_filters;
+    st = new Date(st);
+    let st_m = st.getMonth();
+    et = new Date(et);
+    let et_m = et.getMonth();
+
+    let {phab_profile, gerrit_profile, github_profile} = this.state.meta.user_profiles;
+    let avatar = phab_profile.avatar || gerrit_profile.avatar || github_profile.avatar;
+    let email = phab_profile.email || gerrit_profile.email || github_profile.email;
+    let bio = phab_profile.bio || gerrit_profile.bio || github_profile.bio;
+
     return (
       <React.Fragment>
         {this.state.prev !== null ? (
@@ -586,6 +603,7 @@ class QueryResult extends React.Component {
           ''
         )}
         <NavBar />
+        <GoToTop/>
         <Grid>
           <Grid.Row>
               <div className="result">
@@ -595,15 +613,29 @@ class QueryResult extends React.Component {
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
+                  <React.Fragment>
+                    <DisplayUser
+                      loading={this.state.loading}
+                      username={this.state.current}
+                      avatar={avatar}
+                      email={email}
+                      gerrit_username={this.state.gerrit_username}
+                      phabricator_username={this.state.phab_username}
+                      github_username={this.state.github_username}
+                       />
                   <div className="controls">
                     <div className="search">
-                        <UserSearch
+                        {/*<UserSearch
                           set={this.onUserSearch}
                           hash={this.state.query}
                           value={this.state.value}
-                        />
+                        />*/}
+                        <h3 className="accounts">
+                          {full_months[st_m] + " " + st.getFullYear()}
+                          -
+                          {full_months[et_m] + " " + et.getFullYear()}
+                        </h3>
                       </div>
-
 
                       <div className="filter_and_update">
                       <div className="filter">
@@ -643,6 +675,7 @@ class QueryResult extends React.Component {
                       </div>
                     </div>
                     </div>
+                  </React.Fragment>
                 )}
                 <Transition
                   animation="fade down"
@@ -759,19 +792,6 @@ class QueryResult extends React.Component {
             ) : (
               <React.Fragment>
                 <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
-                    <DisplayUser
-                      loading={this.state.loading}
-                      username={this.state.current}
-                      gerrit_username={this.state.gerrit_username}
-                      phabricator_username={this.state.phab_username}
-                      github_username={this.state.github_username}
-                      filters={this.state.current_filters}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
                   <div className="graphs">
                             <div className="graph">
                               {this.state.loading ? (
@@ -786,9 +806,9 @@ class QueryResult extends React.Component {
                                 <Card className="chart_container">
                                   <span style={{ textAlign: 'center' }}>
                                     <Header className="chart"> PHABRICATOR </Header>
-                                    {this.state.meta.full_names.phab_full_name
+                                    {this.state.meta.user_profiles.phab_profile.full_name
                                      !== "OOPS! We couldn't find a username in your request." &&
-                                     this.state.meta.full_names.phab_full_name
+                                     this.state.meta.user_profiles.phab_profile.full_name
                                      !== "OOPS! We couldn't find an account with that username." ? (
                                       <Line
                                         ref="chart"
@@ -797,7 +817,7 @@ class QueryResult extends React.Component {
                                       />
                                     ) : (
                                       <div className="chart_message">
-                                      <h2>{this.state.meta.full_names.phab_full_name}</h2>
+                                      <h2>{this.state.meta.user_profiles.phab_profile.full_name}</h2>
                                       </div>
                                     )}
                                   </span>
@@ -817,9 +837,9 @@ class QueryResult extends React.Component {
                                 <Card className="chart_container">
                                   <span style={{ textAlign: 'center' }}>
                                     <Header className="chart"> GERRIT </Header>
-                                    {this.state.meta.full_names.gerrit_full_name
+                                    {this.state.meta.user_profiles.gerrit_profile.full_name
                                      !== "OOPS! We couldn't find a username in your request." &&
-                                     this.state.meta.full_names.gerrit_full_name
+                                     this.state.meta.user_profiles.gerrit_profile.full_name
                                      !== "OOPS! We couldn't find an account with that username." ? (
                                       <Line
                                         ref="chart"
@@ -828,7 +848,7 @@ class QueryResult extends React.Component {
                                       />
                                     ) : (
                                       <div className="chart_message">
-                                      <h2>{this.state.meta.full_names.gerrit_full_name}</h2>
+                                      <h2>{this.state.meta.user_profiles.gerrit_profile.full_name}</h2>
                                       </div>
                                     )}
                                   </span>
@@ -848,9 +868,9 @@ class QueryResult extends React.Component {
                                 <Card className="chart_container">
                                   <span style={{ textAlign: 'center' }}>
                                     <Header className="chart"> GITHUB </Header>
-                                    {this.state.meta.full_names.github_full_name
+                                    {this.state.meta.user_profiles.github_profile.full_name
                                      !== "OOPS! We couldn't find a username in your request." &&
-                                     this.state.meta.full_names.github_full_name
+                                     this.state.meta.user_profiles.github_profile.full_name
                                      !== "OOPS! We couldn't find an account with that username." ? (
                                       this.state.meta.rate_limits.github_rate_limit_message === "" ? (
                                         <Line
@@ -865,7 +885,7 @@ class QueryResult extends React.Component {
                                     )
                                     ) : (
                                       <div className="chart_message">
-                                      <h2>{this.state.meta.full_names.github_full_name}</h2>
+                                      <h2>{this.state.meta.user_profiles.github_profile.full_name}</h2>
                                       </div>
                                     )}
                                   </span>

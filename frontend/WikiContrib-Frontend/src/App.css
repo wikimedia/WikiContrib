@@ -499,20 +499,53 @@ h3.accounts  {
 }
 
 /* <--------- */
+.profile {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.profile .avatar {
+width: 20%;
+}
+
+.profile .avatar img {
+  width: 15em;
+  height: 15em;
+  border-radius: 50%;
+}
+
+.profile .contact_me {
+width: 30%;
+}
+
+.profile .contact_me .name {
+  text-transform: capitalize;
+}
+
+.profile .bio {
+width: 50%;
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .filter_and_update {
   display: flex;
-  margin-top: 8vh;
+  /* margin-top: 8vh; */
 }
 
 
 .search {
-  width: 80%;
+  /* width: 80%; */
   margin-right: 1.3rem;
+  display: flex;
+  align-items: center;
 }
 
 /* ----------/> */
@@ -813,7 +846,7 @@ h3.accounts  {
   }
 
   .search {
-    width: 75%
+    /* width: 75% */
   }
 
 
@@ -825,7 +858,7 @@ h3.accounts  {
   }
 
   .search {
-    width: 70%;
+    /* width: 70%; */
   }
 
 }
@@ -850,7 +883,7 @@ h3.accounts  {
   }
 
   .search {
-    width: 100%;
+    /* width: 100%; */
     margin-right: 0;
   }
 
