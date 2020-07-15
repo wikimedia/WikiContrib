@@ -26,7 +26,7 @@ def create_hash():
     :return: hash code to create the Query.
     """
     hash_code = get_random_string(64)
-    while Query.objects.filter(hash_code=hash_code).exists():
+    while Query.objects.filter(hash_code = hash_code).exists():
         hash_code = get_random_string(64)
     return hash_code
 
@@ -44,9 +44,9 @@ class CheckQuery(APIView):
         :param kwargs: Key, values passed to the function.
         :return: Response Object query: bool; filter: bool
         """
-        query = Query.objects.filter(hash_code=self.kwargs['hash'])
+        query = Query.objects.filter(hash_code = self.kwargs['hash'])
         if query:
-            filter_exist = QueryFilter.objects.filter(query=query[0]).exists()
+            filter_exist = QueryFilter.objects.filter(query = query[0]).exists()
         else:
             filter_exist = False
         return Response({
@@ -91,7 +91,7 @@ class AddQueryUser(CreateAPIView):
                     else:
                         filename = BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv"
 
-                    os.makedirs(os.path.dirname(filename), exist_ok=True)
+                    os.makedirs(os.path.dirname(filename), exist_ok = True)
 
                     with open(filename, 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
@@ -99,19 +99,19 @@ class AddQueryUser(CreateAPIView):
                     if int(request.data['complete']) == 0:
                         query_obj.csv_file = query_obj.hash_code + ".csv"
                         query_obj.save()
-                        end_time = timezone.now().replace(microsecond=0)
-                        start_time = end_time - timedelta(days=365)
+                        end_time = timezone.now().replace(microsecond = 0)
+                        start_time = end_time - timedelta(days = 365)
 
                         QueryFilter.objects.create(
-                            query=query_obj,
-                            start_time=start_time,
-                            end_time=end_time,
-                            status=','.join(COMMIT_STATUS)
+                            query = query_obj,
+                            start_time = start_time,
+                            end_time = end_time,
+                            status = ','.join(COMMIT_STATUS)
                         )
                 else:
                     # Append the file to the already created CSV file
 
-                    query_obj = get_object_or_404(Query, hash_code=request.data['hash_code'])
+                    query_obj = get_object_or_404(Query, hash_code = request.data['hash_code'])
                     with open(BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part", "ab") as destination:
                         destination.write(request.data['csv_file'].read())
 
@@ -119,18 +119,19 @@ class AddQueryUser(CreateAPIView):
                         rename(BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv.part",
                                BASE_DIR + "/uploads/" + query_obj.hash_code + ".csv")
                         query_obj.csv_file = query_obj.hash_code + ".csv"
-                        end_time = timezone.now().replace(microsecond=0)
-                        start_time = end_time - timedelta(days=365)
+                        end_time = timezone.now().replace(microsecond = 0)
+                        start_time = end_time - timedelta(days = 365)
+
                         query_obj.save()
                         QueryFilter.objects.create(
-                            query=query_obj,
-                            start_time=start_time,
-                            end_time=end_time,
-                            status=','.join(COMMIT_STATUS)
+                            query = query_obj,
+                            start_time = start_time,
+                            end_time = end_time,
+                            status = ','.join(COMMIT_STATUS)
                         )
 
                 if int(request.data['complete']) is 0:
-                    return redirect('result', hash=query_obj.hash_code)
+                    return redirect('result', hash = query_obj.hash_code)
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
@@ -139,28 +140,28 @@ class AddQueryUser(CreateAPIView):
                     with transaction.atomic():
                         # Add the Query
                         query = super(AddQueryUser, self).post(request, *args, **kwargs)
-                        end_time = timezone.now().replace(microsecond=0)
-                        start_time = end_time - timedelta(days=365)
+                        end_time = timezone.now().replace(microsecond = 0)
+                        start_time = end_time - timedelta(days = 365)
 
                         QueryFilter.objects.create(
-                            query=get_object_or_404(Query, hash_code=query.data['hash_code']),
-                            start_time=start_time,
-                            end_time=end_time,
-                            status=','.join(COMMIT_STATUS)
+                            query = get_object_or_404(Query, hash_code = query.data['hash_code']),
+                            start_time = start_time,
+                            end_time = end_time,
+                            status = ','.join(COMMIT_STATUS)
                         )
 
                         # Add username's & platform's to the query
                         temp = 1
                         for i in request.data['users']:
                             data = i.copy()
-                            if QueryUser.objects.filter(Q(query__pk=query.data['pk']), Q(fullname=data['fullname'])).exists():
+                            if QueryUser.objects.filter(Q(query__pk = query.data['pk']), Q(fullname = data['fullname'])).exists():
                                 raise IntegrityError
                             # Ignore if all the fields are empty
                             if not (data['fullname'] == "" and data['gerrit_username'] == ""
                                     and data['github_username'] == "" and data['phabricator_username'] == ""):
                                 data['query'] = query.data['pk']
-                                s = QueryUserSerializer(data=data)
-                                s.is_valid(raise_exception=True)
+                                s = QueryUserSerializer(data = data)
+                                s.is_valid(raise_exception = True)
                                 s.save()
                                 temp = 0
 
@@ -168,25 +169,25 @@ class AddQueryUser(CreateAPIView):
                         if temp == 1:
                             raise KeyError
                 except KeyError:
-                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                    Query.objects.filter(hash_code = query.data['hash_code']).delete()
                     return Response({
                         'message': 'Please provide users data',
                         'error': 1
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                    }, status = status.HTTP_400_BAD_REQUEST)
 
                 except IntegrityError:
-                    Query.objects.filter(hash_code=query.data['hash_code']).delete()
+                    Query.objects.filter(hash_code = query.data['hash_code']).delete()
                     return Response({
                         'message': 'Fullname\'s has to be unique!!',
                         'error': 1
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                    }, status = status.HTTP_400_BAD_REQUEST)
 
-                return redirect('result', hash=query.data['hash_code'])
+                return redirect('result', hash = query.data['hash_code'])
         except KeyError:
             return Response({
                 'message': 'Fill the form completely!',
                 'error': 1
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status = status.HTTP_400_BAD_REQUEST)
 
 
 class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
@@ -200,7 +201,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         """
         :return: ModalObject of Query
         """
-        return get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        return get_object_or_404(Query, hash_code = self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
         """
@@ -213,7 +214,8 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if self.get_object().file:
             return Response({"uri": self.get_object().csv_file_uri, 'file': 0})
         else:
-            s = QueryUserSerializer(self.get_object().queryuser_set, many=True, context={'request': request})
+            s = QueryUserSerializer(self.get_object().queryuser_set, many = True,
+                context = {'request': request})
             data = {}
             data['users'] = s.data.copy()
             data['file'] = -1
@@ -254,7 +256,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     query.save()
                     rename(file_path + ".part", file_path)
 
-                    response = HttpResponse(content="", status=303)
+                    response = HttpResponse(content = "", status = 303)
                     response['location'] = '/result/' + self.get_object().hash_code + '/'
                     return response
                 else:
@@ -267,7 +269,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                 # Update the users
                 try:
                     with transaction.atomic():
-                        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+                        query = get_object_or_404(Query, hash_code = self.kwargs['hash'])
                         query.file = False
                         query.csv_file = ""
                         query.save()
@@ -279,8 +281,8 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                                 if not (data['fullname'] == "" and data['gerrit_username'] == ""
                                         and data['github_username'] == "" and data['phabricator_username'] == ""):
                                     data['query'] = self.get_object().pk
-                                    s = QueryUserSerializer(data=data)
-                                    s.is_valid(raise_exception=True)
+                                    s = QueryUserSerializer(data = data)
+                                    s.is_valid(raise_exception = True)
                                     s.save()
                                     temp = 1
                             if temp == 0:
@@ -289,8 +291,8 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                     return Response({
                         'message': 'Cannot update with the empty fields',
                         'error': 1
-                    }, status=status.HTTP_400_BAD_REQUEST)
-                response = HttpResponse(content="", status=303)
+                    }, status = status.HTTP_400_BAD_REQUEST)
+                response = HttpResponse(content = "", status=303)
                 response['location'] = '/result/' + self.get_object().hash_code + '/'
                 return response
 
@@ -298,7 +300,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             return Response({
                 "message": "Fill the form completely!",
                 "error": 1
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status = status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -323,7 +325,7 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch']
 
     def get_object(self):
-        return get_object_or_404(QueryFilter, query__hash_code=self.kwargs['hash'])
+        return get_object_or_404(QueryFilter, query__hash_code = self.kwargs['hash'])
 
     def get(self, request, *args, **kwargs):
         """
@@ -333,15 +335,15 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
         :param kwargs: Key, values passed to the function.
         :return: Query filters of the given query.
         """
-        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
-        if QueryFilter.objects.filter(query=query).exists():
+        query = get_object_or_404(Query, hash_code = self.kwargs['hash'])
+        if QueryFilter.objects.filter(query = query).exists():
             if "start_time" in request.data:
                 request.data['start_time'] = utc.localize(datetime.strptime(
-                       request.data["start_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+                       request.data["start_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
 
             if "end_time" in request.data:
                 request.data['end_time'] = utc.localize(datetime.strptime(
-                       request.data["end_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+                       request.data["end_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
 
             return super(QueryFilterView, self).get(request, *args, **kwargs)
         else:
@@ -366,21 +368,22 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             "username": request.data['username'],
             "query": self.get_object().query.hash_code
         }
-        if QueryFilter.objects.filter(query__hash_code=self.kwargs['hash']).exists():
+
+        if QueryFilter.objects.filter(query__hash_code = self.kwargs['hash']).exists():
             commit_status = self.get_object().status
             commit_start = self.get_object().start_time
             commit_end = self.get_object().end_time
             if 'username' not in request.data:
                 return Response({'message': 'Fill the form completely', 'error': 1},
-                                status=status.HTTP_400_BAD_REQUEST)
+                                status = status.HTTP_400_BAD_REQUEST)
 
             if "start_time" in request.data:
                 request.data['start_time'] = utc.localize(datetime.strptime(
-                       request.data["start_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+                       request.data["start_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
 
             if "end_time" in request.data:
                 request.data['end_time'] = utc.localize(datetime.strptime(
-                       request.data["end_time"].split(".")[0],"%Y-%m-%dT%H:%M:%S"))
+                       request.data["end_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
 
             data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
 
@@ -395,6 +398,6 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
                 return UserUpdateTimeStamp(rv)
         else:
             kwargs = request.data.copy()
-            kwargs['query'] = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+            kwargs['query'] = get_object_or_404(Query, hash_code = self.kwargs['hash'])
             QueryFilter.objects.create(**kwargs)
             return UserUpdateTimeStamp(rv)

@@ -171,6 +171,25 @@ h3.accounts  {
   z-index: 1002 !important;
 }
 
+
+#fuzzy-warning .header {
+  background-color: #F0AD4D;
+  color: #856404;
+}
+
+#fuzzy-warning .actions {
+  background-color: white;
+}
+
+#fuzzy-warning .actions .no {
+  color: black!important;
+}
+
+#fuzzy-warning .actions .yes {
+  background-color: #F0AD4D;
+  color:  #856404;
+}
+
 .drag_drop {
   background: #eaecf0;
   padding: 20px;

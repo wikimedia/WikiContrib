@@ -11,6 +11,8 @@ export const QueryCreateApi = BASE_API_URI + 'query/add/user/';
 // method: GET, PATCH, DELETE
 export const QueryDetailApi = BASE_API_URI + 'query/<hash>/update/user/';
 // method: POST
+export const matchFullNamesApi = BASE_API_URI + 'result/match-fullnames/';
+// method: POST
 export const filterCreateApi = BASE_API_URI + 'query/<hash>/add/filter/';
 // method: GET, PATCH, DELETE
 export const filterDetailApi = BASE_API_URI + 'query/<hash>/update/filter/';
@@ -109,9 +111,9 @@ export const getDaysInMonth = (year, month) => {
   return day;
 };
 
-export const get_dates = (time_string) => {
+export const get_dates = () => {
 
-  let current_date = new Date(time_string);
+  let current_date = new Date();
   let current_year = current_date.getFullYear();
   let current_month = current_date.getMonth();
   let rv = [];

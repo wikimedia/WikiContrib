@@ -93,9 +93,9 @@ async def get_full_name(data):
     """
     if data["platform"] == "phab":
         if data["full_names"]["phab_full_name"] == "":
-            if data["request_data"][2]['constraints[usernames][0]'] != "":
-                async with data["session"].post(data["url"][1],
-                data=data["request_data"][2]) as response:
+            if data["request_data"]['constraints[usernames][0]'] != "":
+                async with data["session"].post(data["url"],
+                data=data["request_data"]) as response:
                     realname  = await response.read()
                     _data = loads(realname.decode("utf-8"))['result']['data']
                     if(len(_data) != 0):
@@ -108,12 +108,14 @@ async def get_full_name(data):
 
     if data["platform"] == "gerrit":
         if data["url"].split("?")[1].split("&")[0].split(":")[1] != "":
-            try:
-                data["full_names"]["gerrit_full_name"] = data["gerrit_response"][0]["owner"]["name"]
-            except:
-                data["full_names"]["gerrit_full_name"] = username_does_not_exist
+            async with data["session"].get(data["url"]) as response:
+                realname = await response.read()
+                try:
+                    data["full_names"]["gerrit_full_name"] = loads(realname[4:].decode("utf-8"))[0]["name"]
+                except:
+                    data["full_names"]["gerrit_full_name"] = "username does not exist"
         else:
-            data["full_names"]["gerrit_full_name"] = no_username_provided
+            data["full_names"]["gerrit_full_name"] = "no username provided"
 
     if data["platform"] == "github":
         if data["request_data"]["github_username"] != "":
@@ -131,6 +133,66 @@ async def get_full_name(data):
                     data["full_names"]["github_full_name"] = username_does_not_exist
         else:
             data["full_names"]["github_full_name"] = no_username_provided
+
+
+class MatchFullNames(APIView):
+
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+
+        async def concurrent_get_fullnames(urls, request_data, loop, full_names):
+            tasks = []
+            async with ClientSession() as session:
+                tasks.append(loop.create_task((get_full_name(data = {"platform":"phab", "session":session,
+                 "full_names":full_names, "url":urls[0], "request_data":request_data[0]}))))
+                tasks.append(loop.create_task((get_full_name(data = {"platform":"gerrit", "session":session,
+                 "full_names":full_names, "url":urls[1]}))))
+                tasks.append(loop.create_task((get_full_name(data = {"platform":"github", "session":session,
+                 "full_names":full_names, "request_data":request_data[1]}))))
+
+                await asyncio.gather(*tasks)
+
+        user = request.data['users'][0].copy()
+        fullname = user['fullname']
+        phabricator_username = user['phabricator_username']
+        gerrit_username = user['gerrit_username']
+        github_username = user['github_username']
+
+        if isinstance(phabricator_username, float):
+            phabricator_username = ''
+
+        if isinstance(gerrit_username, float):
+            gerrit_username = ''
+
+        if isinstance(github_username, float):
+            github_username = ''
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        full_names = {"phab_full_name":"", "gerrit_full_name":"", "github_full_name":""}
+
+        request_data = []
+        urls = []
+        request_data.append(deepcopy(REQUEST_DATA[2]))
+        request_data.append(deepcopy(REQUEST_DATA[3]))
+
+        urls.append(API_ENDPOINTS[0][1])
+        urls.append(API_ENDPOINTS[1][1].format(gerrit_username=gerrit_username))
+
+        request_data[0]['constraints[usernames][0]'] = phabricator_username
+
+        request_data[1]['github_username'] = github_username
+
+        loop.run_until_complete(concurrent_get_fullnames(urls = urls, request_data = request_data,
+                                         loop = loop,full_names = full_names))
+
+        match_percent = fuzzyMatching(control = fullname, full_names = full_names)
+
+        return Response({
+            'match_percent':match_percent
+        })
 
 
 async def get_task_authors(url, request_data, session, resp, phid, full_names):
@@ -163,7 +225,7 @@ async def get_task_authors(url, request_data, session, resp, phid, full_names):
                     request_data[0]['after'] = after
 
     await get_full_name(data={"platform":"phab", "session":session,
-     "full_names":full_names, "url":url, "request_data":request_data})
+     "full_names":full_names, "url":url[1], "request_data":request_data[2]})
 
 async def get_task_assigner(url, request_data, session, resp, full_names):
     """
@@ -188,11 +250,11 @@ async def get_task_assigner(url, request_data, session, resp, full_names):
                     after = data['cursor']['after']
                     request_data[1]['after'] = after
 
-    await get_full_name(data={"platform":"phab", "session":session,
-     "full_names":full_names, "url":url, "request_data":request_data})
+    await get_full_name(data = {"platform":"phab", "session":session,
+     "full_names":full_names, "url":url[1], "request_data":request_data[2]})
 
 
-async def get_gerrit_data(url, session, gerrit_resp,full_names):
+async def get_gerrit_data(url, session, gerrit_resp, full_names):
     """
     :Summary: Get all the Gerrit tasks of the user.
     :param url: URL to be fetched.
@@ -202,8 +264,8 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
     :return: None
     """
     data = []
-    if url.split("?")[1].split("&")[0].split(":")[1] != "":
-        async with session.get(url) as response:
+    if url[0].split("?")[1].split("&")[0].split(":")[1] != "":
+        async with session.get(url[0]) as response:
             data = await response.read()
             try:
                 data = loads(data[4:].decode("utf-8"))
@@ -212,8 +274,8 @@ async def get_gerrit_data(url, session, gerrit_resp,full_names):
 
             gerrit_resp.extend(data)
 
-    await get_full_name(data={"platform":"gerrit", "full_names":full_names,
-     "url":url, "gerrit_response":data})
+    await get_full_name(data = {"platform":"gerrit", "full_names":full_names,
+     "session":session, "url":url[1], "gerrit_response":data})
 
 
 async def get_github_commit_by_org(orgs, url, request_data, session, github_resp,
@@ -251,7 +313,7 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
     headers = {"Authorization":"token "+request_data["github_access_token"],
                "Accept":"application/vnd.github.cloak-preview"}
 
-    orgs_filter = """user:{org_0}+user:{org_1}""".format(org_0=orgs[0], org_1=orgs[1])
+    orgs_filter = """user:{org_0}+user:{org_1}""".format(org_0 = orgs[0], org_1 = orgs[1])
     query = """{url}+{orgs_filter}+committer-date:{dateRangeStartIsoFormat}..{dateRangeEndIsoFormat}"""
 
 
@@ -268,13 +330,13 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
         return url
 
     while loopCount > 0:
-        newURL = query.format(url=url, orgs_filter=orgs_filter,
-                 dateRangeStartIsoFormat=dateRangeStart.isoformat()+"Z",
-                 dateRangeEndIsoFormat=dateRangeEnd.isoformat()+"Z")
+        newURL = query.format(url = url, orgs_filter = orgs_filter,
+                 dateRangeStartIsoFormat = dateRangeStart.isoformat()+"Z",
+                 dateRangeEndIsoFormat = dateRangeEnd.isoformat()+"Z")
         while newURL:
             if rateLimitCount[0] == GITHUB_API_LIMIT:
                 break
-            async with session.get(newURL, headers=headers) as response:
+            async with session.get(newURL, headers = headers) as response:
                 data = await response.read()
                 try:
                     data = loads(data.decode("utf-8"))["items"]
@@ -308,7 +370,7 @@ async def get_github_data(url, request_data, session, github_resp, full_names):
     index = 0
     rateLimitCount = [0]
 
-    await get_full_name(data={"platform":"github", "session":session,
+    await get_full_name(data = {"platform":"github", "session":session,
      "full_names":full_names, "request_data":request_data})
 
     if(full_names["github_full_name"] != username_does_not_exist and
@@ -356,7 +418,7 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
     else:
         status_name = True
     with transaction.atomic():
-        ListCommit.objects.filter(query=query).delete()
+        ListCommit.objects.filter(query = query).delete()
         for i in range(0, leng):
             if i < len_pd:
                 if pd[i]['phid'] not in temp:
@@ -376,17 +438,17 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                         }
                         resp.append(rv)
                     ListCommit.objects.create(
-                        query=query, heading=pd[i]['fields']['name'],
-                        platform="Phabricator", created_on=date_time,
-                        redirect="T" + str(pd[i]['id']),
-                        status=pd[i]['fields']['status']['name'],
-                        owned=pd[i]['fields']['authorPHID'] == phid,
-                        assigned= pd[i]['fields']['ownerPHID'] == True
+                        query = query, heading = pd[i]['fields']['name'],
+                        platform = "Phabricator", created_on = date_time,
+                        redirect = "T" + str(pd[i]['id']),
+                        status = pd[i]['fields']['status']['name'],
+                        owned = pd[i]['fields']['authorPHID'] == phid,
+                        assigned = pd[i]['fields']['ownerPHID'] == True
                         or phid == pd[i]['fields']['ownerPHID']
                     )
             if i < len_gd:
-                date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0],"%Y-%m-%d %H:%M:%S")
-                                        .replace(microsecond=0))
+                date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0], "%Y-%m-%d %H:%M:%S")
+                                        .replace(microsecond = 0))
                 if date_time <= query.queryfilter.end_time and date_time >= query.queryfilter.start_time:
                     status = gd[i]['status'].lower()
                     if (status_name is True or status in status_name
@@ -399,10 +461,10 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                         }
                         resp.append(rv)
                     ListCommit.objects.create(
-                        query=query, heading=gd[i]['subject'],
-                        platform="Gerrit", created_on=date_time,
-                        redirect=gd[i]['change_id'], status=gd[i]['status'],
-                        owned=True, assigned=True
+                        query = query, heading = gd[i]['subject'],
+                        platform = "Gerrit", created_on = date_time,
+                        redirect = gd[i]['change_id'], status = gd[i]['status'],
+                        owned = True, assigned = True
                     )
 
             if i < len_ghd:
@@ -410,8 +472,8 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                     if ghdRateLimitTriggered is not True:
                         if GITHUB_FALLBACK_TO_PR == False:
                             date_time = (datetime.strptime(
-                            ghd[i]['commit']['committer']['date'],"%Y-%m-%dT%H:%M:%S.%f%z")
-                            .replace(microsecond=0)).astimezone(utc)
+                            ghd[i]['commit']['committer']['date'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                            .replace(microsecond = 0)).astimezone(utc)
 
                             rv = {
                             "time": date_time.isoformat(),
@@ -422,16 +484,16 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                             resp.append(rv)
 
                             ListCommit.objects.create(
-                            query=query, heading = ghd[i]["commit"]["message"],
-                            platform="Github", created_on=date_time,
-                            redirect=ghd[i]["html_url"], status="merged", owned=True,
-                            assigned=True
+                            query = query, heading = ghd[i]["commit"]["message"],
+                            platform = "Github", created_on = date_time,
+                            redirect = ghd[i]["html_url"], status = "merged", owned = True,
+                            assigned = True
                             )
                         else:
                             date_time = utc.localize(datetime.strptime(
                             ghd[i]['closed_at']
-                            .split("Z")[0],"%Y-%m-%dT%H:%M:%S")
-                            .replace(microsecond=0))
+                            .split("Z")[0], "%Y-%m-%dT%H:%M:%S")
+                            .replace(microsecond = 0))
 
                             rv = {
                             "time": date_time.isoformat(),
@@ -442,10 +504,10 @@ def format_data(pd, gd,  ghd, ghd_rate_limit_message, query, phid):
                             resp.append(rv)
 
                             ListCommit.objects.create(
-                            query=query, heading = ghd[i]["title"],
-                            platform="Github", created_on=date_time,
-                            redirect=ghd[i]["html_url"], status="merged", owned=True,
-                            assigned=True
+                            query = query, heading = ghd[i]["title"],
+                            platform = "Github", created_on = date_time,
+                            redirect = ghd[i]["html_url"], status = "merged", owned=True,
+                            assigned = True
                             )
                 except:
                     ghdRateLimitTriggered = True
@@ -509,15 +571,16 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     phab_response = []
     gerrit_response = []
     github_response = []
-    full_names = {"phab_full_name":"","gerrit_full_name":"","github_full_name":""}
+    full_names = {"phab_full_name":"", "gerrit_full_name":"", "github_full_name":""}
     github_rate_limit_message = ['']
 
     api_endpoints = deepcopy(API_ENDPOINTS)
     request_data = deepcopy(REQUEST_DATA)
 
-    api_endpoints[1] = api_endpoints[1].format(gerrit_username=gerrit_username)
-    api_endpoints[2][0] = api_endpoints[2][0].format(github_username=github_username)
-    api_endpoints[2][1] = api_endpoints[2][1].format(github_username=github_username)
+    api_endpoints[1][0] = api_endpoints[1][0].format(gerrit_username = gerrit_username)
+    api_endpoints[1][1] = api_endpoints[1][1].format(gerrit_username = gerrit_username)
+    api_endpoints[2][0] = api_endpoints[2][0].format(github_username = github_username)
+    api_endpoints[2][1] = api_endpoints[2][1].format(github_username = github_username)
 
     request_data[0]['constraints[authorPHIDs][0]'] = username
     request_data[0]['constraints[createdStart]'] = int(createdStart)
@@ -533,16 +596,17 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     request_data[3]['createdStart'] = int(createdStart)
     request_data[3]['createdEnd'] = int(createdEnd)
 
+
     start_time = time.time()
-    loop.run_until_complete(get_data(urls=api_endpoints, request_data=request_data,
-                                     loop=loop,gerrit_response=gerrit_response,
-                                     phab_response=phab_response,
-                                     github_response=github_response,
-                                     full_names=full_names, phid=phid))
+    loop.run_until_complete(get_data(urls = api_endpoints, request_data = request_data,
+                                     loop = loop,gerrit_response = gerrit_response,
+                                     phab_response = phab_response,
+                                     github_response = github_response,
+                                     full_names = full_names, phid = phid))
     print(time.time() - start_time)
     formatted = format_data(phab_response, gerrit_response, github_response,
     github_rate_limit_message, query, phid[0])
-    match_percent = fuzzyMatching(control=users[1], full_names=full_names)
+    match_percent = fuzzyMatching(control = users[1], full_names = full_names)
 
     return Response({
         'query': query.hash_code,
@@ -576,11 +640,11 @@ class DisplayResult(APIView):
 
     def get(self, request, *args, **kwargs):
         phid = [False]
-        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        query = get_object_or_404(Query, hash_code = self.kwargs['hash'])
         if query.file:
             # get the data from CSV file
             try:
-                file = read_csv(query.csv_file, encoding="latin-1")
+                file = read_csv(query.csv_file, encoding = "latin-1")
                 try:
                     if 'user' in request.GET:
                         user = file[file['fullname'] == request.GET['user']]
@@ -634,19 +698,19 @@ class DisplayResult(APIView):
         else:
             users = list(query.queryuser_set.all())
             if 'user' in request.GET:
-                user = query.queryuser_set.filter(fullname=request.GET['user'])
+                user = query.queryuser_set.filter(fullname = request.GET['user'])
                 if not user.exists():
                     return Response({
                         'message': 'Not Found',
                         'error': 1
-                    }, status=status.HTTP_404_NOT_FOUND)
+                    }, status = status.HTTP_404_NOT_FOUND)
             else:
                 user = users
                 if len(user) == 0:
                     return Response({
                         'message': 'Not Found',
                         'error': 1
-                    }, status=status.HTTP_404_NOT_FOUND)
+                    }, status = status.HTTP_404_NOT_FOUND)
 
             user = user[0]
             if len(users) != 1:
@@ -674,9 +738,9 @@ class DisplayResult(APIView):
         createdStart = choose_time_format_method(query.queryfilter.start_time, "str")
         createdEnd = choose_time_format_method(query.queryfilter.end_time, "str")
 
-        return getDetails(username=username, gerrit_username=gerrit_username,
-                    github_username=github_username, createdStart=createdStart,
-                    createdEnd=createdEnd, phid=phid, query=query, users=paginate)
+        return getDetails(username = username, gerrit_username = gerrit_username,
+                    github_username = github_username, createdStart = createdStart,
+                    createdEnd = createdEnd, phid = phid, query = query, users = paginate)
 
 
 class GetUserCommits(ListAPIView):
@@ -687,7 +751,7 @@ class GetUserCommits(ListAPIView):
     serializer_class = UserCommitSerializer
 
     def get(self, request, *args, **kwargs):
-        query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
+        query = get_object_or_404(Query, hash_code = self.kwargs['hash'])
 
         list_commits = []
         try:
@@ -695,15 +759,15 @@ class GetUserCommits(ListAPIView):
             with transaction.atomic():
                 for each in date_time:
                     if each != "":
-                        each = utc.localize(datetime.strptime(each.split(" ")[0],"%Y-%m-%dT%H:%M:%S"))
-                        list_commits.extend(ListCommit.objects.filter(query=query,created_on=each))
+                        each = utc.localize(datetime.strptime(each.split(" ")[0], "%Y-%m-%dT%H:%M:%S"))
+                        list_commits.extend(ListCommit.objects.filter(query = query, created_on = each))
         except KeyError:
-            date_time = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            next_day = date_time + timedelta(days=1)
-            list_commits = ListCommit.objects.filter(query=query, created_on__gte = date_time, created_on__lt = next_day)
-
+            date_time = timezone.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+            next_day = date_time + timedelta(days = 1)
+            list_commits = ListCommit.objects.filter(query = query, created_on__gte = date_time, created_on__lt = next_day)
 
         self.queryset = list_commits
+
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
         data = []
         status = query.queryfilter.status.split(",")
@@ -726,11 +790,11 @@ class GetUsers(APIView):
     def get(self, request, *args, **kwargs):
         query = get_object_or_404(Query, hash_code=self.kwargs['hash'])
         if not query.file:
-            users = query.queryuser_set.all().values_list('fullname', flat=True)
+            users = query.queryuser_set.all().values_list('fullname', flat = True)
         else:
             try:
                 try:
-                    file = read_csv(query.csv_file, encoding="latin-1")
+                    file = read_csv(query.csv_file, encoding = "latin-1")
                     users = file[(file['fullname'] == file['fullname']) &
                             ((file['Phabricator'] == file['Phabricator']) |
                             (file['Gerrit'] == file['Gerrit'])
@@ -741,10 +805,10 @@ class GetUsers(APIView):
                         'message': 'CSV file uploaded is not in the supported \
                         format. Click on ⓘ (Information icon) to check the format.',
                         'error': 1
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                    }, status = status.HTTP_400_BAD_REQUEST)
             except FileNotFoundError:
                 return Response({'message': 'Not Found', 'error': 1},
-                       status=status.HTTP_404_NOT_FOUND)
+                       status = status.HTTP_404_NOT_FOUND)
         return Response({'users': users})
 
 
@@ -753,25 +817,25 @@ def UserUpdateTimeStamp(data):
     :param data: Hash Code of the Query.
     :return: contributions of the user on updating Query Filter timestamp.
     """
-    data['query'] = get_object_or_404(Query, hash_code=data['query'])
+    data['query'] = get_object_or_404(Query, hash_code = data['query'])
     if data['query'].file:
         try:
-            file = read_csv(data['query'].csv_file, encoding="latin-1")
+            file = read_csv(data['query'].csv_file, encoding = "latin-1")
             user = file[file['fullname'] == data['username']]
             if user.empty:
                 return Response({'message': 'Not Found', 'error': 1},
-                      status=status.HTTP_404_NOT_FOUND)
+                      status = status.HTTP_404_NOT_FOUND)
             else:
                 username = user.iloc[0]['Phabricator']
                 gerrit_username = user.iloc[0]['Gerrit']
                 github_username = user.iloc[0]['Github']
 
         except FileNotFoundError:
-            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Not Found', 'error': 1}, status = status.HTTP_404_NOT_FOUND)
     else:
-        user = data['query'].queryuser_set.filter(fullname=data['username'])
+        user = data['query'].queryuser_set.filter(fullname = data['username'])
         if not user.exists():
-            return Response({'message': 'Not Found', 'error': 1}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Not Found', 'error': 1}, status = status.HTTP_404_NOT_FOUND)
         username = user[0].phabricator_username
         gerrit_username =  user[0].gerrit_username
         github_username =  user[0].github_username
@@ -779,9 +843,9 @@ def UserUpdateTimeStamp(data):
     createdStart = choose_time_format_method(data["query"].queryfilter.start_time, "str")
     createdEnd = choose_time_format_method(data["query"].queryfilter.end_time, "str")
     phid = [False]
-    return getDetails(username=username, gerrit_username=gerrit_username,
-            github_username=github_username, createdStart=createdStart,
-          createdEnd=createdEnd, phid=phid, query=data['query'], users=['', data['username'], ''])
+    return getDetails(username = username, gerrit_username = gerrit_username,
+            github_username = github_username, createdStart = createdStart,
+          createdEnd = createdEnd, phid = phid, query = data['query'], users = ['', data['username'], ''])
 
 
 def UserUpdateStatus(data):
@@ -790,7 +854,7 @@ def UserUpdateStatus(data):
     :return: contributions of the user on updating Query Filter commit status.
     """
     result = []
-    data['query'] = get_object_or_404(Query, hash_code=data['query'])
+    data['query'] = get_object_or_404(Query, hash_code = data['query'])
     status = data['query'].queryfilter.status
     p_open = -1
     if status is not None and status != "":
@@ -804,8 +868,8 @@ def UserUpdateStatus(data):
 
             status.append("open")
         status = '|'.join(status)
-        commits = ListCommit.objects.filter(Q(query=data['query']),
-                 Q(status__iregex="(" + status + ")"))
+        commits = ListCommit.objects.filter(Q(query = data['query']),
+                 Q(status__iregex = "(" + status + ")"))
     else:
         commits = ListCommit.objects.all()
     for i in commits:
