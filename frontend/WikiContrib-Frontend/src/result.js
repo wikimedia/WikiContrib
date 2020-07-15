@@ -292,6 +292,7 @@ class QueryResult extends React.Component {
     }
 
     let current_month = [0, 0, 0];
+
     this.state.data.forEach(e => {
       let index = new Date(e.time);
       let index_year = index.getFullYear();
@@ -656,7 +657,7 @@ class QueryResult extends React.Component {
                           selection
                           icon={false}
                           value={this.func()}
-                          options={get_dates(cf.end_time)}
+                          options={get_dates()}
                           onChange={(e, obj) => {
                             let filters = Object.assign({}, uf);
                             filters.end_time = obj.value;
