@@ -8,7 +8,6 @@ import {
   Placeholder,
   Transition,
   Header,
-  Message,
   Icon
 } from 'semantic-ui-react';
 import { fetchAsynchronous } from './components/fetch';
@@ -220,7 +219,6 @@ class QueryResult extends React.Component {
       loading: data === false,
       data: data !== false ? data.result : [],
       meta: data !== false ? data.meta : {},
-      showMismatch: data === false ? false : (data.meta.match_percent > 60 ? true : false),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
@@ -293,7 +291,7 @@ class QueryResult extends React.Component {
       };
     }
 
-    let current_month = [0,0,0];
+    let current_month = [0, 0, 0];
 
     this.state.data.forEach(e => {
       let index = new Date(e.time);
@@ -307,36 +305,36 @@ class QueryResult extends React.Component {
 
       if (platform === 'phabricator' && platform in e) {
         if (e.assigned && !e.owned) {
-            if(index === et_m && index_year === et_y){
+            if (index === et_m && index_year === et_y) {
               current_month[0] += 1;
               current_month[2] += 1;
-            }else{
+            } else {
               data.datasets[0].data[index] += 1;
               data.datasets[2].data[index] += 1;
             }
         } else if (e.owned && !e.assigned) {
-          if(index === et_m && index_year === et_y){
+          if (index === et_m && index_year === et_y) {
             current_month[1] += 1;
             current_month[2] += 1;
-          }else{
+          } else {
             data.datasets[1].data[index] += 1;
             data.datasets[2].data[index] += 1;
           }
         } else {
-          if(index === et_m && index_year === et_y){
+          if (index === et_m && index_year === et_y) {
             current_month[0] += 1;
             current_month[1] += 1;
             current_month[2] += 1;
-          }else{
+          } else {
             data.datasets[0].data[index] += 1;
             data.datasets[1].data[index] += 1;
             data.datasets[2].data[index] += 1;
           }
         }
       } else if (platform !== 'phabricator' && platform in e) {
-          if(index === et_m && index_year === et_y){
+          if (index === et_m && index_year === et_y) {
             current_month[0] += 1;
-          }else{
+          } else {
             data.datasets[0].data[index] += 1;
           }
       }
@@ -355,14 +353,14 @@ class QueryResult extends React.Component {
       lbl_a = months.slice(0, m_index),
       lbl_b = months.slice(m_index);
 
-    data.labels = lbl_b.concat(lbl_a,lbl_b[0]);
+    data.labels = lbl_b.concat(lbl_a, lbl_b[0]);
 
     for (var i = 0; i < data_len; i++) {
       if (data.datasets[i]) {
         let set_a = data.datasets[i].data,
           set_b = set_a.splice(m_index);
 
-        data.datasets[i].data = set_b.concat(set_a,[current_month[i]]);
+        data.datasets[i].data = set_b.concat(set_a, [current_month[i]]);
       }
     }
 
@@ -379,7 +377,6 @@ class QueryResult extends React.Component {
       this.setState({
         data: response.result,
         meta: response !== false ? response.meta : {},
-        showMismatch: response === false ? false : (response.meta.match_percent > 60 ? true : false),
         current: response.current,
         prev: response.previous,
         gerrit_username: response.current_gerrit,
@@ -453,7 +450,6 @@ class QueryResult extends React.Component {
       this.setState({
         data: response.result,
         meta: response !== false ? response.meta : {},
-        showMismatch: response === false ? false : (response.meta.match_percent > 60 ? true : false),
         current_filters: this.state.update_filters,
         loading: false,
       });
@@ -504,7 +500,7 @@ class QueryResult extends React.Component {
      * Restore the initial filters.
      */
     let time = new Date();
-    time.setMinutes(0,0,0);
+    time.setMinutes(0, 0, 0);
     let one_year = time_delta(365);
 
     let filters = {
@@ -532,11 +528,11 @@ class QueryResult extends React.Component {
 
   func = () => {
     let { update_filters: uf } = this.state;
-    if(uf.end_time !== "" && uf.start_time !== ""){
+    if (uf.end_time !== "" && uf.start_time !== "") {
     let month = new Date(uf.end_time).getMonth();
     let year = new Date(uf.end_time).getFullYear();
 
-    return new Date(`${year}-${zero_pad(month+1)}-${getDaysInMonth(year,months[month])}`).toISOString();
+    return new Date(`${year}-${zero_pad(month+1)}-${getDaysInMonth(year, months[month])}`).toISOString();
     }
   }
 
@@ -736,28 +732,6 @@ class QueryResult extends React.Component {
           {this.state.notFound ? (
             <NotFound />
           ) : (
-            !this.state.showMismatch && !this.state.page_load? (
-              <Grid.Row>
-              <Grid.Column width={2} />
-              <Grid.Column width={12}>
-              <Card className="graph_load">
-              <Message
-                attached
-                warning
-                header="Warning! It seems like the Provided Usernames doesn't belong to the same user"
-                content={`This can happen when the provided fullname is too different from the retrieved
-                        fullname(s) or when there is no existing user for the provided username(s).
-                        If the submitted usernames are yours, try updating the fullname used to register
-                        the different accounts to be similar to the fullname provided during query`}
-              />
-              <Button
-                color="yellow"
-                onClick={() => this.setState({showMismatch:true})}
-                >Proceed</Button>
-              </Card>
-              </Grid.Column>
-              </Grid.Row>
-            ) : (
               <React.Fragment>
                 <Grid.Row>
                   <Grid.Column width={2} />
@@ -904,7 +878,6 @@ class QueryResult extends React.Component {
                   ''
                 )}
               </React.Fragment>
-            )
           )}
         </Grid>
       </React.Fragment>
