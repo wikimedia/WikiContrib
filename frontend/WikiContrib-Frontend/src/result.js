@@ -656,7 +656,7 @@ class QueryResult extends React.Component {
                           selection
                           icon={false}
                           value={this.func()}
-                          options={get_dates(cf.end_time)}
+                          options={get_dates()}
                           onChange={(e, obj) => {
                             let filters = Object.assign({}, uf);
                             filters.end_time = obj.value;

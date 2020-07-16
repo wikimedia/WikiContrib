@@ -111,9 +111,9 @@ export const getDaysInMonth = (year, month) => {
   return day;
 };
 
-export const get_dates = (time_string) => {
+export const get_dates = () => {
 
-  let current_date = new Date(time_string);
+  let current_date = new Date();
   let current_year = current_date.getFullYear();
   let current_month = current_date.getMonth();
   let rv = [];
