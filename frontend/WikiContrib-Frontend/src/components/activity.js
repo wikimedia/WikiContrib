@@ -8,6 +8,7 @@ import githubPlatformIcon from '../img/githubPlatformIcon.png';
 /**
  * Show all the user Commits on a specific day
  */
+
 class Activity extends React.Component {
   constructor(props) {
     super(props);
