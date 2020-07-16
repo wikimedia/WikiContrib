@@ -150,7 +150,7 @@ class UserContribution extends React.Component {
 
       while (count_month > 0) {
 
-        try{
+        try {
 
           //########### decide if we should remove the first month in render_months or not #########
           shouldNotRemoveFirstMonthInArr = count_month !== 1 && render_months.length !== numb_months;
@@ -160,11 +160,11 @@ class UserContribution extends React.Component {
           shouldNotRemoveFirstMonthInArr = shouldNotRemoveFirstMonthInArr || monthHasContribution;
           //######################################################################################
 
-        }catch{
+        } catch {
           // Do nothing
         }
 
-        if(shouldNotRemoveFirstMonthInArr){
+        if (shouldNotRemoveFirstMonthInArr) {
           render_months.unshift(
             <GenerateMonth
               month={months[end_month]}

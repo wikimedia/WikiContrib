@@ -1,7 +1,10 @@
-from . views import DisplayResult, GetUserCommits, GetUsers
+from . views import DisplayResult, GetUserCommits, GetUsers, MatchFullNames
 from django.urls import path
 
 urlpatterns = [
+    # Check if usernames belong to the same user
+    path('match-fullnames/',MatchFullNames.as_view(), name="match_fullnames"),
+
     # Fetch the User contributions with a given username.
     path('<hash>/', DisplayResult.as_view(), name="result"),
 

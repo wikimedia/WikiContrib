@@ -104,7 +104,6 @@ def create_hash(usersArr=None):
         for dict in usersArr:
             hash_code = hash_code + dict["fullname"].lower() + dict["gerrit_username"].lower()\
             + dict["phabricator_username"].lower() + dict["github_username"].lower()
-            print(hash_code)
         if len(usersArr) == 1:
             fullname_slug = slugify(usersArr[0]["fullname"].lower())
             hash_code = fullname_slug +"-"+ sha256(hash_code.encode("utf-8")).hexdigest()[:9]

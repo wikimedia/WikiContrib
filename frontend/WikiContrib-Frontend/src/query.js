@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { fetchAsynchronous } from './components/fetch';
 import fetchFileAsynchronous from './components/fetchFile';
 import MessageDisplay from './components/message';
-import { QueryCreateApi, QueryDetailApi } from './api';
+import { QueryCreateApi, QueryDetailApi, matchFullNamesApi } from './api';
 import csv from './img/csv.png';
 import format from './img/format.png';
 import {
@@ -18,6 +18,7 @@ import {
   Transition,
   Loader,
   Header,
+  Modal
 } from 'semantic-ui-react';
 import { NavBar } from './components/nav';
 
@@ -43,6 +44,7 @@ export class Query extends Component {
         : false;
 
     this.state = {
+      showMismatch: true,
       step: 1,
       rows:
         localStorage.getItem('users') !== null && type
@@ -197,7 +199,7 @@ export class Query extends Component {
      * Add CSV file to the tool.
      * @param {file} file file added to upload.
      */
-    if(file.type === 'text/csv' ||
+    if (file.type === 'text/csv' ||
        file.type === "application/vnd.ms-excel" ||
        file.type === "text/plain" ||
        file.type === "text/x-csv" ||
@@ -247,13 +249,22 @@ export class Query extends Component {
       message: {
         message: 'Lost Internet connection, please re-upload the file',
         update: !this.state.message.update,
-        type: 1,
+         type: 1,
         trigger: true,
       },
     });
   };
 
-  createQuery = () => {
+  matchFullNames = () => {
+    this.setState({
+      loadData:true,
+      showMismatch:false
+    });
+
+    this.createQuery(true)
+  }
+
+  createQuery = (match_fullnames) => {
     /**
      * fetch the API to create / update Query.
      */
@@ -326,41 +337,81 @@ export class Query extends Component {
       localStorage.removeItem('res_users');
       localStorage.removeItem('res_query');
       this.setState({ loading: true, notfound: false });
-      let uri = this.state.operation
-        ? QueryCreateApi
-        : QueryDetailApi.replace('<hash>', this.props.match.params.hash);
-      if (this.state.file !== false) {
-        fetchFileAsynchronous(
-          this.state.file,
-          this.state.operation ? 'POST' : 'PATCH',
+
+      if (match_fullnames) {
+        let uri = matchFullNamesApi;
+        let data = {};
+        data['users'] = this.getExactRows();
+        fetchAsynchronous(
           uri,
-          this.callback,
-          (chunk, chunks) => {
-            this.setState({ chunk: chunk, chunks: chunks });
-          },
-          this.errorCallback
+          'POST',
+          data,
+          { 'Content-Type': 'application/json' },
+          this.matchFullNamesCallback
         );
+
       } else {
-        if (
-          this.state.original_users === this.state.rows &&
-          !this.state.operation
-        ) {
-          this.callback('');
-        } else {
-          let data = { file: -1 };
-          data['users'] = this.getExactRows();
-          this.setState({ loadData: true, notfound: false });
-          fetchAsynchronous(
-            uri,
+        let uri = this.state.operation
+          ? QueryCreateApi
+          : QueryDetailApi.replace('<hash>', this.props.match.params.hash);
+        if (this.state.file !== false) {
+          fetchFileAsynchronous(
+            this.state.file,
             this.state.operation ? 'POST' : 'PATCH',
-            data,
-            { 'Content-Type': 'application/json' },
-            this.callback
+            uri,
+            this.callback,
+            (chunk, chunks) => {
+              this.setState({ chunk: chunk, chunks: chunks });
+            },
+            this.errorCallback
           );
-        }
+        } else {
+          if (
+            this.state.original_users === this.state.rows &&
+            !this.state.operation
+          ) {
+            this.callback('');
+          } else {
+            let data = { file: -1 };
+            data['users'] = this.getExactRows();
+            this.setState({ loadData: true, notfound: false });
+            fetchAsynchronous(
+              uri,
+              this.state.operation ? 'POST' : 'PATCH',
+              data,
+              { 'Content-Type': 'application/json' },
+              this.callback
+            );
+          }
+      }
       }
     }
   };
+
+  matchFullNamesCallback = response => {
+    if (response !== '' &&
+    response !== 'error' in response &&
+    response.error === 1) {
+      this.setState({
+        loading: false,
+        loadData: false,
+        message: {
+          message: response.message,
+          trigger: true,
+          type: 1,
+          update: !this.state.message.update,
+        },
+      });
+    }
+    else {
+      if (response.match_percent > 60) {
+        this.createQuery(false)
+      }
+      else {
+        this.setState({loading:false,loadData:false})
+      }
+    }
+  }
 
   callback = response => {
     /**
@@ -388,8 +439,8 @@ export class Query extends Component {
         redirect: hash,
         loading: false,
         loadData: response,
-      },()=>{
-        if(this.state.redirect !== false){
+      }, ()=>{
+        if (this.state.redirect !== false) {
         this.props.history.push({
             pathname: '/' + this.state.redirect + '/',
             data: this.state.loadData,
@@ -409,6 +460,35 @@ export class Query extends Component {
         ) : (
           <React.Fragment>
             <NavBar />
+            <Modal
+              id="fuzzy-warning"
+              open={!this.state.showMismatch}
+              onClose={()=> this.setState({showMismatch:true, loading:false})}
+              size='tiny'
+              >
+              <Modal.Header>Warning!</Modal.Header>
+              <Modal.Content>
+                <p>The usernames you have provided does not seem to belong to the same user.
+                Do you still want to proceed ?</p>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button
+                  basic
+                  className="no"
+                  size="medium"
+                  onClick={() => this.setState({showMismatch:true, loading:false})}
+                  >
+                  No
+                </Button>
+                <Button
+                  size="medium"
+                  className="yes"
+                  onClick={()=>this.createQuery(false)}
+                  >
+                  Yes
+                </Button>
+                </Modal.Actions>
+            </Modal>
             <MessageDisplay
               message={this.state.message.message}
               type={this.state.message.type}
@@ -482,7 +562,7 @@ export class Query extends Component {
                                   onClose={(event) => {
                                     // in case of bulkTooltipShown being false (currently open)
                                     // the event fired when click would be onClose
-                                    if(this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
+                                    if (this.state.bulkTooltipShown || (event.target.tagName.toLowerCase() !== 'i'))
                                       // if tooltip already finished, close normally
                                       this.setState({ bulkShown: false, bulkTooltipShown: true })
                                     else
@@ -762,7 +842,8 @@ export class Query extends Component {
                                         position="top center"
                                         trigger={
                                           <Button
-                                            className="remove"
+                                            className="remove display_non"
+                                            disabled
                                             aria-label="remove user"
                                             style={{backgroundColor:"inherit"}}
                                             tabIndex="0"
@@ -791,18 +872,26 @@ export class Query extends Component {
                           )}
                           <br />
                           <Card.Content extra>
-                            <div>
-                              <label>
+                            <Popup
+                              content=<a href="https://github.com/wikimedia/WikiContrib"
+                                rel="noopener noreferrer" target="_blank">
+                              This feature is currently disabled. Contact the tool maintainers to learn more.
+                              </a>
+                              position="top center"
+                              pinned
+                              on="click"
+                              trigger={
                                 <Checkbox
                                   toggle
-                                  onClick={() =>
+                                  disabled
+                                  label="Bulk Add"
+                                  onClick={null/*() =>
                                     this.setState({ bulk: !this.state.bulk })
-                                  }
-                                  checked={this.state.bulk}
+                                  */}
+                                  defaultChecked={null/*this.state.bulk*/}
                                 />
-                              <span className="checkbox_label">Bulk Add</span>
-                              </label>
-                            </div>
+                              }
+                            />
                           </Card.Content>
                         </Card>
                         <div className="reset_add_continue">
@@ -833,19 +922,25 @@ export class Query extends Component {
                               </Button>
                             }
                           />
-                          <Popup
-                            content="Add User"
+                        {/*<Popup
+                            content=<a href="https://github.com/wikimedia/WikiContrib"
+                              rel="noopener noreferrer" target="_blank">
+                              This feature is currently disabled. Contact the tool maintainers to learn more.
+                            </a>
                             position="top center"
+                            pinned
                             trigger={
                               <Button
                                 className="table_row_add"
+                                id="disable_bulk_add_feature"
                                 aria-label="add more user"
                                 onClick={this.addrow}
+                                disabled
                               >
                               <Icon name="user plus" />
                               </Button>
                             }
-                          />
+                          />*/}
                           <Popup
                             content="Search"
                             position="top center"
@@ -853,7 +948,7 @@ export class Query extends Component {
                               <Button
                                 className="continue"
                                 aria-label="search"
-                                onClick={this.createQuery}
+                                onClick={this.matchFullNames}
                                 disabled={this.state.loading}
                                 loading={this.state.loading}
                               >
