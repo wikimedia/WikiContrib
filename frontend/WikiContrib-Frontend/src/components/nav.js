@@ -5,19 +5,9 @@ import { info_content } from './../api';
 export const NavBar = () => (
   <Menu fluid secondary style={{ marginTop: -5 }}>
     <Menu.Menu position="right">
-      <Menu.Item>
-        <a className="a docs"
-        aria-label="read the documentation"
-          target="_blank"
-          href="https://wikicontrib.readthedocs.io/en/latest/"
-          rel="noopener noreferrer"
-        >
-            <span style={{ marginRight: 5 }}>Docs</span> <Icon name="book" />
-        </a>
-      </Menu.Item>
-      <Menu.Item>
+      <Menu.Item className="nav-item">
         <Popup
-          trigger={<Button icon="info" aria-label="about wikicontrib" tabIndex="0" size="large" className="info"></Button>}
+          trigger={<Button icon="info" aria-label="about wikicontrib" tabIndex="0" size="large" className="info a source"></Button>}
           position="bottom right"
           content={
             <div id="info_content" style={{ textAlign: 'center' }}>
@@ -28,6 +18,26 @@ export const NavBar = () => (
             </div>
           }
         />
+      </Menu.Item>
+      <Menu.Item className="nav-item">
+        <a className="a source"
+        aria-label="View source code on Github"
+          target="_blank"
+          href="https://github.com/wikimedia/wikicontrib"
+          rel="noopener noreferrer"
+        >
+        <Icon name="code" />
+        </a>
+      </Menu.Item>
+      <Menu.Item className="nav-item">
+        <a className="a source"
+          aria-label="Share your ideas or feedback on the tool's talk page on meta-wiki"
+          target="_blank"
+          href="https://meta.wikimedia.org/wiki/Talk:WikiContrib"
+          rel="noopener noreferrer"
+        >
+        <Icon name="talk" />
+        </a>
       </Menu.Item>
     </Menu.Menu>
   </Menu>
