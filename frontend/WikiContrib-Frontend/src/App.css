@@ -171,6 +171,25 @@ h3.accounts  {
   z-index: 1002 !important;
 }
 
+
+#fuzzy-warning .header {
+  background-color: #F0AD4D;
+  color: #856404;
+}
+
+#fuzzy-warning .actions {
+  background-color: white;
+}
+
+#fuzzy-warning .actions .no {
+  color: black!important;
+}
+
+#fuzzy-warning .actions .yes {
+  background-color: #F0AD4D;
+  color:  #856404;
+}
+
 .drag_drop {
   background: #eaecf0;
   padding: 20px;
@@ -738,7 +757,12 @@ width: 50%;
   margin-right: -25px;
 } */
 
-  .a.docs {
+  .nav-item {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .a.source {
     background: #eaecf0;
     color: #222;
     padding-left: 10px;
@@ -746,13 +770,11 @@ width: 50%;
     padding-top: 8px;
     padding-bottom: 10px;
     border-radius: 4px;
-    margin-right: -25px;
   }
 
 .ui.button.info {
   background: #eaecf0 !important;
   color: #222 !important;
-  margin-right: -15px !important;
 }
 
 .ui.button.info:focus {
