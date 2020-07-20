@@ -9,27 +9,18 @@ from pytz import utc
 from rest_framework import status
 from .models import Query, QueryFilter, QueryUser
 from datetime import timedelta, datetime
-from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import QueryFilterSerializer, QuerySerializer, QueryUserSerializer
+from django.core.serializers import serialize
+from collections import namedtuple
 from WikiContrib.settings import BASE_DIR, DEBUG
 from os import rename, remove
 from WikiContrib.settings import COMMIT_STATUS
 from result.views import UserUpdateStatus, UserUpdateTimeStamp
-
-
-def create_hash():
-    """
-    :return: hash code to create the Query.
-    """
-    hash_code = get_random_string(64)
-    while Query.objects.filter(hash_code = hash_code).exists():
-        hash_code = get_random_string(64)
-    return hash_code
-
+from result.helper import create_hash
 
 class CheckQuery(APIView):
     """
@@ -63,6 +54,7 @@ class AddQueryUser(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
+        Summary: This function creates a query
         :param request: request Object.
         :param args: arguments passed to the function.
         :param kwargs: Key, values passed to the function.
@@ -135,11 +127,26 @@ class AddQueryUser(CreateAPIView):
                 else:
                     return Response({'message': query_obj.hash_code, "chunk": request.data['chunk'], 'error': 0})
             else:
-                request.data['hash_code'] = create_hash()
+                request.data['hash_code'] = create_hash(request.data['users'])
                 try:
                     with transaction.atomic():
-                        # Add the Query
-                        query = super(AddQueryUser, self).post(request, *args, **kwargs)
+                        query = ""
+
+                        # if query with the given hash already exists
+                        if Query.objects.filter(hash_code = request.data['hash_code']).exists():
+                            query = Query.objects.filter(hash_code = request.data['hash_code'])
+                            query[0].queryuser_set.all().delete()
+                            query[0].queryfilter.delete()
+
+                            query = json.loads(serialize("json",query))
+                            query[0]["fields"]["pk"] = query[0]["pk"]
+                            query = {"data":query[0]["fields"]}
+                            query = namedtuple("query",query.keys())(*query.values())
+
+                        else:
+                            # Add the Query
+                            query = super(AddQueryUser, self).post(request, *args, **kwargs)
+
                         end_time = timezone.now().replace(microsecond = 0)
                         start_time = end_time - timedelta(days = 365)
 
@@ -209,7 +216,7 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         :param request: request Object.
         :param args: arguments passed to the function.
         :param kwargs: Key, values passed to the function.
-        :return: Response Object containing the data of of all the users in the Query.
+        :return: Response Object containing the data of all the users in the Query.
         """
         if self.get_object().file:
             return Response({"uri": self.get_object().csv_file_uri, 'file': 0})
@@ -230,12 +237,24 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         :return: HTTPRedirect with redirect location (to /result/<hash>/)
         """
         try:
+            # if a csv file is present in the update request
             if int(request.data['file']) is 0:
                 # Update the CSV file
                 try:
                     file_path = self.get_object().csv_file.path
                 except ValueError:
+                    initial = self.kwargs['hash']
+
+                    # if we changed input type during the query update on the frontend
+                    # (from single user or multiple users form to csv), the hash type
+                    # needs to change to the hash type used by csv inputs
+                    if(len(initial.split("-")) > 1 or initial.islower()):
+                        query = self.get_object()
+                        self.kwargs['hash'] = create_hash()
+                        query.hash_code = self.kwargs['hash']
+                        query.save()
                     file_path = BASE_DIR + "/uploads/" + self.kwargs['hash'] + ".csv"
+
                 if int(request.data['chunk']) is 1:
                     with open(file_path + ".part", 'wb+') as destination:
                         destination.write(request.data['csv_file'].read())
@@ -276,6 +295,32 @@ class QueryRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
                         query.queryuser_set.all().delete()
                         temp = 0
                         if "users" in request.data:
+
+                            new_hash = create_hash(request.data['users'])
+
+                            old_query = Query.objects.filter(hash_code = new_hash)
+
+                            # If there is an identical query in the database,
+                            if len(old_query) > 0:
+                                # check if the identical query and the new query where created on the same day and if not,
+                                if (old_query[0].created_on.date() <
+                                query.created_on.date()):
+                                # delete old query
+                                    old_query[0].delete()
+
+                                # if both queries where created on the same day
+                                else:
+                                    # use the old query instead
+                                    query = old_query[0]
+                                    query.queryuser_set.all().delete()
+                                    query.file = False
+                                    query.csv_file = ""
+
+                            query.hash_code = new_hash
+                            query.save()
+                            self.kwargs['hash'] = query.hash_code
+
+                            # update the query user(s) with the usernames submitted
                             for i in request.data['users']:
                                 data = i.copy()
                                 if not (data['fullname'] == "" and data['gerrit_username'] == ""
@@ -337,6 +382,11 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
         """
         query = get_object_or_404(Query, hash_code = self.kwargs['hash'])
         if QueryFilter.objects.filter(query = query).exists():
+
+            """ <----------------------------------------------------------------------
+            format the recieved datetime string to a timezone-aware datetime object
+             before saving to db """
+
             if "start_time" in request.data:
                 request.data['start_time'] = utc.localize(datetime.strptime(
                        request.data["start_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
@@ -344,6 +394,7 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             if "end_time" in request.data:
                 request.data['end_time'] = utc.localize(datetime.strptime(
                        request.data["end_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
+            """---------------------------------------------------------------------/>"""
 
             return super(QueryFilterView, self).get(request, *args, **kwargs)
         else:
@@ -377,6 +428,10 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
                 return Response({'message': 'Fill the form completely', 'error': 1},
                                 status = status.HTTP_400_BAD_REQUEST)
 
+            """ <----------------------------------------------------------------------
+            format the recieved datetime string to a timezone-aware datetime object
+             before saving to db """
+
             if "start_time" in request.data:
                 request.data['start_time'] = utc.localize(datetime.strptime(
                        request.data["start_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
@@ -384,6 +439,7 @@ class QueryFilterView(RetrieveUpdateDestroyAPIView):
             if "end_time" in request.data:
                 request.data['end_time'] = utc.localize(datetime.strptime(
                        request.data["end_time"].split(".")[0], "%Y-%m-%dT%H:%M:%S"))
+            """-----------------------------------------------------------------/>"""
 
             data = super(QueryFilterView, self).patch(request, *args, **kwargs).data
 

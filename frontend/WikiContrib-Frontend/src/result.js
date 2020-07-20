@@ -303,7 +303,7 @@ class QueryResult extends React.Component {
       let et_m = et.getMonth();
       let et_y = et.getFullYear();
 
-      if (platform === 'phabricator' && platform in e) {
+      if (platform === 'phabricator' && e.platform.toLowerCase() === platform) {
         if (e.assigned && !e.owned) {
             if (index === et_m && index_year === et_y) {
               current_month[0] += 1;
@@ -331,8 +331,8 @@ class QueryResult extends React.Component {
             data.datasets[2].data[index] += 1;
           }
         }
-      } else if (platform !== 'phabricator' && platform in e) {
-          if (index === et_m && index_year === et_y) {
+      } else if (platform !== 'phabricator' && e.platform.toLowerCase() === platform) {
+          if(index === et_m && index_year === et_y){
             current_month[0] += 1;
           } else {
             data.datasets[0].data[index] += 1;

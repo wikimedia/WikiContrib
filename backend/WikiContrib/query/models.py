@@ -11,7 +11,7 @@ class Query(models.Model):
     hash_code = models.CharField(unique=True, max_length=64)
     file = models.BooleanField(default=False)
     csv_file = models.FileField(upload_to='uploads/', null=True, blank=True)
-    created_on = models.DateTimeField(default=timezone.now())
+    created_on = models.DateTimeField(default=timezone.now)
 
     @property
     def csv_file_uri(self):

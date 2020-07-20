@@ -1,9 +1,5 @@
 static_cdn/
-query/migrations/__pycache__/
-result/migrations/__pycache__/
 WikiContrib/.env
-query/__pycache__/
-WikiContrib/__pycache__/
-result/__pycache__/
 uploads/
-query/management/__pycache__/
+migrations/
+__pycache__/
