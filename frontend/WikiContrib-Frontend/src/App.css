@@ -724,7 +724,12 @@ h3.accounts  {
   margin-right: -25px;
 } */
 
-  .a.docs {
+  .nav-item {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .a.source {
     background: #eaecf0;
     color: #222;
     padding-left: 10px;
@@ -732,13 +737,11 @@ h3.accounts  {
     padding-top: 8px;
     padding-bottom: 10px;
     border-radius: 4px;
-    margin-right: -25px;
   }
 
 .ui.button.info {
   background: #eaecf0 !important;
   color: #222 !important;
-  margin-right: -15px !important;
 }
 
 .ui.button.info:focus {
