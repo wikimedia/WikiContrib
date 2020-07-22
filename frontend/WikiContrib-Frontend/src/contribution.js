@@ -15,34 +15,34 @@ import {
 class GenerateDay extends React.Component {
   render = () => {
     let color = 'rgb(227, 231, 229)';
-    let data = 0;
+    let data = [];
     try {
       data = this.props.data[this.props.year][months.indexOf(this.props.month)][
         this.props.date
       ];
+
       if (data === undefined) {
-        data = 0;
+        data = [];
       }
     } catch (TypeError) {
       // perform nothing.
     }
 
-    color = contribution_color(data);
+    color = contribution_color(data.length);
     let pad = getPadding();
-    let month = months.indexOf(this.props.month) + 1;
     return (
       <div
         className="day"
         style={{ background: color, padding: 6 + pad }}
         onClick={() => {
           this.props.set({
-            activity: this.props.year + '-' + month + '-' + this.props.date,
+            activity: data.toString(),
           });
           window.scrollTo(0, document.body.scrollHeight);
         }}
       >
         <div className="tooltip">
-          {data} {data === 1 ? 'Contribution' : 'Contributions'}
+          {data.length} {data.length === 1 ? 'Contribution' : 'Contributions'}
           on {this.props.month} {this.props.date}, {this.props.year}
         </div>
       </div>
@@ -123,9 +123,9 @@ class UserContribution extends React.Component {
       }
       let day = date.getDate();
       if (!(day in rv[year][month])) {
-        rv[year][month][day] = 0;
+        rv[year][month][day] = [];
       }
-      rv[year][month][day] += 1;
+      rv[year][month][day].push(i.time);
     }
 
     return rv;

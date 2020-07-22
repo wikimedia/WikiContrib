@@ -25,7 +25,7 @@ async def get_github_pr_by_org(orgs, url, request_data, session, github_resp):
     url = """{url}+{orgs_filter}+merged:{createdStartIsoFormat}..{createdEndIsoFormat}""".format(url=url,
             orgs_filter=orgs_filter,
             createdStartIsoFormat=createdStart.isoformat()+"Z",
-            createdEndIsoFormat=createdEnd.isoformat()+"Z")
+            createdEndIsoFormat=createdEnd.isoformat()+"Z"))
 
     def getNextUrlOrNone(response):
         url = None

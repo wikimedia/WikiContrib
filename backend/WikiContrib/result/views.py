@@ -443,7 +443,7 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                 if pd[i]['phid'] not in temp:
                     temp.append(pd[i]['phid'])
                     date_time = utc.localize(datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
-                                            .replace(hour = 0, minute = 0, second = 0, microsecond = 0))
+                                             .replace(microsecond=0))
                     status = pd[i]['fields']['status']['name'].lower()
 
                     contrib = ListCommit.objects.create(
@@ -468,9 +468,8 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
 
             if i < len_gd:
                 date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0], "%Y-%m-%d %H:%M:%S")
-                                        .replace(minute = 0, second = 0, microsecond = 0))
+                                        .replace(microsecond = 0))
                 if date_time <= query.queryfilter.end_time and date_time >= query.queryfilter.start_time:
-                    date_time = date_time.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
                     status = gd[i]['status'].lower()
 
                     contrib = ListCommit.objects.create(
@@ -498,9 +497,9 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                 try:
                     if ghdRateLimitTriggered is not True:
                         if GITHUB_FALLBACK_TO_PR == False:
-                            date_time = utc.localize(datetime.strptime(
-                            ghd[i]['commit']['committer']['date'].split(".")[0], "%Y-%m-%dT%H:%M:%S")
-                            .replace(minute = 0, second = 0, microsecond = 0))
+                            date_time = (datetime.strptime(
+                            ghd[i]['commit']['committer']['date'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                            .replace(microsecond = 0)).astimezone(utc)
                             contrib = ListCommit.objects.create(
                                 query = query, user_hash = unique_user_hash,
                                 heading = ghd[i]["commit"]["message"], created_on = date_time,
@@ -520,8 +519,8 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                         else:
                             date_time = utc.localize(datetime.strptime(
                             ghd[i]['closed_at']
-                            .split(".")[0], "%Y-%m-%dT%H:%M:%S")
-                            .replace(minute = 0, second = 0, microsecond = 0))
+                            .split("Z")[0], "%Y-%m-%dT%H:%M:%S")
+                            .replace(microsecond = 0))
 
                             contrib = ListCommit.objects.create(
                                 query=query, user_hash = unique_user_hash,
@@ -865,12 +864,21 @@ class GetUserCommits(ListAPIView):
     def get(self, request, *args, **kwargs):
         query = get_object_or_404(Query, hash_code = self.kwargs['hash'])
 
+        list_commits = []
         try:
-            date = utc.localize(datetime.strptime(request.GET['created'], "%Y-%m-%d"))
+            date_time  = list(set(request.GET["created"].split(",")))
+            with transaction.atomic():
+                for each in date_time:
+                    if each != "":
+                        each = utc.localize(datetime.strptime(each.split(" ")[0], "%Y-%m-%dT%H:%M:%S"))
+                        list_commits.extend(ListCommit.objects.filter(query = query, created_on = each))
         except KeyError:
-            date = timezone.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+            date_time = timezone.now().replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+            next_day = date_time + timedelta(days = 1)
+            list_commits = ListCommit.objects.filter(query = query, created_on__gte = date_time, created_on__lt = next_day)
 
-        self.queryset = ListCommit.objects.filter(Q(query = query), Q(created_on = date))
+        self.queryset = list_commits
+
         context = super(GetUserCommits, self).get(request, *args, **kwargs)
         data = []
         status = query.queryfilter.status.split(",")
