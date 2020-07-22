@@ -415,8 +415,10 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
             status = result["fields"]["status"].lower()
             if (status_name is True or status in status_name or
             ((status == "open" and "p-open" in status_name) or (status == "open" in status_name))):
+                time = utc.localize(datetime.strptime(
+                        result["fields"]["created_on"].split("Z")[0],"%Y-%m-%dT%H:%M:%S"))
                 rv = {
-                   "time": result["fields"]["created_on"], "platform":result["fields"]["platform"],
+                   "time": time.isoformat(), "platform":result["fields"]["platform"],
                    "staus":result["fields"]["status"], "owned":result["fields"]["owned"],
                    "assigned":result["fields"]["assigned"]
                 }
@@ -521,6 +523,15 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                             ghd[i]['closed_at']
                             .split("Z")[0], "%Y-%m-%dT%H:%M:%S")
                             .replace(microsecond = 0))
+
+                            contrib = ListCommit.objects.create(
+                                query=query, user_hash = unique_user_hash,
+                                heading = ghd[i]["title"], created_on=date_time,
+                                createdStart = query.queryfilter.start_time,
+                                createdEnd = query.queryfilter.end_time,
+                                platform="Github", status="merged", assigned=True,
+                                redirect=ghd[i]["html_url"], owned=True,
+                            )
 
                             contrib = ListCommit.objects.create(
                                 query=query, user_hash = unique_user_hash,
