@@ -86,6 +86,11 @@ def fuzzyMatching(control, user_profiles):
 
     return ave/len(_list)
 
+
+# def get_wikimedia_profile(session,username):
+#
+
+
 async def get_user_profile(data):
     """
     :Summary: Gets users profile details per platform and add them to the user_profiles
@@ -101,6 +106,11 @@ async def get_user_profile(data):
                     if(len(_data) != 0):
                         realname = _data[0]['fields']['realName']
                         data["user_profiles"]["phab_profile"]["full_name"] = realname
+                        # wikimedia_profile = get_wikimedia_profile(session = data["session"],
+                        #                     username = data["request_data"]["constraints[usernames][0]"])
+                        # data["user_profiles"]["phab_profile"]["avatar"] = wikimedia_profile["avatar"]
+                        # data["user_profiles"]["phab_profile"]["email"] = wikimedia_profile["email"]
+                        # data["user_profiles"]["phab_profile"]["bio"] = wikimedia_profile["bio"]
                     else:
                         data["user_profiles"]["phab_profile"]["full_name"] = username_does_not_exist
             else:
