@@ -6,7 +6,7 @@ The present doc deals with installing and running `backend`. If you go inside `b
 
 # Steps to setup server locally
 
-## Using Docker 
+## Using Docker
 
 1. Install Docker in your system (https://docs.docker.com/install/)
 2. Get to the  Dockerfile directory : `cd backend/WikiContrib`  
@@ -20,7 +20,7 @@ The present doc deals with installing and running `backend`. If you go inside `b
 
 1. Create a virtual environment
 2. Install the required packages to run the tool
-3. Create the phabricator account and generate a Conduit API token
+3. Create phabricator and Github accounts and generate the API tokens
 4. Set up environment variables
 5. Run the migrations
 6. Create super user
@@ -165,7 +165,7 @@ You may be getting errors if you don't have MySQL installed on your OS. To fix t
 ```commandline
 brew install mysql
 ```
-or 
+or
 
 2. Comment out the line of code `mysqlclient==1.3.13` from the requirements.txt file in the backend/WikiContrib folder.
 Make sure not to push this change to the remote directory. The best way to to go about this is to go to the root ".git" folder of your project, open "info\exclude" file and add `requirements.txt` to it.
@@ -181,14 +181,30 @@ The output is something like: `2.2.2`.
 
 ## Create a Phabricator account and generate a Conduit API token:
 
-Before running the development server, you need to provide an API key to fetch the details from the phabricator. So create a phabricator account from [here](https://phabricator.wikimedia.org/auth/start/?next=%2F). Use **Log In or Register** through Mediawiki(If you don't have a Mediawiki account, you can create it from [here](https://www.mediawiki.org/w/index.php?title=Special:CreateAccount)).
+Before running the development server, you need to provide an API key to fetch the contributions on phabricator and github.
 
+For phabricator, create a phabricator account [here](https://phabricator.wikimedia.org/auth/start/?next=%2F) (if you don't already have one). Use **Log In or Register** through Mediawiki(If you don't have a Mediawiki account, you can create it from [here](https://www.mediawiki.org/w/index.php?title=Special:CreateAccount)).
 Once you login to the phabricator. You can generate a Conduit API token from `https://phabricator.wikimedia.org/settings/user/{Your username}/page/apitokens/` (fill your username in the link).
 
-Copy the API token.
+For github, create a github account [here](https://github.com) (if you don't already have one), and sign in.
+Once you have signed in, you can generate the required personal access token from `https://github.com/settings/tokens`
+You are required to add a note explaining the purpose of the token.
+For permissions, you can use the ones below as they work perfectly for our use case:
+
+repo:status
+public_repo
+read:packages
+read:org
+read:repo_hook
+read:user
+read:email
+read:discussion
+read:enterprise
+
+Note: make sure to copy the generated API tokens before exiting the pages as you may not be able to directly view them again once you exit the pages.
 
 ## Set up environment variables
-Copy contents of `backend/WikiContrib/WikiContrib/.env.example` to a new file `backend/WikiContrib/WikiContrib/.env`. Paste the Phabricator API token in the variable `PHAB_KEY` in the file you just created.
+Copy contents of `backend/WikiContrib/WikiContrib/.env.example` to a new file `backend/WikiContrib/WikiContrib/.env`. Paste the Phabricator API token in the variable `PHAB_KEY` in the file you just created, and paste the Github API token in `GITHUB_ACCESS_TOKEN`field as well.
 
 
 ## Run the migrations:
@@ -220,6 +236,6 @@ Finally, run the server with the command:
 python manage.py runserver
 ```
 
-Hurray!! Now you can access the API. You can get the API doc [here](https://documenter.getpostman.com/view/6222710/SVYurxMj?version=latest).
+Hurray!! Now you can access the API. You can get the API doc [here]https://documenter.getpostman.com/view/12264092/T1LFmpTP).
 
 To see the database tables, you can go to this url: `http://127.0.0.1:8000/admin/` and login with the super user credentials.
