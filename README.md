@@ -20,7 +20,7 @@ WikiContrib is participating in [Outreachy](https://www.outreachy.org/) Round 20
 To view a community members’ contributions, provide their full name, Gerrit username, and Phabricator username. By default, the tool searches for their contributions in the past year.  There are options to filter by timestamp and issue type (for example: merged, open, etc.)
 There is also a feature to upload a list of usernames in a CSV format and view contributions for several community members altogether (this feature is still in experimental mode).
 
-## Getting started
+## Getting Started
 - First, clone the repo `git clone https://github.com/wikimedia/WikiContrib.git`
 
 #### Using Docker Compose
