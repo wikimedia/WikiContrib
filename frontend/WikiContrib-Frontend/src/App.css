@@ -1,6 +1,14 @@
 @import 'fonts.css';
 @import 'https://tools-static.wmflabs.org/fontcdn/css?family=Lato:400,700,400italic,700italic&subset=latin';
 
+#root {
+  height: 100%;
+}
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
 h1.accounts,
 h2.accounts,
 h3.accounts,
@@ -9,7 +17,18 @@ h4.accounts {
   font-weight: 200;
 }
 
-.ui.header.title {
+.ui.header.title_and_logo {
+  display: flex;
+  align-items: center;
+}
+
+.ui.header .logo {
+  width: 3.7rem;
+  margin-right: 1em;
+  margin-top: 1.4em;
+}
+
+.ui.header .title {
   font-family: 'Charter';
   font-size: 5rem;
 }
@@ -36,6 +55,7 @@ h3.accounts  {
 .ui.header .name {
   font-family: 'Charter';
   font-size: 4rem;
+  margin: 0.5em 0 0.5em 0;
 }
 
 .ui.single.line.table.user_table {
@@ -63,6 +83,20 @@ h3.accounts  {
 }
 
 /* End of NavBar Styles */
+
+/* footer */
+.footer {
+  border-top: 1px solid #cecccc;
+  height: 3em;
+  width: 100vw;
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+/* end of footer styles*/
 
 /* About tool text */
 
@@ -100,11 +134,19 @@ h3.accounts  {
 .ui.card.query_create,
 .ui.card.query_add_filter {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
+  margin-top: 4em;
   background: #ffffff;
   border-radius: 5px;
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+}
+
+.ui.card.query_add_filter {
+  padding: 10px;
+}
+
+.ui.card.query_create .extra {
+  background-color: rgba(0,0,0,0.03);
+  display: flex;
 }
 
 .ui.card.chart_container {
@@ -287,6 +329,10 @@ h3.accounts  {
   font-weight: bold;
 }
 
+.table_entry {
+  margin: 1em;
+}
+
 .ui.button.table_row_add {
   background: #222 !important;
   color: white !important;
@@ -297,8 +343,6 @@ h3.accounts  {
   text-align: center;
   padding: 10px 0;
   font-size: 2rem;
-  /* line-height: 1.428571429; */
-  /* border-radius: 30px; */
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
@@ -322,14 +366,7 @@ h3.accounts  {
 .ui.button.save_offline {
   background: #36c !important;
   color: white !important;
-  padding: 17px !important;
   transition: 0.3s;
-  width: 60px;
-  height: 60px;
-  text-align: center;
-  padding: 10px 0;
-  font-size: 2rem;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .ui.single.line.table {
@@ -337,23 +374,21 @@ h3.accounts  {
   width: 100% !important;
 }
 
+
+.bulk_add {
+  align-self: center;
+}
+
+
 .reset_add_continue {
-  float: right;
+  margin-left: auto;
 }
 
 .ui.button.reset {
   background: #d33 !important;
   color: white !important;
-  padding: 17px !important;
   transition: 0.3s;
-  width: 60px;
-  height: 60px;
   text-align: center;
-  padding: 10px 0;
-  font-size: 2rem;
-  /* line-height: 1.428571429; */
-  /* border-radius: 30px; */
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .ui.button.reset:hover {
@@ -423,9 +458,9 @@ h3.accounts  {
 }
 
 .activity_wrapper {
-  width: 100%;
-  margin-left: 15%;
-  margin-right: 15%;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  max-width: 1500px;
 }
 
 .day .tooltip {
@@ -464,13 +499,22 @@ h3.accounts  {
 
 .result {
   width: 100%;
-  padding-left:14%;
-  padding-right:14%;
+  padding-left:12%;
+  padding-right:12%;
+}
+
+.result .profile {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.result .profile .usernames {
+  margin-right: 0.6em;
+  margin-bottom: 0;
 }
 
 .drop {
   padding-bottom: 10px;
-  /* z-index: 100; */
 }
 
 #dropdown {
@@ -521,48 +565,35 @@ h3.accounts  {
 .controls {
   display: flex;
   flex-wrap: wrap;
-}
-
-.filter_and_update {
-  display: flex;
-  margin-top: 8vh;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 
 .search {
-  width: 80%;
   margin-right: 1.3rem;
+  display: inherit;
+}
+
+.controls .search .accounts {
+  align-self: center;
 }
 
 /* ----------/> */
 
 .ui.icon.button.filters {
-  /* left: 0px !important; */
-  /* margin-left: 3rem; */
-  /* float: left !important; */
-  margin-right: 1.3em;
-  background: #222 !important;
+  background: #787c80 !important;
   color: white !important;
-  padding: 17px !important;
   transition: 0.3s;
   text-align: center;
-  font-size: 1.5rem;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  font-size: 1.2rem;
   opacity: 1;
-}
-
-.ui.icon.button.filters:hover,.ui.icon.button.filters:focus {
-  opacity: 0.8;
-  -webkit-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
-  -moz-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
-  box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
-  outline: 2px solid white;
 }
 
 .ui.card.filter_view {
   background: #eaecf0;
   width: 80%;
-  margin-top:0.1rem;
+  margin-top:1em;
   padding: 1rem;
   font-family: 'Lato ', sans-serif;
   font-size: 1.1rem;
@@ -575,7 +606,6 @@ h3.accounts  {
   float: right !important;
   background: #36c !important;
   color: white !important;
-  padding: 12px !important;
   transition: 0.3s;
   text-align: center;
   font-size: 1.1rem;
@@ -590,12 +620,15 @@ h3.accounts  {
   float: right;
   background: #d33 !important;
   color: white !important;
-  padding: 12px !important;
   transition: 0.3s;
   text-align: center;
   font-size: 1.1rem;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   margin-top: 20px;
+}
+
+.ui.button.reset_filters .icon, .ui.button.apply_filters .icon {
+  margin: 0;
 }
 
 .left_arrow {
@@ -622,22 +655,17 @@ h3.accounts  {
 }
 
 .ui.icon.button.update_query {
-  background: #222 !important;
+  background: #787c80 !important;
   transition: 0.3s !important;
-  /* float: left !important; */
   color: white;
   z-index: 1;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   opacity: 1;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  /* margin-left: -50%; */
 }
 
-.ui.icon.button.update_query:hover,.ui.icon.button.update_query:focus {
+.ui.icon.button.update_query:hover, .ui.icon.button.filters:hover,
+.ui.icon.button.update_query:focus, .ui.icon.button.filters:focus {
   opacity: 0.8;
-  -webkit-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
-  -moz-box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
-  box-shadow: 0px 0px 5px 6px rgba(0,0,0,0.43);
   outline: 2px solid white;
 }
 
@@ -716,14 +744,6 @@ h3.accounts  {
   border: 1px solid #C3C4C4;
 }
 
-/* .ui.button.docs {
-  background: #eaecf0 !important;
-  color: #222 !important;
-  padding-left: 10px !important;
-  padding-right: 8px !important;
-  margin-right: -25px;
-} */
-
   .nav-item {
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -774,6 +794,17 @@ h3.accounts  {
   vertical-align: middle;
   align-items: center;
 }
+
+.commits_load .title a {
+  font-size: 1.3rem;
+  line-height: 1.3;
+  font-weight: bold;
+  width: 100%;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 .input_label {
   text-align: left;
@@ -833,23 +864,6 @@ h3.accounts  {
   .ui.card.filter_view {
     width: 75%
   }
-
-  .search {
-    width: 75%
-  }
-
-
-}
-
-@media screen and (min-width: 768px) and (max-width: 900px ){
-  .ui.card.filter_view {
-    width: 70%;
-  }
-
-  .search {
-    width: 70%;
-  }
-
 }
 
 @media screen and (max-width: 752px){
@@ -863,22 +877,12 @@ h3.accounts  {
 }
 
 @media screen and (max-width: 768px){
-  .ui.header.title {
-    font-size: 4rem;
-  }
-
   .ui.card.filter_view {
     width: 100%;
   }
 
-  .search {
-    width: 100%;
-    margin-right: 0;
-  }
-
-  .filter_and_update {
-    margin-top: 4vh;
-    margin-bottom: 4vh;
+  .ui.header.title {
+    font-size: 4rem;
   }
 
   .graph {
@@ -891,6 +895,14 @@ h3.accounts  {
 
 
 @media screen and (max-width: 565px){
+  .ui.header .logo {
+    width: 2.7rem;
+  }
+
+  .ui.header .title {
+    font-size: 4rem;
+  }
+
   .ui.header .name {
     font-size: 2rem;
   }
@@ -913,6 +925,41 @@ h3.accounts  {
     margin-top: 1rem;
     margin-left: 0 !important;
     flex-direction: row;
+  }
+}
+
+
+@media screen and (max-width: 446px){
+  .ui.header .logo {
+    width: 2rem;
+    margin-right: 0.5em;
+  }
+
+  .ui.header .title {
+    font-size: 3rem;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .profile {
+    flex-wrap: wrap;
+  }
+
+  .profile .usernames {
+    width: 100%;
+  }
+
+  .filter_and_update {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+  }
+}
+
+@media screen and (max-width: 343px){
+  .ui.button.reset,.ui.button.continue {
+    padding: .78571429em 1em .78571429em;
   }
 }
 

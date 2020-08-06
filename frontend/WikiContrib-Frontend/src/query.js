@@ -5,6 +5,7 @@ import MessageDisplay from './components/message';
 import { QueryCreateApi, QueryDetailApi, matchFullNamesApi } from './api';
 import csv from './img/csv.png';
 import format from './img/format.png';
+import logo from './img/logo.svg';
 import {
   Card,
   Grid,
@@ -20,7 +21,7 @@ import {
   Header,
   Modal
 } from 'semantic-ui-react';
-import { NavBar } from './components/nav';
+import { NavBar, Footer } from './components/nav';
 
 var emptyObj = {
   fullname: '',
@@ -495,8 +496,8 @@ export class Query extends Component {
               update={this.state.message.update}
               trigger={this.state.message.trigger}
             />
-            <div style={{ marginTop: '8%' }} />
-            <Grid>
+          <div style={{ marginTop: '4%' }} />
+            <Grid style={{marginBottom: '2em'}}>
               <Grid.Row>
                 <Grid.Column computer={2} tablet={1} mobile={1} />
                 <Grid.Column computer={12} tablet={14} mobile={14}>
@@ -533,11 +534,12 @@ export class Query extends Component {
                       animation="fade"
                     >
                       <React.Fragment>
-                        <h1><Header className="title">WikiContrib</Header></h1>
+                        <Header className="title_and_logo">
+                          <img className="logo" src={logo} alt="wikicontrib logo"/>
+                          <h1 className="title">WikiContrib</h1>
+                        </Header>
                         <h2 className="accounts">
-                          Get the Contributions of your fellow Wikimedians,
-                          showcase yourself! Visualize their contribs using
-                          graphs over different time ranges.
+                          Visualize your technical contributions or a fellow Wikimedian's to Wikimedia projects!
                         </h2>
                         <Card className="query_create">
                           {this.state.bulk ? (
@@ -756,13 +758,11 @@ export class Query extends Component {
                                       <Table.Cell
                                         style={{ textAlign: 'center' }}
                                       >
-                                      <label>
-                                        <div className="input_label">Full Name</div>
                                         <input
                                           className="user_input"
                                           value={obj.fullname}
                                           name="fullname"
-                                          placeholder="Full Name"
+                                          placeholder="Full name"
                                           onChange={e =>
                                             this.handlChange(
                                               e.target.name,
@@ -771,18 +771,15 @@ export class Query extends Component {
                                             )
                                           }
                                         />
-                                    </label>
                                       </Table.Cell>
                                       <Table.Cell
                                         style={{ textAlign: 'center' }}
                                       >
-                                        <label>
-                                          <div className="input_label">Gerrit Username</div>
                                           <input
                                             className="user_input"
                                             value={obj.gerrit_username}
                                             name="gerrit_username"
-                                            placeholder="Gerrit Username"
+                                            placeholder="Gerrit username"
                                             onChange={e =>
                                               this.handlChange(
                                                 e.target.name,
@@ -791,18 +788,15 @@ export class Query extends Component {
                                               )
                                             }
                                           />
-                                        </label>
                                       </Table.Cell>
                                       <Table.Cell
                                         style={{ textAlign: 'center' }}
                                       >
-                                        <label>
-                                          <div className="input_label">Phabricator Username</div>
                                           <input
                                             className="user_input"
                                             value={obj.phabricator_username}
                                             name="phabricator_username"
-                                            placeholder="Phabricator Username"
+                                            placeholder="Phabricator username"
                                             onChange={e =>
                                               this.handlChange(
                                                 e.target.name,
@@ -811,19 +805,15 @@ export class Query extends Component {
                                               )
                                             }
                                           />
-                                        </label>
                                       </Table.Cell>
                                       <Table.Cell
                                        style={{ textAlign: 'center' }}
                                       >
-
-                                      <label>
-                                        <div className="input_label">Github Username</div>
                                         <input
                                           className="user_input"
                                           value={obj.github_username}
                                           name="github_username"
-                                          placeholder="Github Username"
+                                          placeholder="Github username"
                                           onChange={e =>
                                             this.handlChange(
                                               e.target.name,
@@ -832,7 +822,6 @@ export class Query extends Component {
                                             )
                                           }
                                         />
-                                      </label>
                                     </Table.Cell>
                                     <Table.Cell
                                      style={{ textAlign: 'center' }}
@@ -885,6 +874,7 @@ export class Query extends Component {
                                   toggle
                                   disabled
                                   label="Bulk Add"
+                                  className="bulk_add"
                                   onClick={null/*() =>
                                     this.setState({ bulk: !this.state.bulk })
                                   */}
@@ -892,74 +882,77 @@ export class Query extends Component {
                                 />
                               }
                             />
+
+                            <div className="reset_add_continue">
+                              <Popup
+                                content='Reset'
+                                position="top center"
+                                trigger={
+                                  <Button
+                                    className="reset"
+                                    aria-label="reset"
+                                    size="large"
+                                    onClick={() => {
+                                      localStorage.removeItem('users');
+                                      this.setState({
+                                        message: {
+                                          message: 'Cleared the cache data!',
+                                          trigger: true,
+                                          type: 0,
+                                          update: !this.state.message.update,
+                                        },
+                                        rows: [Object.assign({}, emptyObj)],
+                                      });
+                                    }}
+                                  >
+                                  <Icon
+                                    name="redo alternate"
+                                    style={{ paddingLeft: 4 }}
+                                  />
+                                  </Button>
+                                }
+                              />
+                            {/*<Popup
+                                content=<a href="https://github.com/wikimedia/WikiContrib"
+                                  rel="noopener noreferrer" target="_blank">
+                                  This feature is currently disabled. Contact the tool maintainers to learn more.
+                                </a>
+                                position="top center"
+                                pinned
+                                trigger={
+                                  <Button
+                                    className="table_row_add"
+                                    id="disable_bulk_add_feature"
+                                    aria-label="add more user"
+                                    onClick={this.addrow}
+                                    disabled
+                                  >
+                                  <Icon name="user plus" />
+                                  </Button>
+                                }
+                              />*/}
+                              <Popup
+                                content="Search"
+                                position="top center"
+                                trigger={
+                                  <Button
+                                    className="continue"
+                                    aria-label="search"
+                                    size="large"
+                                    onClick={this.matchFullNames}
+                                    disabled={this.state.loading}
+                                    loading={this.state.loading}
+                                  >
+                                  <Icon
+                                    name="search"
+                                    style={{ paddingLeft: 4 }}
+                                    />
+                                  </Button>
+                                }
+                              />
+                            </div>
                           </Card.Content>
                         </Card>
-                        <div className="reset_add_continue">
-                          <Popup
-                            content='Reset'
-                            position="top center"
-                            trigger={
-                              <Button
-                                className="reset"
-                                aria-label="reset"
-                                onClick={() => {
-                                  localStorage.removeItem('users');
-                                  this.setState({
-                                    message: {
-                                      message: 'Cleared the cache data!',
-                                      trigger: true,
-                                      type: 0,
-                                      update: !this.state.message.update,
-                                    },
-                                    rows: [Object.assign({}, emptyObj)],
-                                  });
-                                }}
-                              >
-                              <Icon
-                                name="trash alternate"
-                                style={{ paddingLeft: 4 }}
-                              />
-                              </Button>
-                            }
-                          />
-                        {/*<Popup
-                            content=<a href="https://github.com/wikimedia/WikiContrib"
-                              rel="noopener noreferrer" target="_blank">
-                              This feature is currently disabled. Contact the tool maintainers to learn more.
-                            </a>
-                            position="top center"
-                            pinned
-                            trigger={
-                              <Button
-                                className="table_row_add"
-                                id="disable_bulk_add_feature"
-                                aria-label="add more user"
-                                onClick={this.addrow}
-                                disabled
-                              >
-                              <Icon name="user plus" />
-                              </Button>
-                            }
-                          />*/}
-                          <Popup
-                            content="Search"
-                            position="top center"
-                            trigger={
-                              <Button
-                                className="continue"
-                                aria-label="search"
-                                onClick={this.matchFullNames}
-                                disabled={this.state.loading}
-                                loading={this.state.loading}
-                              >
-                              <Icon
-                                name="search"
-                                style={{ paddingLeft: 4 }}
-                                />
-                              </Button>
-                            }
-                          />
-                        </div>
                       </React.Fragment>
                     </Transition>
                   )}
@@ -967,6 +960,7 @@ export class Query extends Component {
                 <Grid.Column computer={2} tablet={1} mobile={1} />
               </Grid.Row>
             </Grid>
+            <Footer/>
           </React.Fragment>
         )}
       </React.Fragment>
