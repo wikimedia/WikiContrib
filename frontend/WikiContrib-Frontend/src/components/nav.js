@@ -42,3 +42,15 @@ export const NavBar = () => (
     </Menu.Menu>
   </Menu>
 );
+
+
+
+export const Footer = () => (
+  <footer className="footer">
+     Built with&nbsp;<Icon className="heart" name="heart" />&nbsp;by
+     &nbsp;<a className="contributor" href="https://phabricator.wikimedia.org/p/Rammanojpotla/" target="_blank" rel="noopener noreferrer">Rammanojpotla</a>
+    , &nbsp;<a className="contributor" href="https://phabricator.wikimedia.org/p/Raymond_Ndibe" target="_blank" rel="noopener noreferrer">Raymond Ndibe</a>
+    , &nbsp;<a className="contributor" href="https://phabricator.wikimedia.org/p/srishakatux/" target="_blank" rel="noopener noreferrer">Srishti Sethi</a>
+    , &nbsp;and &nbsp;<a className="contributor" href="https://phabricator.wikimedia.org/p/Tuxology/" target="_blank" rel="noopener noreferrer">Suchakra Sharma</a>
+  </footer>
+);

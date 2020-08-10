@@ -104,7 +104,7 @@ class Activity extends React.Component {
             {this.state.data.length !== 0 ? (
               <React.Fragment>
                 <Header className="chart">
-                  {this.props.username}'s activity on {this.props.date.split("T")[0]}
+                  {this.props.username+"'s"} activity on {this.props.date.split("T")[0]}
                 </Header>
                 {this.state.data.map((obj, index) => (
                   <Card className="commits_load" key={index}>
@@ -130,16 +130,16 @@ class Activity extends React.Component {
                         <div className="title">
                           {obj.platform === 'Phabricator' ? (
                             <a href={'https://phabricator.wikimedia.org/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                              <h3>{obj.heading}</h3>
+                              {obj.heading}
                               </a>
                             ) : (
                               obj.platform === 'Gerrit' ? (
                                 <a href={'https://gerrit.wikimedia.org/r/#/q/' + obj.redirect} target="_blank" rel="noopener noreferrer">
-                                <h3>{obj.heading}</h3>
+                                {obj.heading}
                                 </a>
                               ) : (
                                 <a href={obj.redirect} target="_blank" rel="noopener noreferrer">
-                                <h3>{obj.heading}</h3>
+                              {obj.heading}
                                 </a>
                               )
                             )}

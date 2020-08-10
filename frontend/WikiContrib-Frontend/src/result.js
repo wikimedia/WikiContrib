@@ -24,12 +24,12 @@ import {
   get_num_days,
   filterDetailApi,
 } from './api';
-import UserSearch from './components/dropdown';
+// import UserSearch from './components/dropdown';
 import { Line } from 'react-chartjs-2';
 import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
-import { NavBar } from './components/nav';
+import { NavBar, Footer } from './components/nav';
 
 /**
  * Styles to the Line Graphs.
@@ -112,13 +112,8 @@ class GoToTop extends React.Component {
  */
 class DisplayUser extends React.Component {
   render = () => {
-    let { start_time: st, end_time: et } = this.props.filters;
-    st = new Date(st);
-    let st_m = st.getMonth();
-    et = new Date(et);
-    let et_m = et.getMonth();
     return (
-      <div>
+      <div className="profile">
         {this.props.loading ? (
           <React.Fragment>
             <Placeholder>
@@ -128,10 +123,7 @@ class DisplayUser extends React.Component {
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <GoToTop/>
-              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
-              <span>
-                <h3 className="accounts">
+                <h3 className="accounts usernames">
                   Gerrit:{' '}
                   {this.props.gerrit_username !== '' ? (
                     <a
@@ -180,12 +172,24 @@ class DisplayUser extends React.Component {
                       'None'
                     )}
                 </h3>
-                <h3 className="accounts">
-                  {full_months[st_m] + " " + st.getFullYear()}
-                  -
-                  {full_months[et_m] + " " + et.getFullYear()}
-                </h3>
-              </span>
+
+                <div className="update filter_and_update">
+                  <Popup
+                    content="Update"
+                    position="top center"
+                    trigger={
+                      <Button
+                        className="update_query"
+                        aria-label="update query"
+                        icon="write"
+                        as={Link}
+                        to={
+                          '/query/' + this.props.query + '/update/'
+                        }
+                      />
+                    }
+                  />
+                </div>
             </React.Fragment>
           )}
       </div>
@@ -538,6 +542,12 @@ class QueryResult extends React.Component {
   render = () => {
     document.body.style.backgroundColor = '#f8f9fa';
     let { update_filters: uf, current_filters: cf } = this.state;
+    let { start_time: st, end_time: et } = cf;
+    st = new Date(st);
+    let st_m = st.getMonth();
+    et = new Date(et);
+    let et_m = et.getMonth();
+
     return (
       <React.Fragment>
         {this.state.prev !== null ? (
@@ -582,33 +592,46 @@ class QueryResult extends React.Component {
           ''
         )}
         <NavBar />
-        <Grid>
+        <GoToTop/>
+        <Grid style={{marginBottom: '2em'}}>
           <Grid.Row>
               <div className="result">
-                <h1 className="result_page_heading">Query Result</h1>
                 {this.state.page_load ? (
                   <Placeholder fluid className="search_load">
                     <Placeholder.Line className="load_background" />
                   </Placeholder>
                 ) : (
+                  <React.Fragment>
+                  <Header><h2 className="name">{this.state.current+'\'s '}Activity</h2></Header>
+                    <DisplayUser
+                      loading={this.state.loading}
+                      username={this.state.current}
+                      gerrit_username={this.state.gerrit_username}
+                      phabricator_username={this.state.phab_username}
+                      github_username={this.state.github_username}
+                      query={this.state.query}
+                    />
                   <div className="controls">
                     <div className="search">
-                        <UserSearch
+                        {/*<UserSearch
                           set={this.onUserSearch}
                           hash={this.state.query}
                           value={this.state.value}
-                        />
+                        />*/}
+                        <h3 className="accounts">
+                          {full_months[st_m] + " " + st.getFullYear()}
+                          -
+                          {full_months[et_m] + " " + et.getFullYear()}
+                        </h3>
                       </div>
 
-
-                      <div className="filter_and_update">
-                      <div className="filter">
+                      <div className="filter filter_and_update">
                         <Popup
                           content="View Filters"
                           position="top center"
                           trigger={
                             <Button
-                              icon="options"
+                              icon="write"
                               className="filters"
                               aria-label="filters"
                               onClick={() =>
@@ -620,25 +643,8 @@ class QueryResult extends React.Component {
                           }
                         />
                       </div>
-                      <div className="update">
-                        <Popup
-                          content="Update"
-                          position="top center"
-                          trigger={
-                            <Button
-                              className="update_query"
-                              aria-label="update query"
-                              icon="write"
-                              as={Link}
-                              to={
-                                '/query/' + this.state.query + '/update/'
-                              }
-                            />
-                          }
-                        />
-                      </div>
                     </div>
-                    </div>
+                  </React.Fragment>
                 )}
                 <Transition
                   animation="fade down"
@@ -715,13 +721,13 @@ class QueryResult extends React.Component {
                         className="apply_filters"
                         onClick={() => this.handleSearchClick()}
                       >
-                        APPLY
+                      <Icon name="redo alternate"/>
                       </Button>
                       <Button
                         className="reset_filters"
                         onClick={() => this.handleReset()}
                       >
-                        RESET
+                        <Icon name="search"/>
                       </Button>
                     </div>
                   </Card>
@@ -732,19 +738,6 @@ class QueryResult extends React.Component {
             <NotFound />
           ) : (
               <React.Fragment>
-                <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
-                    <DisplayUser
-                      loading={this.state.loading}
-                      username={this.state.current}
-                      gerrit_username={this.state.gerrit_username}
-                      phabricator_username={this.state.phab_username}
-                      github_username={this.state.github_username}
-                      filters={this.state.current_filters}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
                 <Grid.Row>
                   <div className="graphs">
                             <div className="graph">
@@ -866,6 +859,9 @@ class QueryResult extends React.Component {
                   <Grid.Column width={2} />
                 </Grid.Row>
                 {this.state.activity !== undefined ? (
+                <Grid.Row>
+                  <Grid.Column width={2} />
+                  <Grid.Column width={12}>
                     <div className="activity_wrapper">
                       <Activity
                         date={this.state.activity}
@@ -873,12 +869,16 @@ class QueryResult extends React.Component {
                         username={this.state.current}
                       />
                     </div>
+                    </Grid.Column>
+                  <Grid.Column width={2} />
+                </Grid.Row>
                 ) : (
                   ''
                 )}
               </React.Fragment>
           )}
         </Grid>
+        <Footer/>
       </React.Fragment>
     );
   };
