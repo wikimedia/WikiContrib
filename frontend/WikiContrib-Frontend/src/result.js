@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Grid,
   Button,
   Card,
   Popup,
@@ -24,12 +23,16 @@ import {
   get_num_days,
   filterDetailApi,
 } from './api';
-import UserSearch from './components/dropdown';
+// import UserSearch from './components/dropdown';
 import { Line } from 'react-chartjs-2';
 import UserContribution from './contribution';
 import Activity from './components/activity';
 import NotFound from './components/404';
 import { NavBar } from './components/nav';
+import emptyAvatar from './img/empty_avatar.png';
+import gerritPlatformIcon from './img/gerritPlatformIcon.png';
+import phabricatorPlatformIcon from './img/phabricatorPlatformIcon.png';
+import githubPlatformIcon from './img/githubPlatformIcon.png';
 
 /**
  * Styles to the Line Graphs.
@@ -72,24 +75,35 @@ const chartOptions = {
 
 
 class GoToTop extends React.Component {
-  state = {
-       showButton: false
-   };
+  constructor(props){
+    super(props);
+    this.state = {
+         showButton: false
+     };
+  }
+
 
   componentDidMount() {
-      document.addEventListener("scroll", () => {
-          if (window.scrollY > 170) {
-              this.setState({ showButton: true })
-          } else {
-              this.setState({ showButton: false })
-          }
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    let contrib_div = this.props.userContributionsNode;
+
+      let listener = setInterval(()=>{
+        if(contrib_div.current){
+          contrib_div.current.addEventListener("scroll", () => {
+              if (contrib_div.current.scrollTop > 170) {
+                  this.setState({ showButton: true })
+              } else {
+                  this.setState({ showButton: false })
+              }
+          });
+          contrib_div.current.scrollTo({ top: 0, behavior: 'smooth' });
+          clearInterval(listener);
+        }
+      },1000);
   }
 
 
   scrollToTop = () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.props.userContributionsNode.current.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   render(){
@@ -112,83 +126,124 @@ class GoToTop extends React.Component {
  */
 class DisplayUser extends React.Component {
   render = () => {
-    let { start_time: st, end_time: et } = this.props.filters;
-    st = new Date(st);
-    let st_m = st.getMonth();
-    et = new Date(et);
-    let et_m = et.getMonth();
     return (
-      <div>
+      <section className="profile">
         {this.props.loading ? (
           <React.Fragment>
-            <Placeholder>
-              <Placeholder.Line className="load_background" />
-              <Placeholder.Line className="load_background" />
+
+            <div className="avatar">
+            <Placeholder className="img" style={{height:"15em"}}>
+              <Placeholder.Image />
             </Placeholder>
+
+            <Placeholder>
+              <Placeholder.Header>
+                <Placeholder.Line/>
+              </Placeholder.Header>
+            </Placeholder>
+          </div>
+
+          <div className="contact_me">
+            <Placeholder style={{marginTop:"2em"}}>
+              <Placeholder.Header image>
+                <Placeholder.Line/>
+              </Placeholder.Header>
+              <Placeholder.Header image>
+                <Placeholder.Line/>
+              </Placeholder.Header>
+              <Placeholder.Header image>
+                <Placeholder.Line/>
+              </Placeholder.Header>
+              <Placeholder.Header image>
+                <Placeholder.Line/>
+              </Placeholder.Header>
+            </Placeholder>
+          </div>
+
+              {/*<Placeholder.Line className="load_background" />*/}
+
           </React.Fragment>
         ) : (
             <React.Fragment>
-              <GoToTop/>
-              <Header><h2 className="name">{this.props.username}'s Activity</h2></Header>
-              <span>
-                <h3 className="accounts">
-                  Gerrit:{' '}
-                  {this.props.gerrit_username !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        'https://gerrit.wikimedia.org/r/#/q/' +
-                        this.props.gerrit_username
-                      }
-                    >
-                      {this.props.gerrit_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}{' '}
-                  | Phabricator:{' '}
-                  {this.props.phabricator_username !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        'https://phabricator.wikimedia.org/p/' +
-                        this.props.phabricator_username +
-                        '/'
-                      }
-                    >
-                      {this.props.phabricator_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}{' '}
-                  | Github:{' '}
-                  {this.props.github_username !== '' ? (
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        'https://github.com/' +
-                        this.props.github_username +
-                        '/'
-                      }
-                    >
-                      {this.props.github_username}
-                    </a>
-                  ) : (
-                      'None'
-                    )}
-                </h3>
-                <h3 className="accounts">
-                  {full_months[st_m] + " " + st.getFullYear()}
-                  -
-                  {full_months[et_m] + " " + et.getFullYear()}
-                </h3>
-              </span>
+                <div className="avatar">
+                <img className="img" src={this.props.avatar || emptyAvatar} alt={`${this.props.username}'s avatar`}/>
+                <h2 className="name">{this.props.username}</h2>
+                </div>
+                {this.props.bio ?
+                (<div className="bio">
+                  <p>{this.props.bio}</p>
+                </div>):''
+                }
+                <div className="contact_me">
+                  <h3 className="link email">
+                  <span><Icon name="envelope" size="large"/>&nbsp;{this.props.email}</span>
+                  </h3>
+                  <h3 className="link gerrit">
+                    {this.props.gerrit_username !== '' ? (
+                    <React.Fragment>
+                        <img alt="gerrit" height="30px" src={gerritPlatformIcon}/>
+                        &nbsp;
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={
+                          'https://gerrit.wikimedia.org/r/#/q/' +
+                          this.props.gerrit_username
+                        }
+                      >
+                        {this.props.gerrit_username}
+                      </a>
+                    </React.Fragment>
+                    ) : (
+                        'None'
+                      )}
+                    </h3>
+                    <h3 className="link phabricator">
+                    {this.props.phabricator_username !== '' ? (
+                    <React.Fragment>
+                        <img alt="Phabricator" height="30px" src={phabricatorPlatformIcon}/>
+                        &nbsp;
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={
+                          'https://phabricator.wikimedia.org/p/' +
+                          this.props.phabricator_username +
+                          '/'
+                        }
+                      >
+                        {this.props.phabricator_username}
+                      </a>
+                    </React.Fragment>
+                    ) : (
+                        'None'
+                      )}
+                    </h3>
+                    <h3 className="link github">
+                    {this.props.github_username !== '' ? (
+                    <React.Fragment>
+                      <img alt="github" height="30px" src={githubPlatformIcon}/>
+                      &nbsp;
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={
+                          'https://github.com/' +
+                          this.props.github_username +
+                          '/'
+                        }
+                      >
+                        {this.props.github_username}
+                      </a>
+                      </React.Fragment>
+                    ) : (
+                        'None'
+                      )}
+                  </h3>
+                </div>
             </React.Fragment>
           )}
-      </div>
+      </section>
     );
   };
 }
@@ -215,10 +270,12 @@ class QueryResult extends React.Component {
     }
 
     this.state = {
+      userContributionsNode: React.createRef(),
       query: this.props.match.params.hash,
       loading: data === false,
       data: data !== false ? data.result : [],
-      meta: data !== false ? data.meta : {},
+      meta: (data !== false ? data.meta : {user_profiles:{phab_profile:{},
+                             gerrit_profile:{}, github_profile:{}}}),
       current: data !== false ? data.current : null,
       prev: data !== false ? data.previous : null,
       next: data !== false ? data.next : null,
@@ -538,6 +595,17 @@ class QueryResult extends React.Component {
   render = () => {
     document.body.style.backgroundColor = '#f8f9fa';
     let { update_filters: uf, current_filters: cf } = this.state;
+    let { start_time: st, end_time: et } = this.state.current_filters;
+    st = new Date(st);
+    let st_m = st.getMonth();
+    et = new Date(et);
+    let et_m = et.getMonth();
+
+    let {phab_profile, gerrit_profile, github_profile} = this.state.meta.user_profiles;
+    let avatar = phab_profile.avatar || gerrit_profile.avatar || github_profile.avatar;
+    let email = phab_profile.email || gerrit_profile.email || github_profile.email;
+    let bio = phab_profile.bio || gerrit_profile.bio || github_profile.bio;
+
     return (
       <React.Fragment>
         {this.state.prev !== null ? (
@@ -581,304 +649,302 @@ class QueryResult extends React.Component {
         ) : (
           ''
         )}
-        <NavBar />
-        <Grid>
-          <Grid.Row>
-              <div className="result">
-                <h1 className="result_page_heading">Query Result</h1>
-                {this.state.page_load ? (
-                  <Placeholder fluid className="search_load">
-                    <Placeholder.Line className="load_background" />
-                  </Placeholder>
-                ) : (
-                  <div className="controls">
-                    <div className="search">
-                        <UserSearch
-                          set={this.onUserSearch}
-                          hash={this.state.query}
-                          value={this.state.value}
-                        />
+        <div className="profile_and_user-contributions">
+        <DisplayUser
+          loading={this.state.loading}
+          username={this.state.current}
+          avatar={avatar}
+          email={email}
+          bio={bio}
+          gerrit_username={this.state.gerrit_username}
+          phabricator_username={this.state.phab_username}
+          github_username={this.state.github_username}
+           />
+         <NavBar />
+         <section className="user-contributions" ref={this.state.userContributionsNode}>
+            <GoToTop userContributionsNode={this.state.userContributionsNode}/>
+            <div className="result">
+                  <h1 className="result_page_heading">Query Result</h1>
+                  {this.state.page_load ? (
+                    <Placeholder fluid className="search_load">
+                      <Placeholder.Line className="load_background" />
+                    </Placeholder>
+                  ) : (
+                    <React.Fragment>
+                    <div className="controls">
+                      <div className="search">
+                          {/*<UserSearch
+                            set={this.onUserSearch}
+                            hash={this.state.query}
+                            value={this.state.value}
+                          />*/}
+                          <h3 className="accounts">
+                            {full_months[st_m] + " " + st.getFullYear()}
+                            -
+                            {full_months[et_m] + " " + et.getFullYear()}
+                          </h3>
+                        </div>
+
+                        <div className="filter_and_update">
+                        <div className="filter">
+                          <Popup
+                            content="View Filters"
+                            position="top center"
+                            trigger={
+                              <Button
+                                icon="options"
+                                className="filters"
+                                aria-label="filters"
+                                onClick={() =>
+                                  this.setState({
+                                    view_filters: !this.state.view_filters,
+                                  })
+                                }
+                              />
+                            }
+                          />
+                        </div>
+                        <div className="update">
+                          <Popup
+                            content="Update"
+                            position="top center"
+                            trigger={
+                              <Button
+                                className="update_query"
+                                aria-label="update query"
+                                icon="write"
+                                as={Link}
+                                to={
+                                  '/query/' + this.state.query + '/update/'
+                                }
+                              />
+                            }
+                          />
+                        </div>
                       </div>
-
-
-                      <div className="filter_and_update">
-                      <div className="filter">
-                        <Popup
-                          content="View Filters"
-                          position="top center"
-                          trigger={
-                            <Button
-                              icon="options"
-                              className="filters"
-                              aria-label="filters"
-                              onClick={() =>
-                                this.setState({
-                                  view_filters: !this.state.view_filters,
-                                })
-                              }
-                            />
-                          }
-                        />
                       </div>
-                      <div className="update">
-                        <Popup
-                          content="Update"
-                          position="top center"
-                          trigger={
-                            <Button
-                              className="update_query"
-                              aria-label="update query"
-                              icon="write"
-                              as={Link}
-                              to={
-                                '/query/' + this.state.query + '/update/'
-                              }
-                            />
-                          }
-                        />
+                    </React.Fragment>
+                  )}
+                  <Transition
+                    animation="fade down"
+                    duration={300}
+                    visible={this.state.view_filters}
+                  >
+                    <Card className="filter_view">
+
+                          <Header>From</Header>
+                          <Dropdown
+                            style={{ marginTop: 10 }}
+                            fluid
+                            search
+                            selection
+                            icon={false}
+                            value={this.func()}
+                            options={get_dates()}
+                            onChange={(e, obj) => {
+                              let filters = Object.assign({}, uf);
+                              filters.end_time = obj.value;
+                              let days = get_num_days(
+                                new Date(uf.end_time),
+                                new Date(uf.start_time)
+                              );
+
+                              let updated_val = new Date(filters.end_time);
+
+                              let start_time = new Date(updated_val - time_delta(days));
+
+                              filters.start_time = start_time.toISOString();
+
+                              this.setState({
+                                update_filters: filters,
+                              });
+                            }}
+                            placeholder="Select Date"
+                            closeOnChange={true}
+                          />
+
+                          <Header>Time Range</Header>
+                          <Dropdown
+                            style={{ marginTop: 10 }}
+                            fluid
+                            search
+                            selection
+                            icon={false}
+                            options={filter_2}
+                            value={get_num_days(
+                              new Date(uf.start_time),
+                              new Date(uf.end_time)
+                            )}
+                            onChange={(e, obj) => {
+                              let date = new Date(
+                                this.state.update_filters.end_time
+                              );
+                              let days = obj.value;
+
+                              date = new Date(date - time_delta(days));
+
+                              let filters = Object.assign({}, uf);
+                              filters.start_time = date.toISOString();
+
+                              this.setState({ update_filters: filters });
+                            }}
+                            placeholder="Get by date"
+                            closeOnChange={true}
+                          />
+
+                      <div style={{ width: '100%' }}>
+                        <Button
+                          className="apply_filters"
+                          onClick={() => this.handleSearchClick()}
+                        >
+                          APPLY
+                        </Button>
+                        <Button
+                          className="reset_filters"
+                          onClick={() => this.handleReset()}
+                        >
+                          RESET
+                        </Button>
                       </div>
-                    </div>
-                    </div>
-                )}
-                <Transition
-                  animation="fade down"
-                  duration={300}
-                  visible={this.state.view_filters}
-                >
-                  <Card className="filter_view">
-                    <Grid>
-                      <Grid.Column computer={8} tablet={16} mobile={16}>
-                        <Header>From</Header>
-                        <Dropdown
-                          style={{ marginTop: 10 }}
-                          fluid
-                          search
-                          selection
-                          icon={false}
-                          value={this.func()}
-                          options={get_dates()}
-                          onChange={(e, obj) => {
-                            let filters = Object.assign({}, uf);
-                            filters.end_time = obj.value;
-                            let days = get_num_days(
-                              new Date(uf.end_time),
-                              new Date(uf.start_time)
-                            );
+                    </Card>
+                  </Transition>
+                </div>
 
-                            let updated_val = new Date(filters.end_time);
-
-                            let start_time = new Date(updated_val - time_delta(days));
-
-                            filters.start_time = start_time.toISOString();
-
-                            this.setState({
-                              update_filters: filters,
-                            });
-                          }}
-                          placeholder="Select Date"
-                          closeOnChange={true}
-                        />
-                      </Grid.Column>
-                      <Grid.Column computer={8} tablet={16} mobile={16}>
-                        <Header>Time Range</Header>
-                        <Dropdown
-                          style={{ marginTop: 10 }}
-                          fluid
-                          search
-                          selection
-                          icon={false}
-                          options={filter_2}
-                          value={get_num_days(
-                            new Date(uf.start_time),
-                            new Date(uf.end_time)
-                          )}
-                          onChange={(e, obj) => {
-                            let date = new Date(
-                              this.state.update_filters.end_time
-                            );
-                            let days = obj.value;
-
-                            date = new Date(date - time_delta(days));
-
-                            let filters = Object.assign({}, uf);
-                            filters.start_time = date.toISOString();
-
-                            this.setState({ update_filters: filters });
-                          }}
-                          placeholder="Get by date"
-                          closeOnChange={true}
-                        />
-                      </Grid.Column>
-                    </Grid>
-                    <div style={{ width: '100%' }}>
-                      <Button
-                        className="apply_filters"
-                        onClick={() => this.handleSearchClick()}
-                      >
-                        APPLY
-                      </Button>
-                      <Button
-                        className="reset_filters"
-                        onClick={() => this.handleReset()}
-                      >
-                        RESET
-                      </Button>
-                    </div>
-                  </Card>
-                </Transition>
-              </div>
-          </Grid.Row>
-          {this.state.notFound ? (
-            <NotFound />
-          ) : (
-              <React.Fragment>
-                <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
-                    <DisplayUser
-                      loading={this.state.loading}
-                      username={this.state.current}
-                      gerrit_username={this.state.gerrit_username}
-                      phabricator_username={this.state.phab_username}
-                      github_username={this.state.github_username}
-                      filters={this.state.current_filters}
-                    />
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
+            {this.state.notFound ? (
+              <NotFound />
+            ) : (
+                <React.Fragment>
                   <div className="graphs">
-                            <div className="graph">
-                              {this.state.loading ? (
-                                <Card className="graph_load">
-                                  <Card.Content>
-                                    <Placeholder fluid className="image_load">
-                                      <Placeholder.Line />
-                                    </Placeholder>
-                                  </Card.Content>
-                                </Card>
-                              ) : (
-                                <Card className="chart_container">
-                                  <span style={{ textAlign: 'center' }}>
-                                    <Header className="chart"> PHABRICATOR </Header>
-                                    {this.state.meta.full_names.phab_full_name
-                                     !== "OOPS! We couldn't find a username in your request." &&
-                                     this.state.meta.full_names.phab_full_name
-                                     !== "OOPS! We couldn't find an account with that username." ? (
-                                      <Line
-                                        ref="chart"
-                                        data={this.getGraphData('phabricator')}
-                                        options={chartOptions}
-                                      />
-                                    ) : (
-                                      <div className="chart_message">
-                                      <h2>{this.state.meta.full_names.phab_full_name}</h2>
-                                      </div>
-                                    )}
-                                  </span>
-                                </Card>
-                              )}
-                            </div>
-                            <div className="graph">
-                              {this.state.loading ? (
-                                <Card className="graph_load">
-                                  <Card.Content>
-                                    <Placeholder fluid className="image_load">
-                                      <Placeholder.Line />
-                                    </Placeholder>
-                                  </Card.Content>
-                                </Card>
-                              ) : (
-                                <Card className="chart_container">
-                                  <span style={{ textAlign: 'center' }}>
-                                    <Header className="chart"> GERRIT </Header>
-                                    {this.state.meta.full_names.gerrit_full_name
-                                     !== "OOPS! We couldn't find a username in your request." &&
-                                     this.state.meta.full_names.gerrit_full_name
-                                     !== "OOPS! We couldn't find an account with that username." ? (
-                                      <Line
-                                        ref="chart"
-                                        data={this.getGraphData('gerrit')}
-                                        options={chartOptions}
-                                      />
-                                    ) : (
-                                      <div className="chart_message">
-                                      <h2>{this.state.meta.full_names.gerrit_full_name}</h2>
-                                      </div>
-                                    )}
-                                  </span>
-                                </Card>
-                              )}
-                            </div>
-                            <div className="graph">
-                              {this.state.loading ? (
-                                <Card className="graph_load">
-                                  <Card.Content>
-                                    <Placeholder fluid className="image_load">
-                                      <Placeholder.Line />
-                                    </Placeholder>
-                                  </Card.Content>
-                                </Card>
-                              ) : (
-                                <Card className="chart_container">
-                                  <span style={{ textAlign: 'center' }}>
-                                    <Header className="chart"> GITHUB </Header>
-                                    {this.state.meta.full_names.github_full_name
-                                     !== "OOPS! We couldn't find a username in your request." &&
-                                     this.state.meta.full_names.github_full_name
-                                     !== "OOPS! We couldn't find an account with that username." ? (
-                                      this.state.meta.rate_limits.github_rate_limit_message === "" ? (
+                              <div className="graph">
+                                {this.state.loading ? (
+                                  <Card className="graph_load">
+                                    <Card.Content>
+                                      <Placeholder fluid className="image_load">
+                                        <Placeholder.Line />
+                                      </Placeholder>
+                                    </Card.Content>
+                                  </Card>
+                                ) : (
+                                  <Card className="chart_container">
+                                    <span style={{ textAlign: 'center' }}>
+                                      <Header className="chart"> PHABRICATOR </Header>
+                                      {this.state.meta.user_profiles.phab_profile.full_name
+                                       !== "OOPS! We couldn't find a username in your request." &&
+                                       this.state.meta.user_profiles.phab_profile.full_name
+                                       !== "OOPS! We couldn't find an account with that username." ? (
                                         <Line
                                           ref="chart"
-                                          data={this.getGraphData('github')}
+                                          data={this.getGraphData('phabricator')}
                                           options={chartOptions}
                                         />
-                                    ) : (
-                                      <div className="chart_message">
-                                      <h2>{this.state.meta.rate_limits.github_rate_limit_message}</h2>
-                                      </div>
-                                    )
-                                    ) : (
-                                      <div className="chart_message">
-                                      <h2>{this.state.meta.full_names.github_full_name}</h2>
-                                      </div>
-                                    )}
-                                  </span>
-                                </Card>
-                              )}
+                                      ) : (
+                                        <div className="chart_message">
+                                        <h2>{this.state.meta.user_profiles.phab_profile.full_name}</h2>
+                                        </div>
+                                      )}
+                                    </span>
+                                  </Card>
+                                )}
+                              </div>
+                              <div className="graph">
+                                {this.state.loading ? (
+                                  <Card className="graph_load">
+                                    <Card.Content>
+                                      <Placeholder fluid className="image_load">
+                                        <Placeholder.Line />
+                                      </Placeholder>
+                                    </Card.Content>
+                                  </Card>
+                                ) : (
+                                  <Card className="chart_container">
+                                    <span style={{ textAlign: 'center' }}>
+                                      <Header className="chart"> GERRIT </Header>
+                                      {this.state.meta.user_profiles.gerrit_profile.full_name
+                                       !== "OOPS! We couldn't find a username in your request." &&
+                                       this.state.meta.user_profiles.gerrit_profile.full_name
+                                       !== "OOPS! We couldn't find an account with that username." ? (
+                                        <Line
+                                          ref="chart"
+                                          data={this.getGraphData('gerrit')}
+                                          options={chartOptions}
+                                        />
+                                      ) : (
+                                        <div className="chart_message">
+                                        <h2>{this.state.meta.user_profiles.gerrit_profile.full_name}</h2>
+                                        </div>
+                                      )}
+                                    </span>
+                                  </Card>
+                                )}
+                              </div>
+                              <div className="graph">
+                                {this.state.loading ? (
+                                  <Card className="graph_load">
+                                    <Card.Content>
+                                      <Placeholder fluid className="image_load">
+                                        <Placeholder.Line />
+                                      </Placeholder>
+                                    </Card.Content>
+                                  </Card>
+                                ) : (
+                                  <Card className="chart_container">
+                                    <span style={{ textAlign: 'center' }}>
+                                      <Header className="chart"> GITHUB </Header>
+                                      {this.state.meta.user_profiles.github_profile.full_name
+                                       !== "OOPS! We couldn't find a username in your request." &&
+                                       this.state.meta.user_profiles.github_profile.full_name
+                                       !== "OOPS! We couldn't find an account with that username." ? (
+                                        this.state.meta.rate_limits.github_rate_limit_message === "" ? (
+                                          <Line
+                                            ref="chart"
+                                            data={this.getGraphData('github')}
+                                            options={chartOptions}
+                                          />
+                                      ) : (
+                                        <div className="chart_message">
+                                        <h2>{this.state.meta.rate_limits.github_rate_limit_message}</h2>
+                                        </div>
+                                      )
+                                      ) : (
+                                        <div className="chart_message">
+                                        <h2>{this.state.meta.user_profiles.github_profile.full_name}</h2>
+                                        </div>
+                                      )}
+                                    </span>
+                                  </Card>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column width={2} />
-                  <Grid.Column width={12}>
-                    <Card className="chart_container">
-                      <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
-                      <UserContribution
-                        start_time={cf.start_time}
-                        end_time={cf.end_time}
-                        user={this.state.current}
-                        data={this.state.data}
-                        set={this.set}
-                        loading={this.state.loading}
-                      />
-                    </Card>
-                  </Grid.Column>
-                  <Grid.Column width={2} />
-                </Grid.Row>
-                {this.state.activity !== undefined ? (
-                    <div className="activity_wrapper">
-                      <Activity
-                        date={this.state.activity}
-                        hash={this.state.query}
-                        username={this.state.current}
-                      />
-                    </div>
-                ) : (
-                  ''
-                )}
-              </React.Fragment>
-          )}
-        </Grid>
+
+                    <section className="daily_contributions">
+                      <Card className="chart_container">
+                        <Header className="chart"> TOTAL CONTRIBUTIONS </Header>
+                        <UserContribution
+                          start_time={cf.start_time}
+                          end_time={cf.end_time}
+                          user={this.state.current}
+                          data={this.state.data}
+                          set={this.set}
+                          loading={this.state.loading}
+                        />
+                      </Card>
+                    </section>
+
+                  {this.state.activity !== undefined ? (
+                      <div className="activity_wrapper">
+                        <Activity
+                          date={this.state.activity}
+                          hash={this.state.query}
+                          username={this.state.current}
+                        />
+                      </div>
+                  ) : (
+                    ''
+                  )}
+                </React.Fragment>
+            )}
+        </section>
+      </div>
       </React.Fragment>
     );
   };

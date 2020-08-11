@@ -60,24 +60,24 @@ def choose_time_format_method(expression, format):
             return int(expression.strftime("%s"))
 
 
-def fuzzyMatching(control, full_names):
+def fuzzyMatching(control, user_profiles):
     """
-    :Summary: compare the full names in the full_names dictionary to the control
+    :Summary: compare the full names in the user_profiles dictionary to the control
               full name, gather parcentage similarity in an array and return the
               average.
     :control: A control full name string against which other full names in
-              full_names dict are compared.
-    :full_names: A Dictionary containing a users full names as specified in the
+              user_profiles dict are compared.
+    :user_profiles: A Dictionary containing a user's profile details as specified in the
               neccessary platforms
     :return: returns average parcentage similarity or zero if any of the
              usernames doesn't exist.
     """
     _list = []
     ave = 0
-    for key in full_names:
-        if full_names[key] != username_does_not_exist:
-            if full_names[key] != no_username_provided:
-                _list.append(fuzz.WRatio(control, full_names[key],score_cutoff=60))
+    for key in user_profiles:
+        if user_profiles[key]["full_name"] != username_does_not_exist:
+            if user_profiles[key]["full_name"] != no_username_provided:
+                _list.append(fuzz.WRatio(control, user_profiles[key]["full_name"],score_cutoff=60))
         else:
             return 0
 
@@ -87,13 +87,17 @@ def fuzzyMatching(control, full_names):
     return ave/len(_list)
 
 
-async def get_full_name(data):
+# def get_wikimedia_profile(session,username):
+#
+
+
+async def get_user_profile(data):
     """
-    :Summary: Gets users full name per platform and add them to the full_names
+    :Summary: Gets users profile details per platform and add them to the user_profiles
               dictionary.
     """
     if data["platform"] == "phab":
-        if data["full_names"]["phab_full_name"] == "":
+        if data["user_profiles"]["phab_profile"]["full_name"] == "":
             if data["request_data"]['constraints[usernames][0]'] != "":
                 async with data["session"].post(data["url"],
                 data=data["request_data"]) as response:
@@ -101,39 +105,76 @@ async def get_full_name(data):
                     _data = loads(realname.decode("utf-8"))['result']['data']
                     if(len(_data) != 0):
                         realname = _data[0]['fields']['realName']
-                        data["full_names"]["phab_full_name"] = realname
+                        data["user_profiles"]["phab_profile"]["full_name"] = realname
+                        # wikimedia_profile = get_wikimedia_profile(session = data["session"],
+                        #                     username = data["request_data"]["constraints[usernames][0]"])
+                        # data["user_profiles"]["phab_profile"]["avatar"] = wikimedia_profile["avatar"]
+                        # data["user_profiles"]["phab_profile"]["email"] = wikimedia_profile["email"]
+                        # data["user_profiles"]["phab_profile"]["bio"] = wikimedia_profile["bio"]
                     else:
-                        data["full_names"]["phab_full_name"] = username_does_not_exist
+                        data["user_profiles"]["phab_profile"]["full_name"] = username_does_not_exist
             else:
-                data["full_names"]["phab_full_name"] = no_username_provided
+                data["user_profiles"]["phab_profile"]["full_name"] = no_username_provided
 
     if data["platform"] == "gerrit":
         if data["url"].split("?")[1].split("&")[0].split(":")[1] != "":
             async with data["session"].get(data["url"]) as response:
-                realname = await response.read()
+                gerrit_data = await response.read()
                 try:
-                    data["full_names"]["gerrit_full_name"] = loads(realname[4:].decode("utf-8"))[0]["name"]
+                    gerrit_data = loads(gerrit_data[4:].decode("utf-8"))
+                    data["user_profiles"]["gerrit_profile"]["full_name"] = gerrit_data[0]["name"]
+                    data["user_profiles"]["gerrit_profile"]["email"] = gerrit_data[0]["email"]
                 except:
-                    data["full_names"]["gerrit_full_name"] = "username does not exist"
+                    data["user_profiles"]["gerrit_profile"]["full_name"] = username_does_not_exist
         else:
-            data["full_names"]["gerrit_full_name"] = "no username provided"
+            data["user_profiles"]["gerrit_profile"]["full_name"] = no_username_provided
 
     if data["platform"] == "github":
         if data["request_data"]["github_username"] != "":
             headers = {"Authorization":"bearer "+data["request_data"]["github_access_token"]}
-            query = """{{user(login:"{username}"){{name}}}}""".format(
+            query = """{{user(login:"{username}"){{name,email,bio,avatarUrl}}}}""".format(
             username=data["request_data"]["github_username"])
             async with data["session"].post("https://api.github.com/graphql",
              headers=headers, data=dumps({"query":query})) as response:
                 full_name = await response.read()
                 full_name = loads(full_name.decode('utf-8'))
                 try:
-                    full_name = full_name['data']['user']['name']
-                    data["full_names"]["github_full_name"] = full_name
+                    name = full_name['data']['user']['name']
+                    email = full_name['data']['user']['email']
+                    bio = full_name['data']['user']['bio']
+                    avatar = full_name['data']['user']['avatarUrl']
+                    data["user_profiles"]["github_profile"]["full_name"] = name
+                    data["user_profiles"]["github_profile"]["email"] = email
+                    data["user_profiles"]["github_profile"]["bio"] = bio
+                    data["user_profiles"]["github_profile"]["avatar"] = avatar
                 except:
-                    data["full_names"]["github_full_name"] = username_does_not_exist
+                    data["user_profiles"]["github_profile"]["full_name"] = username_does_not_exist
         else:
-            data["full_names"]["github_full_name"] = no_username_provided
+            data["user_profiles"]["github_profile"]["full_name"] = no_username_provided
+
+
+
+
+async def get_user_profiles(urls, request_data, user_profiles, loop):
+    """
+    :Summary: Start a session and fetch users fullname on various platforms concurrently.
+    :param urls: URLS to be fetched.
+    :param request_data: Request Payload to be sent.
+    :param full_names: Dictionary to store full names
+    :param loop: asyncio event loop.
+    :return:
+    """
+    tasks = []
+    async with ClientSession() as session:
+        tasks.append(loop.create_task((get_user_profile(data = {"platform":"phab", "url":urls[0][1],
+        "session":session, "request_data":request_data[2], "user_profiles":user_profiles}))))
+        tasks.append(loop.create_task((get_user_profile(data = {"platform":"gerrit", "url":urls[1][1],
+        "session":session, "user_profiles":user_profiles}))))
+        tasks.append(loop.create_task((get_user_profile(data = {"platform":"github",
+        "session":session, "request_data":request_data[3], "user_profiles":user_profiles}))))
+        await asyncio.gather(*tasks)
+
+
 
 
 
@@ -142,18 +183,6 @@ class MatchFullNames(APIView):
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-
-        async def concurrent_get_fullnames(urls, request_data, loop, full_names):
-            tasks = []
-            async with ClientSession() as session:
-                tasks.append(loop.create_task((get_full_name(data = {"platform":"phab", "session":session,
-                 "full_names":full_names, "url":urls[0], "request_data":request_data[0]}))))
-                tasks.append(loop.create_task((get_full_name(data = {"platform":"gerrit", "session":session,
-                 "full_names":full_names, "url":urls[1]}))))
-                tasks.append(loop.create_task((get_full_name(data = {"platform":"github", "session":session,
-                 "full_names":full_names, "request_data":request_data[1]}))))
-
-                await asyncio.gather(*tasks)
 
         user = request.data['users'][0].copy()
         fullname = user['fullname']
@@ -173,24 +202,22 @@ class MatchFullNames(APIView):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        full_names = {"phab_full_name":"", "gerrit_full_name":"", "github_full_name":""}
+        user_profiles = {"phab_profile":{"full_name":""},
+                        "gerrit_profile":{"full_name":""},
+                        "github_profile":{"full_name":""}}
 
-        request_data = []
-        urls = []
-        request_data.append(deepcopy(REQUEST_DATA[2]))
-        request_data.append(deepcopy(REQUEST_DATA[3]))
+        api_endpoints = deepcopy(API_ENDPOINTS)
+        request_data = deepcopy(REQUEST_DATA)
 
-        urls.append(API_ENDPOINTS[0][1])
-        urls.append(API_ENDPOINTS[1][1].format(gerrit_username=gerrit_username))
+        api_endpoints[1][1] = api_endpoints[1][1].format(gerrit_username = gerrit_username)
 
-        request_data[0]['constraints[usernames][0]'] = phabricator_username
+        request_data[2]['constraints[usernames][0]'] = phabricator_username
+        request_data[3]['github_username'] = github_username
 
-        request_data[1]['github_username'] = github_username
+        loop.run_until_complete(get_user_profiles(urls = api_endpoints, request_data = request_data,
+                                         loop = loop, user_profiles = user_profiles))
 
-        loop.run_until_complete(concurrent_get_fullnames(urls = urls, request_data = request_data,
-                                         loop = loop,full_names = full_names))
-
-        match_percent = fuzzyMatching(control = fullname, full_names = full_names)
+        match_percent = fuzzyMatching(control = fullname, user_profiles = user_profiles)
 
         return Response({
             'match_percent':match_percent
@@ -351,7 +378,8 @@ async def get_github_commit_by_org(orgs, url, request_data, session, github_resp
         loopCount -= 1
 
 
-async def get_github_data(url, request_data, session, github_resp, full_names):
+
+async def get_github_data(url, request_data, session, github_resp, user_profiles):
     """
     :Summary: make concurrent requests to get the users contributions to wikimedia
               accounts on github two at a time.
@@ -368,15 +396,15 @@ async def get_github_data(url, request_data, session, github_resp, full_names):
     index = 0
     rateLimitCount = [0]
 
-    if(full_names["github_full_name"] != username_does_not_exist and
-      full_names["github_full_name"] != no_username_provided):
+    if(user_profiles["github_profile"]["full_name"] != username_does_not_exist and
+      user_profiles["github_profile"]["full_name"] != no_username_provided):
         while index < (len(ORGS)):# iterate through two items in the orgs list at once
             if GITHUB_FALLBACK_TO_PR == False:
                 tasks.append(get_github_commit_by_org([ORGS[index], ORGS[index+1]],
                  url[0], request_data, session, github_resp, rateLimitCount))
             else:
                 tasks.append(get_github_pr_by_org([ORGS[index], ORGS[index+1]],
-                 url[1], request_data, session, github_resp))
+                 url[1], request_data[3], session, github_resp))
             index = index + 2
         await asyncio.gather(*tasks)
 
@@ -557,30 +585,9 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
 
 
 
-
-async def get_full_names(urls, request_data, full_names, loop):
-    """
-    :Summary: Start a session and fetch users fullname on various platforms concurrently.
-    :param urls: URLS to be fetched.
-    :param request_data: Request Payload to be sent.
-    :param full_names: Dictionary to store full names
-    :param loop: asyncio event loop.
-    :return:
-    """
-    tasks = []
-    async with ClientSession() as session:
-        tasks.append(loop.create_task((get_full_name(data = {"platform":"phab", "url":urls[0][1],
-        "session":session, "request_data":request_data[2], "full_names":full_names}))))
-        tasks.append(loop.create_task((get_full_name(data = {"platform":"gerrit", "url":urls[1][1],
-        "session":session, "full_names":full_names}))))
-        tasks.append(loop.create_task((get_full_name(data = {"platform":"github",
-        "session":session, "request_data":request_data[3], "full_names":full_names}))))
-        await asyncio.gather(*tasks)
-
-
 def get_cache_or_request(query, unique_user_hash, urls, request_data, loop, createdStart,
                         createdEnd, phid, gerrit_response, phab_response, github_response,
-                        full_names, ghd_rate_limit_message):
+                        user_profiles, ghd_rate_limit_message):
     """
     :Summary: This function gets the user's contributions from cache if any,
               otherwise fetches it from network.
@@ -624,7 +631,7 @@ def get_cache_or_request(query, unique_user_hash, urls, request_data, loop, crea
     loop.run_until_complete(get_data(urls = urls, request_data = request_data, loop = loop,
                                      gerrit_response = gerrit_response, phab_response = phab_response,
                                      github_response = github_response,
-                                     full_names = full_names, phid = phid))
+                                     user_profiles = user_profiles, phid = phid))
     print(time.time() - start_time)
     return format_data(unique_user_hash = unique_user_hash, pd = phab_response,
            gd = gerrit_response, ghd = github_response, query = query, phid = phid[0],
@@ -632,7 +639,7 @@ def get_cache_or_request(query, unique_user_hash, urls, request_data, loop, crea
 
 
 async def get_data(urls, request_data, loop, gerrit_response, phab_response,
-                  github_response, phid, full_names):
+ github_response, phid, user_profiles):
     """
     :Summary: Start a session and fetch the data.
     :param urls: URLS to be fetched.
@@ -654,7 +661,7 @@ async def get_data(urls, request_data, loop, gerrit_response, phab_response,
         tasks.append(loop.create_task((get_task_assigner(urls[0], request_data,
          session, phab_response))))
         tasks.append(loop.create_task((get_github_data(urls[2], request_data[3]
-        , session, github_response, full_names))))
+        , session, github_response, user_profiles))))
         await asyncio.gather(*tasks)
 
 
@@ -686,7 +693,9 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     phab_response = []
     gerrit_response = []
     github_response = []
-    full_names = {"phab_full_name":"", "gerrit_full_name":"", "github_full_name":""}
+    user_profiles = {"phab_profile":{"full_name":""},
+                    "gerrit_profile":{"full_name":""},
+                    "github_profile":{"full_name":""}}
     github_rate_limit_message = ['']
 
     api_endpoints = deepcopy(API_ENDPOINTS)
@@ -714,9 +723,9 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    loop.run_until_complete(get_full_names(urls = api_endpoints, request_data = request_data,
-                                          full_names = full_names, loop = loop))
-    match_percent = fuzzyMatching(control = users[1], full_names = full_names)
+    loop.run_until_complete(get_user_profiles(urls = api_endpoints, request_data = request_data,
+                                          user_profiles = user_profiles, loop = loop))
+    match_percent = fuzzyMatching(control = users[1], user_profiles = user_profiles)
 
     unique_user_hash = create_hash([{"fullname":users[1], "github_username":github_username,
                        "gerrit_username":gerrit_username, "phabricator_username":username}])
@@ -725,7 +734,7 @@ def getDetails(username, gerrit_username, github_username, createdStart,
                             urls = api_endpoints, request_data = request_data, loop = loop,
                             gerrit_response = gerrit_response, phab_response = phab_response,
                             github_response = github_response, createdStart = createdStart,
-                            createdEnd = createdEnd, phid=phid, full_names = full_names,
+                            createdEnd = createdEnd, phid=phid, user_profiles = user_profiles,
                             ghd_rate_limit_message = github_rate_limit_message)
 
 
@@ -733,7 +742,7 @@ def getDetails(username, gerrit_username, github_username, createdStart,
     return Response({
         'query': query.hash_code,
         'meta':{
-        'full_names':full_names,
+        'user_profiles':user_profiles,
         'rate_limits':{
         'github_rate_limit_message':github_rate_limit_message[0]
         },

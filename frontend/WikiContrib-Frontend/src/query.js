@@ -495,7 +495,7 @@ export class Query extends Component {
               update={this.state.message.update}
               trigger={this.state.message.trigger}
             />
-            <div style={{ marginTop: '8%' }} />
+          <div style={{ marginTop: '13%' }} />
             <Grid>
               <Grid.Row>
                 <Grid.Column computer={2} tablet={1} mobile={1} />

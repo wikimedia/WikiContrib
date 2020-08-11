@@ -1,13 +1,12 @@
 import React from 'react';
-import { Menu, Button, Popup, Icon } from 'semantic-ui-react';
+import { Button, Popup, Icon } from 'semantic-ui-react';
 import { info_content } from './../api';
 
 export const NavBar = () => (
-  <Menu fluid secondary style={{ marginTop: -5 }}>
-    <Menu.Menu position="right">
-      <Menu.Item className="nav-item">
+  <nav className="top-nav">
+      <span className="nav-item">
         <Popup
-          trigger={<Button icon="info" aria-label="about wikicontrib" tabIndex="0" size="large" className="info a source"></Button>}
+          trigger={<Button icon="info" aria-label="about wikicontrib" tabIndex="0" className="source"></Button>}
           position="bottom right"
           content={
             <div id="info_content" style={{ textAlign: 'center' }}>
@@ -18,9 +17,9 @@ export const NavBar = () => (
             </div>
           }
         />
-      </Menu.Item>
-      <Menu.Item className="nav-item">
-        <a className="a source"
+      </span>
+      <span className="nav-item">
+        <a className="source"
         aria-label="View source code on Github"
           target="_blank"
           href="https://github.com/wikimedia/wikicontrib"
@@ -28,9 +27,9 @@ export const NavBar = () => (
         >
         <Icon name="code" />
         </a>
-      </Menu.Item>
-      <Menu.Item className="nav-item">
-        <a className="a source"
+      </span>
+      <span className="nav-item">
+        <a className="source"
           aria-label="Share your ideas or feedback on the tool's talk page on meta-wiki"
           target="_blank"
           href="https://meta.wikimedia.org/wiki/Talk:WikiContrib"
@@ -38,7 +37,6 @@ export const NavBar = () => (
         >
         <Icon name="talk" />
         </a>
-      </Menu.Item>
-    </Menu.Menu>
-  </Menu>
+      </span>
+    </nav>
 );
