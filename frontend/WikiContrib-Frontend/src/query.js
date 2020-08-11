@@ -5,7 +5,7 @@ import MessageDisplay from './components/message';
 import { QueryCreateApi, QueryDetailApi, matchFullNamesApi } from './api';
 import csv from './img/csv.png';
 import format from './img/format.png';
-import logo from './img/logo.svg';
+import logo from './img/logo.png';
 import {
   Card,
   Grid,
