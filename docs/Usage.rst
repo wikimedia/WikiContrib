@@ -1,5 +1,6 @@
-``Please note that all functionalities associated with the features allowing users to add multiple contributors details at once has been disabled. If these features are
-important to you, you can reach out on `Github <https://github.com/wikimedia/wikicontrib>`_ or `WikiContrib talk page<https://meta.wikimedia.org/wiki/Talk:WikiContrib>`_``
+.. note::
+   Please note that all functionalities associated with the features allowing users to add multiple contributors details at once has been disabled. If these features are
+   important to you, you can reach out on `Github <https://github.com/wikimedia/wikicontrib>`_ or `WikiContrib talk page <https://meta.wikimedia.org/wiki/Talk:WikiContrib>`_
 
 =======
 Usage
@@ -115,7 +116,7 @@ It displays the recommendations of the top 50 matching users.
 
 
 Updating Queries
-===============
+================
 
 Once a user creates a query with the usernames of a set of Wikimedians and at a
 later point of time, if he/she wants to know the contributions of another Wikimedian,

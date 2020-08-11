@@ -1,9 +1,10 @@
-``Please note that all functionalities associated with the features allowing users to add multiple contributors details at once has been disabled. If these features are
-important to you, you can reach out on `Github <https://github.com/wikimedia/wikicontrib>`_ or `WikiContrib talk page<https://meta.wikimedia.org/wiki/Talk:WikiContrib>`_``
+.. note::
+   Please note that all functionalities associated with the features allowing users to add multiple contributors details at once has been disabled. If these features are
+   important to you, you can reach out on `Github <https://github.com/wikimedia/wikicontrib>`_ or `WikiContrib talk page <https://meta.wikimedia.org/wiki/Talk:WikiContrib>`_
 
-=======
+================
 Internal Working
-=======
+================
 
 
 In the **Usage** section, we discussed the architecture and how to use the tool. Let's extend the discussion
