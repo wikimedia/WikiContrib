@@ -31,12 +31,14 @@ class Activity extends React.Component {
 
   componentDidMount = () => {
     this.fetchAPI();
+    document.querySelector(".activity_wrapper").scrollIntoView();
   };
 
   componentDidUpdate = (prevProps, prevState) => {
     if (prevProps.date !== this.props.date) {
       this.setState({ loading: true });
       this.fetchAPI();
+      document.querySelector(".activity_wrapper").scrollIntoView();
     }
   };
 
