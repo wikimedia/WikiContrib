@@ -39,7 +39,7 @@ There is also a feature to upload a list of usernames in a CSV format and view c
   * [Backend installation steps](https://github.com/wikimedia/WikiContrib/blob/master/backend/WikiContrib/Install.md)
 
 ## Additional links
-* API documentation: https://documenter.getpostman.com/view/6222710/SVYurxMj
+* API documentation: https://documenter.getpostman.com/view/12264092/T1LFmpTP
 * Full documentation on using and contributing to the tool: https://wikicontrib.readthedocs.io/
 * Steps for hosting are in `DEPLOYING.md`
 * For additional questions, come chat with the maintainers on Wikimedia Zulip: https://wikimedia.zulipchat.com/#narrow/stream/220258-gsoc20-outreachy20/topic/WikiContrib
