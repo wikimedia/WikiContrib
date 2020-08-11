@@ -367,12 +367,6 @@ export class Query extends Component {
             this.errorCallback
           );
         } else {
-          if (
-            this.state.original_users === this.state.rows &&
-            !this.state.operation
-          ) {
-            this.callback('');
-          } else {
             let data = { file: -1 };
             data['users'] = this.getExactRows();
             this.setState({ loadData: true, notfound: false });
@@ -383,7 +377,6 @@ export class Query extends Component {
               { 'Content-Type': 'application/json' },
               this.callback
             );
-          }
       }
       }
     }
