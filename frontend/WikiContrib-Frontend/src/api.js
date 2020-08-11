@@ -201,4 +201,4 @@ export const getPadding = () => {
 };
 
 export const info_content =
-  "WikiContrib tool provides a visualization within a specified time range of users' contributions to Wikimedia projects on Phabricator and Gerrit."
+  "WikiContrib tool provides a visualization within a specified time range of users' contributions to Wikimedia projects on Phabricator, Gerrit and Github."
