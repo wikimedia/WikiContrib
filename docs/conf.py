@@ -18,11 +18,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'WikiContrib'
-copyright = '2019, Wikimedia Foundation'
-author = 'Rammanoj potla'
+copyright = '2020, Wikimedia Foundation'
+authors = 'Rammanoj potla, Ndibe Raymond'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+release = '2.0'
 
 
 # -- General configuration ---------------------------------------------------

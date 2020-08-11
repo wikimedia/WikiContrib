@@ -1,38 +1,39 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Internal Working &mdash; WikiContrib 1.0 documentation</title>
+  <title>Internal Working &mdash; WikiContrib 2.0 documentation</title>
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="Installation.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> WikiContrib
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> WikiContrib
           
 
           
@@ -73,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -92,6 +94,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -130,7 +133,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Internal Working</li>
     
@@ -151,12 +154,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="internal-working">
+  <div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please note that all functionalities associated with the features allowing users to add multiple contributors details at once has been disabled. If these features are
+important to you, you can reach out on <a class="reference external" href="https://github.com/wikimedia/wikicontrib">Github</a> or <a class="reference external" href="https://meta.wikimedia.org/wiki/Talk:WikiContrib">WikiContrib talk page</a></p>
+</div>
+<div class="section" id="internal-working">
 <h1>Internal Working<a class="headerlink" href="#internal-working" title="Permalink to this headline">¶</a></h1>
 <p>In the <strong>Usage</strong> section, we discussed the architecture and how to use the tool. Let’s extend the discussion
 with a complete note of how the tool works internally.</p>
-<p>We shall start our discussion with the schema diagram of the tool.</p>
-<img alt="_images/schema.png" src="_images/schema.png" />
+<p>We shall start our discussion with the schema diagram of the tool’s database.</p>
+<img alt="_images/schema.jpeg" src="_images/schema.jpeg" />
 <p>As you can see above, there are four tables:</p>
 <ol class="arabic simple">
 <li><p>Query.</p></li>
@@ -164,49 +172,71 @@ with a complete note of how the tool works internally.</p>
 <li><p>Query Filters.</p></li>
 <li><p>List commits.</p></li>
 </ol>
-<p><strong>Query</strong> has the data regarding the <code class="docutils literal notranslate"><span class="pre">hash</span></code>, <code class="docutils literal notranslate"><span class="pre">created</span> <span class="pre">time</span></code> etc. The username’s of the wikimedians that the user provided during the query creation will be stored in <strong>Query users</strong> table. All the filters assosiated to the query will be stored in <strong>Query Filters</strong> table.</p>
-<p>Whenever a request of creating a query hits the server, initially a class named <code class="docutils literal notranslate"><span class="pre">AddQueryUser</span></code> view is triggered. The view creates a Query with a hash and adds the provided username’s data to the query. This also creates a default set of filters and rturns a redirect to <code class="docutils literal notranslate"><span class="pre">/&lt;hash&gt;</span></code> URL.</p>
-<p>The URL triggers <code class="docutils literal notranslate"><span class="pre">DisplayResult</span></code> view. This view performs external API requests, fetches the details and store the fetched data in the databases. It also formats the data and returns the data to the browser as an HTTP response.
-Let’s dig deep to the working of <code class="docutils literal notranslate"><span class="pre">DisplayResult</span></code> view.</p>
-<p>This view uses <code class="docutils literal notranslate"><span class="pre">asyncio</span></code> and <code class="docutils literal notranslate"><span class="pre">aiohttp</span></code> to perform API requests in a parallel manner. There are few constraints with the existing Phabricator and Gerrit APIs. Both of them can not return the count of contributions made by a particular user. They will return the contributions made by the user in the form of a list of JSON objects. The good thing about <code class="docutils literal notranslate"><span class="pre">Gerrit</span></code> is it returns contributions of all the users with a single API request. But in case of phabricator, it will paginate the results with a max of 100 contributions in each page Fo example, if a user performed 1000 different actions in phabricator. then
-10 API requests are to be made to get all the actions performed. Another constraint is that all the API requests are to be made sequentially. The API requests can not be parallel because each page has to be requested with a reference(except the first one). The reference to a page <strong>n</strong> will be provided in page <strong>n-1</strong>.
-Suppose if you have to get the commits of the user in 7th page, you have to request the 6th page first to get the reference to the 7th page. To get the 6th page you have to request the 5th page and so on.</p>
+<p><strong>Query</strong> has the data regarding the <code class="docutils literal notranslate"><span class="pre">hash</span></code>, <code class="docutils literal notranslate"><span class="pre">created</span> <span class="pre">time</span></code> etc. The usernames of the Wikimedians that the user provided during the query creation will be stored in <strong>Query users</strong> table. All the filters associated with the query will be stored in <strong>Query Filters</strong> table.</p>
+<p>Whenever a user attempts to create or update a query (change the usernames), we first make sure that the usernames belong to the same user by calling <code class="docutils literal notranslate"><span class="pre">matchFullNames</span></code> view and returning a response that helps us decide whether to proceed or to first warn the user of the mismatch.
+Let’s dig deep into the working of <code class="docutils literal notranslate"><span class="pre">matchFullNames</span></code> view.</p>
+<p>This view uses <code class="docutils literal notranslate"><span class="pre">asyncio</span></code> and <code class="docutils literal notranslate"><span class="pre">aiohttp</span></code> to perform API requests in a parallel manner. It formats the submitted usernames, creates an event loop, and passes the event loop to <code class="docutils literal notranslate"><span class="pre">concurrent_get_fullnames</span></code> where we create three co-routines for Phabricator, Gerrit, and Github and attempts fetching the contributors fullnames on these platforms through <code class="docutils literal notranslate"><span class="pre">get_full_name</span></code>.
+(If you are not familiar with event loops and co-routines, they are used to perform threading programmatically, you can get more information about them <a class="reference external" href="https://docs.python.org/3/library/asyncio.html">here</a>).</p>
+<p>The above code adds three tasks to the event loop. Each of the tasks fetches the contributor’s fullname on one of the three platforms.
+These are parallel because, let’s assume there are two tasks <strong>task1</strong> and <strong>task2</strong>, initially, the loop started executing <strong>task1</strong>. If <strong>task1</strong> performs any API request, it has to wait till the response is received to proceed further. So, whenever the <strong>task1</strong>
+performs an API request, <strong>asyncio</strong> stores the state of <strong>task1</strong> and starts executing <strong>task2</strong>. When the response to the <strong>task1</strong> is received, it stores the current task and executes the <strong>task1</strong> further.
+When we are done attempting to fetch the fullnames, the results are passed to <code class="docutils literal notranslate"><span class="pre">fuzzyMatching</span></code> which uses fuzzy matching to figure out the probability that the usernames belong to the same user. the result of this matching is then returned as HTTP response.</p>
+<p>If the usernames belong to the same user or if the user ignores the warning when usernames don’t belong to the same user, we then query the server. Initially, a class named <code class="docutils literal notranslate"><span class="pre">AddQueryUser</span></code> view is triggered. The view creates a Query with a hash that is based on the usernames submitted
+and adds the provided usernames data to the query. This also creates a default set of filters and returns a redirect to <code class="docutils literal notranslate"><span class="pre">/&lt;hash&gt;</span></code> URL.</p>
+<p>The URL triggers <code class="docutils literal notranslate"><span class="pre">DisplayResult</span></code> view. This view gets the necessary query data from the database and passes it on to <code class="docutils literal notranslate"><span class="pre">getDetails</span></code> where we decide whether to perform external API requests, fetch the details and cache the fetched data in the database or to return the already cached data
+from the database depending on whether we have cached that particular query in the past and if the query is not more than a day old. It also formats the data and returns the data to the browser as an HTTP response.
+Let’s dig deep into the working of <code class="docutils literal notranslate"><span class="pre">DisplayResult</span></code> view.</p>
+<p>This view also uses <code class="docutils literal notranslate"><span class="pre">asyncio</span></code> and <code class="docutils literal notranslate"><span class="pre">aiohttp</span></code> to perform API requests in a parallel manner. There are few constraints with the existing Phabricator, Gerrit, and Github APIs. Both Phabricator and Gerrit can not return the count of contributions made by a particular user. They will return the
+contributions made by the user in the form of a list of JSON objects. The good thing about <code class="docutils literal notranslate"><span class="pre">Gerrit</span></code> is it returns contributions of all the users with a single API request. But in the case of phabricator and Github, they will paginate the results with a max of 100 contributions on each
+page. For example, if a user performed 1000 different actions in phabricator or Github, then 10 API requests are to be made to get all the actions performed. Another constraint is that all the API requests for both Phabricator and Github are to be made sequentially. The API requests can not
+be parallel because each page has to be requested with a reference(except the first one). The reference to a page <strong>n</strong> will be provided on page <strong>n-1</strong>. Suppose if you have to get the commits of the user in the 7th page, you have to request the 6th page first to get the reference to the
+7th page. To get the 6th page you have to request the 5th page and so on.</p>
 <p>So, even if I want to get some page <strong>n</strong> you have to get all the details from <strong>1 to n</strong>.</p>
 <p>In this tool, all the contributions of the user from Gerrit are being fetched. But in the case of phabricator, two kinds of tasks are taken into count:</p>
 <ol class="arabic simple">
 <li><p>Tasks owned by the user.</p></li>
 <li><p>Tasks assigned to the user.</p></li>
 </ol>
-<p><strong>DisplayResult</strong> view gets all the data required to perform the external API requests and call another function <code class="docutils literal notranslate"><span class="pre">getDetails</span></code>. This function takes the data and formats it according to the requirement. It also creates a new <strong>asyncio event loop</strong>.
-This loop is given with three different co-routines. (If you are not familiar with event loops and co-routines, they are used to perform threading programmatically, you can get more information about them <a class="reference external" href="https://docs.python.org/3/library/asyncio.html">here</a>).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">async</span> <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">urls</span><span class="p">,</span> <span class="n">request_data</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">gerrit_response</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">,</span> <span class="n">phid</span><span class="p">):</span>
+<p>For Github, we are only concerned with the contributors commits.</p>
+<p><strong>DisplayResult</strong> view gets all the data required to perform the external API requests and calls another function <code class="docutils literal notranslate"><span class="pre">getDetails</span></code>. This function takes the data and formats it according to the requirement. It also creates a new <strong>asyncio event loop</strong>.
+This loop is first passed to <code class="docutils literal notranslate"><span class="pre">get_full_names</span></code> where we create three co-routines for Phabricator, Gerrit, and Github and attempts fetching the contributor’s fullnames on these platforms through <code class="docutils literal notranslate"><span class="pre">get_full_name</span></code>.</p>
+<p>When we are done attempting to fetch the fullnames, the results are passed to <code class="docutils literal notranslate"><span class="pre">fuzzyMatching</span></code> (just like in <code class="docutils literal notranslate"><span class="pre">matchFullNames</span></code>) which uses fuzzy matching to figure out the probability that the usernames belong to the same user.</p>
+<p>After this, we call <code class="docutils literal notranslate"><span class="pre">get_cache_or_request</span></code> passing it several arguments some of which are query and the same event loop used to fetch the fullnames not long ago.</p>
+<p>Inside <code class="docutils literal notranslate"><span class="pre">get_cache_or_request</span></code>, if the query exists in the cache and it is not older than one day, we fetch it from the cache and pass it to <code class="docutils literal notranslate"><span class="pre">format_data</span></code> where the data is properly formatted before finally returning it.
+If the query is not in the cache or is more than a day old in the cache, we call <code class="docutils literal notranslate"><span class="pre">get_data</span></code> where we create four co-routines to fetch the contributions data for the different platforms (two co-routines belong to Phabricator).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">urls</span><span class="p">,</span> <span class="n">request_data</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">gerrit_response</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">,</span>
+                 <span class="n">github_response</span><span class="p">,</span> <span class="n">phid</span><span class="p">,</span> <span class="n">full_names</span><span class="p">):</span>
     <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_gerrit_data</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span> <span class="n">gerrit_response</span><span class="p">))))</span>
-        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_task_authors</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">request_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">,</span> <span class="n">phid</span><span class="p">))))</span>
-        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_task_assigner</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">request_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">))))</span>
-        <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_gerrit_data</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">session</span><span class="p">,</span>
+        <span class="n">gerrit_response</span><span class="p">))))</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_task_authors</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">request_data</span>
+        <span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">,</span> <span class="n">phid</span><span class="p">))))</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_task_assigner</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">request_data</span><span class="p">,</span>
+        <span class="n">session</span><span class="p">,</span> <span class="n">phab_response</span><span class="p">))))</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">((</span><span class="n">get_github_data</span><span class="p">(</span><span class="n">urls</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">request_data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">github_response</span><span class="p">,</span> <span class="n">full_names</span><span class="p">))))</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The above code adds three tasks to the event loop. Each of the task fetches APIs and get information.</p>
+<p>The above code adds four tasks to the event loop. Each of the tasks fetches contributions data through the various APIs.</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code>: fetch contributions user from gerrit.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code>: fetch tasks owned by a user in phabricator.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code>: fetch tasks assigned to a user in phabricator.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_github_data()</span></code>: fetches contributions to a given set of Wikimedia repositories on github.</p></li>
 </ol>
 <p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code> perform a single API request and gets all the details of the users.
-<code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code> gets the data but, as discussed above, phabricator APIs are paginated. So, these two co-routines has to
-request the data again and again, till there are no more pages left behind to request.</p>
-<p>These are parallel because, let’s assume there are two tasks <strong>task1</strong> and <strong>task2</strong>, initially, the loop started executing <strong>task1</strong>. If <strong>task1</strong> performs any API request, it has to wait till the response is received to proceed further. So, whenever the <strong>task1</strong>
-performs an API request, <strong>asyncio</strong> stores the state of <strong>task1</strong> and start executing <strong>task2</strong>. When the response to the <strong>task1</strong> is received, it stores the current task and executes the <strong>task1</strong> further.</p>
-<p>Once the entire data are received, it is formatted and stored in the table <code class="docutils literal notranslate"><span class="pre">List</span> <span class="pre">Commits</span></code>. Apart from storing them in databases, the commits that meet the requirement of all the Query filters are taken and response is returned to the user.
+<code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code> and <code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code> gets the data but, as discussed above, phabricator APIs are paginated. So, these two co-routines have to
+request the data again and again, until there are no more pages left behind to request.
+<a href="#id1"><span class="problematic" id="id2">``</span></a><cite>get_github_data()</cite> creates additional co-routines to get the contributions to a given set of repositories in a parallel manner.</p>
+<p>Once the entire data are received, it is formatted and cached in the table <code class="docutils literal notranslate"><span class="pre">List</span> <span class="pre">Commits</span></code>. Apart from storing them in databases, the commits that meet the requirement of all the Query filters are taken and the response is returned to the user.
 For the sake of performance, the contributions of at the max. of past one year are being requested.</p>
-<p>Whenever the filters of a query are changed, if the filter “status of commit” is only changed, then there is no need to request external APIs, as all the commits are available here. So, databases are queried and the contributions that match to the current filters are returned.
-If the timestamps are changed, then the external APIs are requested again and the details are fetched.</p>
-<p>The view <code class="docutils literal notranslate"><span class="pre">GetUserCommits</span></code> returns all the commits of a user on the particular date.</p>
-<p><strong>sequence daigram:</strong></p>
-<img alt="_images/sequence.jpg" src="_images/sequence.jpg" />
-<p>If you want to know more about the tool, you can refer the API documentation from <a class="reference external" href="https://documenter.getpostman.com/view/6222710/SVYurxMj?version=latest">here</a>.</p>
+<p>Whenever the filters or usernames of a query are changed, then these whole processes are repeated.</p>
+<p>The view <code class="docutils literal notranslate"><span class="pre">GetUserCommits</span></code> returns all the commits of a user on a particular date.</p>
+<p><strong>sequence diagram:</strong></p>
+<img alt="_images/sequence.jpeg" src="_images/sequence.jpeg" />
+<p>If you want to know more about the tool, you can refer to the API documentation from <a class="reference external" href="https://documenter.getpostman.com/view/12264092/T1LFmpTP">here</a>.</p>
 </div>
 
 
@@ -229,11 +259,19 @@ If the timestamps are changed, then the external APIs are requested again and th
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Wikimeida Foundation
+        
+        &copy; Copyright 2020, Wikimedia Foundation
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -244,7 +282,6 @@ If the timestamps are changed, then the external APIs are requested again and th
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

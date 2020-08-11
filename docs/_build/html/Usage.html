@@ -1,41 +1,42 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Usage &mdash; WikiContrib 1.0 documentation</title>
+  <title>Usage &mdash; WikiContrib 2.0 documentation</title>
   
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Internal Working" href="Internal Working.html" />
+    <link rel="next" title="Internal Working" href="Internal%20Working.html" />
     <link rel="prev" title="Intro" href="Intro.html" /> 
 </head>
 
@@ -50,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> WikiContrib
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> WikiContrib
           
 
           
@@ -73,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,11 +90,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#query-creation">Query Creation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#viewing-updating-filters">Viewing / Updating filters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#viewing-results">Viewing results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#updating-quries">Updating Quries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#deleting-queries">Deleting Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-queries">Updating Queries</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Internal Working.html">Internal Working</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Internal%20Working.html">Internal Working</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
 </ul>
@@ -100,6 +101,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -138,7 +140,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Usage</li>
     
@@ -159,80 +161,112 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="usage">
+  <div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please note that all functionalities associated with the features allowing users to add multiple contributors details at once has been disabled. If these features are
+important to you, you can reach out on <a class="reference external" href="https://github.com/wikimedia/wikicontrib">Github</a> or <a class="reference external" href="https://meta.wikimedia.org/wiki/Talk:WikiContrib">WikiContrib talk page</a></p>
+</div>
+<div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
-<p>As specified, WikiContrib is used in visualizing the contributions of the wikimedians in the form of graphs and user contribution calendar. Let’s start the discussion with how to use the tool first.</p>
+<p>As specified, WikiContrib is used in visualizing the contributions of Wikimedians in the form of graphs and user contribution calendar. Let’s start the discussion with how to use the tool first.</p>
 <div class="section" id="intro-to-queries">
 <h2>Intro to Queries<a class="headerlink" href="#intro-to-queries" title="Permalink to this headline">¶</a></h2>
-<p>A Query is initiated whenever a user searches for the contributions of a single or a group of wikimedians. A query has a lifetime of 30 days i.e the query expires in 30 days from the creation time. Each query is uniquely identified by a <strong>64-bit</strong> hash. Each query has a <strong>group of filters</strong> associated with it. There are three filters in a query:</p>
+<p>A Query is initiated whenever a user searches for the contributions of a single or a group of Wikimedians. Each query is uniquely identified by a user-friendly hash.
+Each query has a <strong>group of filters</strong> associated with it. There are two filters in a query:</p>
 <ol class="arabic simple">
-<li><p>Status of the commit.</p></li>
 <li><p>From time.</p></li>
 <li><p>Time Range.</p></li>
 </ol>
-<p><strong>Status of the commit:</strong> This is used in filtering the commits based on their status like <strong>merged</strong>, <strong>Abandoned</strong> etc. The user can even provide multiple statuses once. Suppose the user add “Merged” and “Open” to the status filter. It will search for the commits that are merged and open in both the platforms.</p>
 <p><strong>From time:</strong> The user can get all the commits from a specified time (i.e month and year).</p>
-<p><strong>Time Range:</strong> From the specified <strong>From time</strong>, the user needs to give a range of time to which he/she want to fetch the details (i.e last one year, last one month or last 6 months etc).</p>
+<dl class="simple">
+<dt><strong>Time Range:</strong> From the specified <strong>From time</strong>, the user needs to give a range</dt><dd><p>of time to which he/she want to fetch the details with the maximum being one year
+(i.e last one year, last one month or last 6 months, etc).</p>
+</dd>
+</dl>
 </div>
 <div class="section" id="query-creation">
 <h2>Query Creation<a class="headerlink" href="#query-creation" title="Permalink to this headline">¶</a></h2>
-<p>To create a query, the user needs to add the data (username’s of Gerrit and Phabricator) to the query. The user can add the data in two different ways:</p>
+<p>To create a query, the user needs to add the data (contributors full name, usernames of Gerrit, Phabricator, and Github) to the query. The user can add the data in two
+different ways:</p>
 <ol class="arabic simple">
-<li><p>Entering username’s manually.</p></li>
-<li><p>Adding username’s in bulk.</p></li>
+<li><p>Entering usernames manually.</p></li>
+<li><p>Adding usernames in bulk.</p></li>
 </ol>
 <p><strong>Entering usernames manually:</strong></p>
 <p><strong>Home page</strong></p>
 <img alt="_images/home.png" src="_images/home.png" />
-<p>Whenever the user goes to the home page, the above page will be displayed. In the above above, the table has three columns. They are:</p>
+<p>Whenever the user goes to the home page, the above page will be displayed.
+In the above, the table has four columns. They are:</p>
 <ol class="arabic simple">
 <li><p>Fullname</p></li>
 <li><p>Gerrit Username</p></li>
-<li><p>Phabricator Username.</p></li>
+<li><p>Phabricator Username</p></li>
+<li><p>Github Username</p></li>
 </ol>
-<p>The user needs to fill the above three details of the corresponding wikimedian whom the user wants to view the contributions of. <code class="docutils literal notranslate"><span class="pre">Gerrit</span> <span class="pre">Username</span></code> is used to fetch the data from <strong>Gerrit APIs</strong> and similarly, <code class="docutils literal notranslate"><span class="pre">Phabricator</span> <span class="pre">Username</span></code> is used for <strong>Phabricator APIs</strong>. The details fetched from both the APIs are associated with a common name i.e <code class="docutils literal notranslate"><span class="pre">Fullname</span></code> of the user. Fullname is also used in searching the users, we will discuss the searching later part of the doc.</p>
-<p>There is an option provided to add usernames of multiple wikimedians. By clicking on <strong>Button 2</strong>, another empty row is added to the DOM. Similarly, the user can add any number of rows and fill the usernames into them. One of the cool things of the tool is the username’s, the user entered will be cached to the device. So, even if the user refresh the page or close the page, the details will not be lost! the user can fill a few username’s at some time, close the page and re-open it at some other time and add few other username’s. The user can also clear the cached data. Clicking the <strong>Button 3</strong> clears all the data he/she entered to the tool.</p>
-<p><strong>Adding Username’s in Bulk:</strong></p>
-<p>Entering username’s of ten’s of users is easy. But what if the user wants to know the contributions of hundreds of <strong>wikimedians</strong>? It will take a lot of time and work to fill them manually to the tool. So, there is also an option to upload all the username’s in a CSV file. On clicking the toggle bar with text “Bulk Add”, the user will be provided with an option to upload a CSV file. If the user is uploading a CSV file, he/she need to fill the data in the file in a particular format.</p>
+<p>The user needs to fill the above four details of the corresponding Wikimedian whom the user wants to view the contributions of. <code class="docutils literal notranslate"><span class="pre">Gerrit</span> <span class="pre">Username</span></code> is used to fetch the data from <strong>Gerrit APIs</strong>,  same with <code class="docutils literal notranslate"><span class="pre">Phabricator</span></code> and <code class="docutils literal notranslate"><span class="pre">Github</span></code> usernames.
+The details fetched from the APIs are associated with a common name i.e <code class="docutils literal notranslate"><span class="pre">Fullname</span></code> of the user.
+Fullname is also used in searching the users, we will discuss the searching in the later part of the doc.</p>
+<p>There is an option provided to add usernames of multiple Wikimedians.
+By clicking on <strong>Add Row</strong> button, another empty row is added to the DOM. Similarly,
+the user can add any number of rows and fill the usernames into them. One of the cool things about the tool is the usernames the user entered will be cached in the user device cache. So, even if the user refreshes or closes the page, the details will not be lost! the user can fill a few usernames at some time, close the page and re-open it at some other time and add few other usernames. The user can also clear the cached data. Clicking the <strong>Reset</strong> button clears all the data he/she entered into the tool.</p>
+<p><strong>Adding Usernames in Bulk:</strong></p>
+<p>Entering usernames of tens of users is easy. But what if the user wants to know the contributions of hundreds of <strong>Wikimedians</strong>? It will take a lot of time and work to fill them manually to the tool. So, there is also an option to upload all the usernames in a CSV file. On clicking the toggle bar with text “Bulk Add”,
+the user will be provided with an option to upload a CSV file. If the user is uploading a CSV file, he/she needs to fill the data in the file in a particular format.</p>
 <p>The CSV format is:</p>
 <img alt="_images/csv.png" src="_images/csv.png" />
-<p><strong>Once the data is provided,</strong> (either entered manually or using a CSV file). The user can click the search button (i.e <strong>Button 1</strong>). This initiates a request to the server and starts making API requests to Gerrit and Phabricator. Once all the required details are fetched, it redirects to a URL <code class="docutils literal notranslate"><span class="pre">/query_hash_code</span></code>. Now the user can see the graphs of user contributions vs time along with a calendar that displays the contributions.</p>
-<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">query_hash_code</span></code> is the hash-code generated by the query, the query can be accessed at any point of time using the has code.</p>
-<p><strong>User contribuion calendar looks like:</strong></p>
+<p><strong>Once the data is provided,</strong> (either entered manually or using a CSV file),
+The user can click the <strong>search</strong> button and this initiates a request to the server. The tool first verifies that the usernames provided belong to the same user and if not, warns the user of the mismatch. The user can decide whether to proceed or to crosscheck the provided usernames. If the usernames match or if the user decides to proceed, the tool then makes API requests to Gerrit, Phabricator, Github APIs.
+Once all the required details are fetched, it redirects to a URL <code class="docutils literal notranslate"><span class="pre">/&lt;query_hash_code&gt;</span></code>.
+Now the user can see the graphs of user contributions vs time along with a calendar
+that displays the contributions.</p>
+<p><strong>Note:</strong> <code class="docutils literal notranslate"><span class="pre">query_hash_code</span></code> is the hash-code generated by the query, the query
+can be accessed at any point in time using the hash-code.</p>
+<p><strong>User contribution calendar looks like:</strong></p>
 <img alt="_images/calendar.png" src="_images/calendar.png" />
-<p>If the user click on a specific date in the above calendar, all the commits made by the wikimedian along with the <code class="docutils literal notranslate"><span class="pre">platform</span></code> and <code class="docutils literal notranslate"><span class="pre">status</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">commit</span></code> will be displayed.</p>
-<p><strong>Button 4</strong> is the Info button, hovering it gives a popup with an intro paragraph about the tool.</p>
+<p>If the user clicks on a specific date in the above calendar, all the commits made
+by the Wikimedian along with the <code class="docutils literal notranslate"><span class="pre">platform</span></code> will be displayed.</p>
+<p>Hovering on the <strong>info</strong> button gives a popup with an intro paragraph about the tool.</p>
 </div>
 <div class="section" id="viewing-updating-filters">
 <h2>Viewing / Updating filters<a class="headerlink" href="#viewing-updating-filters" title="Permalink to this headline">¶</a></h2>
-<p>The user can view the results by following the above process of creating a query, there are also few filters displayed along with the result. The filters can be updated. Updating the current filters performs an API request and fetches the contributions of the wikimedian according to the filters the user provided.</p>
-<p>There is also an option to reset the filters to the default ones. Filters are associated with the Query. The contributions of all the wikimedians are fetched according to the filters the user changed!</p>
-<p><strong>Note:</strong> Presently, the user can see all the contributions of any wikimedian for past one year (at maximum).</p>
+<p>The user can view the results by following the above process of creating a query,
+there are also few filters displayed along with the result. The filters can be updated.
+Updating the current filters performs an API request and fetches the contributions of
+the Wikimedian according to the filters the user provided.</p>
+<p>There is also an option to reset the filters to the default ones. Filters are associated with the Query. The contributions of all the Wikimedians are fetched according to the filters the user changed!</p>
+<p><strong>Note:</strong> Presently, the user can see all the contributions of any Wikimedian for
+the past one year (at maximum).</p>
 </div>
 <div class="section" id="viewing-results">
 <h2>Viewing results<a class="headerlink" href="#viewing-results" title="Permalink to this headline">¶</a></h2>
-<p>Once the contributions of the user are fetched, there are these things displayed:
-1. Graph of user contributions in <strong>Gerrit</strong>.
-2. Graph of user contributions in <strong>Phabricator</strong>.
-3. A simple calender that displays all the user contributions for the time span you provide (similar to <strong>github</strong>).</p>
-<p>At a time, the contributions of a single user are displayed. There are arrows provided to get the details of the next and previous user to the current user.
-There is also an input box provided. If you want to get the contributions of a specific user, you can search the <code class="docutils literal notranslate"><span class="pre">fullname</span></code> of the user in the search box.
-It displays the recommendations of top 50 matching users.</p>
+<dl class="simple">
+<dt>Once the contributions of the user are fetched, these things are displayed:</dt><dd><ol class="arabic simple">
+<li><p>Graph of user contributions in <strong>Gerrit</strong>.</p></li>
+<li><p>Graph of user contributions in <strong>Phabricator</strong>.</p></li>
+<li><p>Graph of user contributions in <em>Github</em>.</p></li>
+<li><p>A simple calendar that displays all the user contributions for the period you provide (similar to <strong>Github green squires</strong>).</p></li>
+</ol>
+</dd>
+</dl>
+<p>At a time, the contributions of a single user are displayed. There are arrows
+provided to get the details of the next and previous user to the current user.
+There is also an input box provided. If you want to get the contributions of a
+specific user, you can search the <code class="docutils literal notranslate"><span class="pre">fullname</span></code> of the user in the search box.
+It displays the recommendations of the top 50 matching users.</p>
 </div>
-<div class="section" id="updating-quries">
-<h2>Updating Quries<a class="headerlink" href="#updating-quries" title="Permalink to this headline">¶</a></h2>
-<p>Once a user creates a query with the username’s of a set of wikimedians and at a later point of time, if he/she wants to know the contributions of another wikimedian, instead of creating a new query for a single wikimedian, he/she can update the query and add the corresponding usernames.</p>
-<p>There are four main different types of update’s possible:</p>
+<div class="section" id="updating-queries">
+<h2>Updating Queries<a class="headerlink" href="#updating-queries" title="Permalink to this headline">¶</a></h2>
+<p>Once a user creates a query with the usernames of a set of Wikimedians and at a
+later point of time, if he/she wants to know the contributions of another Wikimedian,
+instead of creating a new query for a single Wikimedian, he/she can update the
+query and add the corresponding usernames.</p>
+<p>There are four main different types of updates possible:</p>
 <ol class="arabic simple">
 <li><p>Initially a <strong>CSV file</strong> can be provided, another <strong>CSV file</strong> can be provided while updating the query.</p></li>
-<li><p>Initially a <strong>CSV file</strong> can be provided, a set of <strong>username’s of wikimedians</strong> can be provided manually while updating the query.</p></li>
-<li><p>Initially a <strong>set of username’s</strong> of wikimedians are provided manually, a <strong>CSV file</strong> can be provided while updating the query.</p></li>
-<li><p>Initially a <strong>set of username’s</strong> of wikimedians are provided manually, another set of <strong>username’s of wikimedians</strong> are provided manually while updating the query.</p></li>
+<li><p>Initially a <strong>CSV file</strong> can be provided, a set of <strong>usernames of Wikimedians</strong> can be provided manually while updating the query.</p></li>
+<li><p>Initially a <strong>set of usernames</strong> of Wikimedians are provided manually, a <strong>CSV file</strong> can be provided while updating the query.</p></li>
+<li><p>Initially a <strong>set of usernames</strong> of Wikimedians are provided manually, another set of <strong>usernames of Wikimedians</strong> are provided manually while updating the query.</p></li>
 </ol>
-</div>
-<div class="section" id="deleting-queries">
-<h2>Deleting Queries<a class="headerlink" href="#deleting-queries" title="Permalink to this headline">¶</a></h2>
-<p>Presently, the is no feature to delete a query. The query will be automatically deleted, after 30 days of its creation.</p>
 </div>
 </div>
 
@@ -244,7 +278,7 @@ It displays the recommendations of top 50 matching users.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Internal Working.html" class="btn btn-neutral float-right" title="Internal Working" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Internal%20Working.html" class="btn btn-neutral float-right" title="Internal Working" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Intro.html" class="btn btn-neutral float-left" title="Intro" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -256,11 +290,19 @@ It displays the recommendations of top 50 matching users.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Wikimeida Foundation
+        
+        &copy; Copyright 2020, Wikimedia Foundation
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -271,7 +313,6 @@ It displays the recommendations of top 50 matching users.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
