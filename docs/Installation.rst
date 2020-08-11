@@ -24,7 +24,7 @@ cd into ``WikiContrib`` and follow the instructions `here <https://github.com/wi
 Frontend
 ========
 
-from the projects root directory, there will be two directories in it:
+You will see two directories in the project's root directory:
 1. backend
 2. frontend
 
