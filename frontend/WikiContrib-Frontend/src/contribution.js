@@ -38,7 +38,6 @@ class GenerateDay extends React.Component {
           this.props.set({
             activity: data.toString(),
           });
-          window.scrollTo(0, document.body.scrollHeight);
         }}
       >
         <div className="tooltip">
