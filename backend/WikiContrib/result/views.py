@@ -1,4 +1,4 @@
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import ListAPIView
@@ -427,63 +427,37 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
 
     ghdRateLimitTriggered = False
     len_pd = len(pd)
-    len_gd = len(gd)
     len_ghd = len(ghd)
 
-    if len_pd > len_gd and len_pd > len_ghd:
+    if len_pd > len_ghd:
         leng = len_pd
-    elif len_gd > len_pd and len_gd > len_ghd:
-        leng = len_gd
     else:
         leng = len_ghd
 
     temp = []
+    gdChangeIDs = {}
     with transaction.atomic():
         ListCommit.objects.filter(user_hash = unique_user_hash).delete()
-        for i in range(0, leng):
-            if i < len_pd:
-                if pd[i]['phid'] not in temp:
-                    temp.append(pd[i]['phid'])
-                    date_time = utc.localize(datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
-                                             .replace(microsecond=0))
-                    status = pd[i]['fields']['status']['name'].lower()
 
-                    contrib = ListCommit.objects.create(
-                        query = query,
-                        user_hash = unique_user_hash,
-                        heading = pd[i]['fields']['name'], created_on = date_time,
-                        createdStart = query.queryfilter.start_time,
-                        createdEnd = query.queryfilter.end_time,
-                        platform = "Phabricator", status = pd[i]['fields']['status']['name'],
-                        redirect = "T" + str(pd[i]['id']), owned = pd[i]['fields']['authorPHID'] == phid,
-                        assigned = pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
+        for change in gd:
+            gdChangeIDs[change["change_id"]] = True # store all gerrit contribution's change id
+            date_time = utc.localize(datetime.strptime(change['created'].split(".")[0], "%Y-%m-%d %H:%M:%S")
+                                    .replace(microsecond = 0))
+            if date_time <= query.queryfilter.end_time and date_time >= query.queryfilter.start_time:
+                status =change['status'].lower()
+
+                try:
+                    with transaction.atomic():
+                        contrib = ListCommit.objects.create(
+                            query = query,
+                            user_hash = unique_user_hash,
+                            heading = change['subject'],created_on = date_time,
+                            createdStart = query.queryfilter.start_time,
+                            createdEnd = query.queryfilter.end_time,
+                            platform = "Gerrit", status = change['status'],
+                            redirect = change['change_id'], owned = True,
+                            assigned = True
                         )
-                    if (status_name is True or status in status_name
-                    or (status == "open" and "p-open" in status_name)):
-                        rv = {
-                            "time": contrib.created_on.isoformat(), "platform": contrib.platform,
-                            "status": contrib.status, "owned": contrib.owned,
-                            "assigned": contrib.assigned
-                             }
-                        resp.append(rv)
-
-
-            if i < len_gd:
-                date_time = utc.localize(datetime.strptime(gd[i]['created'].split(".")[0], "%Y-%m-%d %H:%M:%S")
-                                        .replace(microsecond = 0))
-                if date_time <= query.queryfilter.end_time and date_time >= query.queryfilter.start_time:
-                    status = gd[i]['status'].lower()
-
-                    contrib = ListCommit.objects.create(
-                        query = query,
-                        user_hash = unique_user_hash,
-                        heading = gd[i]['subject'],created_on = date_time,
-                        createdStart = query.queryfilter.start_time,
-                        createdEnd = query.queryfilter.end_time,
-                        platform = "Gerrit", status = gd[i]['status'],
-                        redirect = gd[i]['change_id'], owned=True,
-                        assigned = True
-                    )
 
                     if (status_name is True or status in status_name
                     or (status == "open" in status_name)):
@@ -493,30 +467,70 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                            "assigned":contrib.assigned
                         }
                         resp.append(rv)
+                except IntegrityError:
+                    pass
 
+
+        for i in range(0, leng):
+            if i < len_pd:
+                if pd[i]['phid'] not in temp:
+                    temp.append(pd[i]['phid'])
+                    date_time = utc.localize(datetime.fromtimestamp(int(pd[i]['fields']['dateCreated']))
+                                             .replace(microsecond=0))
+                    status = pd[i]['fields']['status']['name'].lower()
+
+                    try:
+                        with transaction.atomic():
+                            contrib = ListCommit.objects.create(
+                                query = query,
+                                user_hash = unique_user_hash,
+                                heading = pd[i]['fields']['name'], created_on = date_time,
+                                createdStart = query.queryfilter.start_time,
+                                createdEnd = query.queryfilter.end_time,
+                                platform = "Phabricator", status = pd[i]['fields']['status']['name'],
+                                redirect = "T" + str(pd[i]['id']), owned = pd[i]['fields']['authorPHID'] == phid,
+                                assigned = pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
+                                )
+                        if (status_name is True or status in status_name
+                        or (status == "open" and "p-open" in status_name)):
+                            rv = {
+                                "time": contrib.created_on.isoformat(), "platform": contrib.platform,
+                                "status": contrib.status, "owned": contrib.owned,
+                                "assigned": contrib.assigned
+                                 }
+                            resp.append(rv)
+                    except IntegrityError:
+                        pass
 
             if i < len_ghd:
                 try:
-                    if ghdRateLimitTriggered is not True:
+                    if ghdRateLimitTriggered != True:
                         if GITHUB_FALLBACK_TO_PR == False:
-                            date_time = (datetime.strptime(
-                            ghd[i]['commit']['committer']['date'], "%Y-%m-%dT%H:%M:%S.%f%z")
-                            .replace(microsecond = 0)).astimezone(utc)
-                            contrib = ListCommit.objects.create(
-                                query = query, user_hash = unique_user_hash,
-                                heading = ghd[i]["commit"]["message"], created_on = date_time,
-                                createdStart = query.queryfilter.start_time,
-                                createdEnd = query.queryfilter.end_time,
-                                platform = "Github", status = "merged", assigned=True,
-                                redirect = ghd[i]["html_url"], owned = True,
-                            )
+                            change_id = ghd[i]["commit"]["message"].split("Change-Id:")[-1].strip()
+                            if gdChangeIDs.get(change_id) == None:# if change id is not duplicate, then commit is not a mirror commit
+                                date_time = (datetime.strptime(
+                                ghd[i]['commit']['committer']['date'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                                .replace(microsecond = 0)).astimezone(utc)
 
-                            rv = {
-                               "time": contrib.created_on.isoformat(), "platform":contrib.platform,
-                               "staus":contrib.status, "owned":contrib.owned,
-                               "assigned":contrib.assigned
-                            }
-                            resp.append(rv)
+                                try:
+                                    with transaction.atomic():
+                                        contrib = ListCommit.objects.create(
+                                            query = query, user_hash = unique_user_hash,
+                                            heading = ghd[i]["commit"]["message"], created_on = date_time,
+                                            createdStart = query.queryfilter.start_time,
+                                            createdEnd = query.queryfilter.end_time,
+                                            platform = "Github", status = "merged", assigned = True,
+                                            redirect = ghd[i]["html_url"], owned = True,
+                                        )
+
+                                    rv = {
+                                       "time": contrib.created_on.isoformat(), "platform":contrib.platform,
+                                       "staus":contrib.status, "owned":contrib.owned,
+                                       "assigned":contrib.assigned
+                                    }
+                                    resp.append(rv)
+                                except IntegrityError:
+                                    pass
 
                         else:
                             date_time = utc.localize(datetime.strptime(
@@ -524,30 +538,26 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                             .split("Z")[0], "%Y-%m-%dT%H:%M:%S")
                             .replace(microsecond = 0))
 
-                            contrib = ListCommit.objects.create(
-                                query=query, user_hash = unique_user_hash,
-                                heading = ghd[i]["title"], created_on=date_time,
-                                createdStart = query.queryfilter.start_time,
-                                createdEnd = query.queryfilter.end_time,
-                                platform="Github", status="merged", assigned=True,
-                                redirect=ghd[i]["html_url"], owned=True,
-                            )
+                            try:
+                                with transaction.atomic():
+                                    contrib = ListCommit.objects.create(
+                                        query = query, user_hash = unique_user_hash,
+                                        heading = ghd[i]["title"], created_on = date_time,
+                                        createdStart = query.queryfilter.start_time,
+                                        createdEnd = query.queryfilter.end_time,
+                                        platform = "Github", status="merged", assigned = True,
+                                        redirect = ghd[i]["html_url"], owned = True,
+                                    )
 
-                            contrib = ListCommit.objects.create(
-                                query=query, user_hash = unique_user_hash,
-                                heading = ghd[i]["title"], created_on=date_time,
-                                createdStart = query.queryfilter.start_time,
-                                createdEnd = query.queryfilter.end_time,
-                                platform="Github", status="merged", assigned=True,
-                                redirect=ghd[i]["html_url"], owned=True,
-                            )
+                                rv = {
+                                   "time": contrib.created_on.isoformat(), "platform":contrib.platform,
+                                   "staus":contrib.status, "owned":contrib.owned,
+                                   "assigned":contrib.assigned
+                                }
+                                resp.append(rv)
+                            except IntegrityError:
+                                pass
 
-                            rv = {
-                               "time": contrib.created_on.isoformat(), "platform":contrib.platform,
-                               "staus":contrib.status, "owned":contrib.owned,
-                               "assigned":contrib.assigned
-                            }
-                            resp.append(rv)
                 except:
                     ghdRateLimitTriggered = True
                     ghd_rate_limit_message[0] = ghd[i]['rate-limit-message']

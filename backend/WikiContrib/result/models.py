@@ -9,7 +9,7 @@ class ListCommit(models.Model):
     """
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     user_hash = models.CharField(max_length=64, blank=True ,null=True,  default="")
-    heading = models.CharField(max_length=200)
+    heading = models.CharField(max_length=200, unique=True)
     platform = models.CharField(max_length=20)
     created_on = models.DateTimeField(default=timezone.now)
     createdStart = models.DateTimeField(default=timezone.now)
