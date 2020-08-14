@@ -717,18 +717,28 @@ class QueryResult extends React.Component {
                       </Grid.Column>
                     </Grid>
                     <div style={{ width: '100%' }}>
+                    <Popup
+                      content="Search"
+                      position="top center"
+                      trigger={
                       <Button
                         className="apply_filters"
                         onClick={() => this.handleSearchClick()}
                       >
-                      <Icon name="redo alternate"/>
+                      <Icon name="search"/>
                       </Button>
+                    }/>
+                    <Popup
+                      content="Reset"
+                      position="top center"
+                      trigger={
                       <Button
                         className="reset_filters"
                         onClick={() => this.handleReset()}
                       >
-                        <Icon name="search"/>
+                        <Icon name="redo alternate"/>
                       </Button>
+                    }/>
                     </div>
                   </Card>
                 </Transition>
