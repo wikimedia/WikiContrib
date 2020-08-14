@@ -661,6 +661,36 @@ class QueryResult extends React.Component {
                           search
                           selection
                           icon={false}
+                          options={filter_2}
+                          value={get_num_days(
+                            new Date(uf.start_time),
+                            new Date(uf.end_time)
+                          )}
+                          onChange={(e, obj) => {
+                            let date = new Date(
+                              this.state.update_filters.end_time
+                            );
+                            let days = obj.value;
+
+                            date = new Date(date - time_delta(days));
+
+                            let filters = Object.assign({}, uf);
+                            filters.start_time = date.toISOString();
+
+                            this.setState({ update_filters: filters });
+                          }}
+                          placeholder="Get by date"
+                          closeOnChange={true}
+                        />
+                      </Grid.Column>
+                      <Grid.Column computer={8} tablet={16} mobile={16}>
+                        <Header>To</Header>
+                        <Dropdown
+                          style={{ marginTop: 10 }}
+                          fluid
+                          search
+                          selection
+                          icon={false}
                           value={this.func()}
                           options={get_dates()}
                           onChange={(e, obj) => {
@@ -682,36 +712,6 @@ class QueryResult extends React.Component {
                             });
                           }}
                           placeholder="Select Date"
-                          closeOnChange={true}
-                        />
-                      </Grid.Column>
-                      <Grid.Column computer={8} tablet={16} mobile={16}>
-                        <Header>Time Range</Header>
-                        <Dropdown
-                          style={{ marginTop: 10 }}
-                          fluid
-                          search
-                          selection
-                          icon={false}
-                          options={filter_2}
-                          value={get_num_days(
-                            new Date(uf.start_time),
-                            new Date(uf.end_time)
-                          )}
-                          onChange={(e, obj) => {
-                            let date = new Date(
-                              this.state.update_filters.end_time
-                            );
-                            let days = obj.value;
-
-                            date = new Date(date - time_delta(days));
-
-                            let filters = Object.assign({}, uf);
-                            filters.start_time = date.toISOString();
-
-                            this.setState({ update_filters: filters });
-                          }}
-                          placeholder="Get by date"
                           closeOnChange={true}
                         />
                       </Grid.Column>
