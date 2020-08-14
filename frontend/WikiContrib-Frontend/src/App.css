@@ -64,6 +64,13 @@ h3.accounts  {
   padding-bottom: 2rem;
 }
 
+.ui.single.line.table.user_table .user_table_cell {
+  width: 25%;
+  height: 5em;
+  position: relative;
+  overflow: hidden;
+}
+
 /* NavBar */
 
 .ui.secondary.navbar.menu {
@@ -182,13 +189,25 @@ h3.accounts  {
   padding: 2em;
 }
 
+.user_label {
+  position: absolute;
+  bottom: 1em;
+  font-size: large;
+  font-weight: 700;
+  color: #9a9a9a;
+  left: 1em;
+}
+
 .user_input {
+  position: absolute;
+  bottom: 0;
+  background-color: transparent;
   border: none;
   border-radius: 2px;
   /* background: #f5f5f5; */
   padding: 0.5rem 0.2rem;
   border-bottom: 3px solid #72777d;
-  width: 95%;
+  width: 96%;
   transition: 0.3s;
   font-size: 1.5rem;
   color: #000;
@@ -199,6 +218,13 @@ h3.accounts  {
   background: #f5f5f5;
   outline: none;
 -webkit-appearance: none;
+}
+
+.user_input:focus + .user_label, .user_input:valid + .user_label {
+  top: 0.5em;
+  color: #565656;
+  font-size: medium;
+  transition: 1s;
 }
 
 .user_input:hover {
