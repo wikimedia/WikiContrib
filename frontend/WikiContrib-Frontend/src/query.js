@@ -749,64 +749,77 @@ export class Query extends Component {
                                   {this.state.rows.map((obj, index) => (
                                     <Table.Row key={index}>
                                       <Table.Cell
-                                        style={{ textAlign: 'center' }}
+                                        className="user_table_cell"
                                       >
-                                        <input
-                                          className="user_input"
-                                          value={obj.fullname}
-                                          name="fullname"
-                                          placeholder="Full name"
-                                          onChange={e =>
-                                            this.handlChange(
-                                              e.target.name,
-                                              e.target.value,
-                                              index
-                                            )
-                                          }
-                                        />
+                                      <input
+                                        className="user_input"
+                                        value={obj.fullname}
+                                        name="fullname"
+                                        id="fullname"
+                                        required
+                                        onChange={e =>
+                                          this.handlChange(
+                                            e.target.name,
+                                            e.target.value,
+                                            index
+                                          )
+                                        }
+                                      />
+                                      <label className="user_label" htmlFor="fullname">
+                                        Full name
+                                      </label>
                                       </Table.Cell>
                                       <Table.Cell
-                                        style={{ textAlign: 'center' }}
+                                      className="user_table_cell"
                                       >
-                                          <input
-                                            className="user_input"
-                                            value={obj.gerrit_username}
-                                            name="gerrit_username"
-                                            placeholder="Gerrit username"
-                                            onChange={e =>
-                                              this.handlChange(
-                                                e.target.name,
-                                                e.target.value,
-                                                index
-                                              )
-                                            }
-                                          />
+                                      <input
+                                        className="user_input"
+                                        value={obj.gerrit_username}
+                                        name="gerrit_username"
+                                        id="gerrit_username"
+                                        required
+                                        onChange={e =>
+                                          this.handlChange(
+                                            e.target.name,
+                                            e.target.value,
+                                            index
+                                          )
+                                        }
+                                      />
+                                      <label className="user_label" htmlFor="gerrit_username">
+                                        Gerrit username
+                                      </label>
                                       </Table.Cell>
                                       <Table.Cell
-                                        style={{ textAlign: 'center' }}
+                                        className="user_table_cell"
                                       >
-                                          <input
-                                            className="user_input"
-                                            value={obj.phabricator_username}
-                                            name="phabricator_username"
-                                            placeholder="Phabricator username"
-                                            onChange={e =>
-                                              this.handlChange(
-                                                e.target.name,
-                                                e.target.value,
-                                                index
-                                              )
-                                            }
-                                          />
+                                      <input
+                                        className="user_input"
+                                        value={obj.phabricator_username}
+                                        name="phabricator_username"
+                                        id="phabricator_username"
+                                        required
+                                        onChange={e =>
+                                          this.handlChange(
+                                            e.target.name,
+                                            e.target.value,
+                                            index
+                                          )
+                                        }
+                                      />
+                                      <label className="user_label" htmlFor="phabricator_username">
+                                        Phabricator username
+                                      </label>
                                       </Table.Cell>
                                       <Table.Cell
-                                       style={{ textAlign: 'center' }}
+                                       className="user_table_cell"
                                       >
                                         <input
                                           className="user_input"
                                           value={obj.github_username}
                                           name="github_username"
-                                          placeholder="Github username"
+                                          id="github_username"
+                                          required
                                           onChange={e =>
                                             this.handlChange(
                                               e.target.name,
@@ -815,6 +828,9 @@ export class Query extends Component {
                                             )
                                           }
                                         />
+                                      <label className="user_label" htmlFor="github_username">
+                                        Github username
+                                      </label>
                                     </Table.Cell>
                                     <Table.Cell
                                      style={{ textAlign: 'center' }}
