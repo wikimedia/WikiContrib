@@ -8,4 +8,4 @@ class UserCommitSerializer(ModelSerializer):
     """
     class Meta:
         model = ListCommit
-        fields = ('heading', 'platform', 'redirect', 'owned', 'assigned', 'status')
+        fields = ('heading', 'platform', 'redirect', 'authored', 'assigned', 'status')

@@ -63,7 +63,7 @@ So, even if I want to get some page **n** you have to get all the details from *
 
 In this tool, all the contributions of the user from Gerrit are being fetched. But in the case of phabricator, two kinds of tasks are taken into count:
 
-1. Tasks owned by the user.
+1. Tasks authored by the user.
 2. Tasks assigned to the user.
 
 For Github, we are only concerned with the contributors commits.
@@ -109,7 +109,7 @@ If the query is not in the cache or is more than a day old in the cache, we call
 The above code adds four tasks to the event loop. Each of the tasks fetches contributions data through the various APIs.
 
 1. ``get_gerrit_data()``: fetch contributions user from gerrit.
-2. ``get_task_authors()``: fetch tasks owned by a user in phabricator.
+2. ``get_task_authors()``: fetch tasks authored by a user in phabricator.
 3. ``get_task_assigner()``: fetch tasks assigned to a user in phabricator.
 4. ``get_github_data()``: fetches contributions to a given set of Wikimedia repositories on github.
 

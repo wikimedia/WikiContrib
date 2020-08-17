@@ -410,7 +410,7 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
     """ If there are matching results in the cache """
     if cachedResults != None:
         results = loads(serialize("json", cachedResults, fields = ("created_on",
-                    "platform", "status", "owned", "assigned")))
+                    "platform", "status", "authored", "assigned")))
         for result in results:
             status = result["fields"]["status"].lower()
             if (status_name is True or status in status_name or
@@ -419,7 +419,7 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                         result["fields"]["created_on"].split("Z")[0],"%Y-%m-%dT%H:%M:%S"))
                 rv = {
                    "time": time.isoformat(), "platform":result["fields"]["platform"],
-                   "staus":result["fields"]["status"], "owned":result["fields"]["owned"],
+                   "staus":result["fields"]["status"], "authored":result["fields"]["authored"],
                    "assigned":result["fields"]["assigned"]
                 }
                 resp.append(rv)
@@ -455,7 +455,7 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                             createdStart = query.queryfilter.start_time,
                             createdEnd = query.queryfilter.end_time,
                             platform = "Gerrit", status = change['status'],
-                            redirect = change['change_id'], owned = True,
+                            redirect = change['change_id'], authored = True,
                             assigned = True
                         )
 
@@ -463,7 +463,7 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                     or (status == "open" in status_name)):
                         rv = {
                            "time": contrib.created_on.isoformat(), "platform":contrib.platform,
-                           "staus":contrib.status, "owned":contrib.owned,
+                           "staus":contrib.status, "authored":contrib.authored,
                            "assigned":contrib.assigned
                         }
                         resp.append(rv)
@@ -488,14 +488,14 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                                 createdStart = query.queryfilter.start_time,
                                 createdEnd = query.queryfilter.end_time,
                                 platform = "Phabricator", status = pd[i]['fields']['status']['name'],
-                                redirect = "T" + str(pd[i]['id']), owned = pd[i]['fields']['authorPHID'] == phid,
+                                redirect = "T" + str(pd[i]['id']), authored = pd[i]['fields']['authorPHID'] == phid,
                                 assigned = pd[i]['fields']['ownerPHID'] == True or phid == pd[i]['fields']['ownerPHID']
                                 )
                         if (status_name is True or status in status_name
                         or (status == "open" and "p-open" in status_name)):
                             rv = {
                                 "time": contrib.created_on.isoformat(), "platform": contrib.platform,
-                                "status": contrib.status, "owned": contrib.owned,
+                                "status": contrib.status, "authored": contrib.authored,
                                 "assigned": contrib.assigned
                                  }
                             resp.append(rv)
@@ -520,12 +520,12 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                                             createdStart = query.queryfilter.start_time,
                                             createdEnd = query.queryfilter.end_time,
                                             platform = "Github", status = "merged", assigned = True,
-                                            redirect = ghd[i]["html_url"], owned = True,
+                                            redirect = ghd[i]["html_url"], authored = True,
                                         )
 
                                     rv = {
                                        "time": contrib.created_on.isoformat(), "platform":contrib.platform,
-                                       "staus":contrib.status, "owned":contrib.owned,
+                                       "staus":contrib.status, "authored":contrib.authored,
                                        "assigned":contrib.assigned
                                     }
                                     resp.append(rv)
@@ -546,12 +546,12 @@ def format_data(ghd_rate_limit_message,unique_user_hash = None, pd = None, gd = 
                                         createdStart = query.queryfilter.start_time,
                                         createdEnd = query.queryfilter.end_time,
                                         platform = "Github", status="merged", assigned = True,
-                                        redirect = ghd[i]["html_url"], owned = True,
+                                        redirect = ghd[i]["html_url"], authored = True,
                                     )
 
                                 rv = {
                                    "time": contrib.created_on.isoformat(), "platform":contrib.platform,
-                                   "staus":contrib.status, "owned":contrib.owned,
+                                   "staus":contrib.status, "authored":contrib.authored,
                                    "assigned":contrib.assigned
                                 }
                                 resp.append(rv)
@@ -1011,7 +1011,7 @@ def UserUpdateStatus(data):
         obj = {
             "time": i.created_on,
             "status": i.status,
-            "owned": i.owned,
+            "authored": i.authored,
             "assigned": i.assigned
         }
 
