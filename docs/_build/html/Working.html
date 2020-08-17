@@ -175,7 +175,7 @@ Suppose if you have to get the commits of the user in 7th page, you have to requ
 <p>So, even if I want to get some page <strong>n</strong> you have to get all the details from <strong>1 to n</strong>.</p>
 <p>In this tool, all the contributions of the user from gerrit are being fetched. But in case of phabricator, two kinds of tasks are taken into count:</p>
 <ol class="arabic simple">
-<li><p>Tasks owned by the user.</p></li>
+<li><p>Tasks authored by the user.</p></li>
 <li><p>Tasks assigned to the user.</p></li>
 </ol>
 <p><strong>DisplayResult</strong> view actually gets all the data required to perform the extrnal API requests and call another function <code class="docutils literal notranslate"><span class="pre">getDetails</span></code>. This function takes the data and format them according to the requirement. It also creates a new <strong>asyncio event loop</strong>.
@@ -192,7 +192,7 @@ This loop is given with three different co-routines. (If you are not familiar wi
 <p>The above code adds three tasks to the event loop. Each of the task fetches APIs and get information.</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code>: fetch contributions user from gerrit.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code>: fetch tasks owned by a user in phabricator.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code>: fetch tasks authored by a user in phabricator.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code>: fetch tasks assigned to a user in phabricator.</p></li>
 </ol>
 <p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code> perform a single API request and gets all the details of the users.

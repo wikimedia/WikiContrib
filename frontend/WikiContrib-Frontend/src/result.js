@@ -265,7 +265,7 @@ class QueryResult extends React.Component {
             lineTension: 0.4,
           },
           {
-            label: 'Owned',
+            label: 'Authored',
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             borderColor: 'rgba(255, 204, 51, 0.6)',
             backgroundColor: 'rgba(255, 204, 51, 0.2)',
@@ -308,7 +308,7 @@ class QueryResult extends React.Component {
       let et_y = et.getFullYear();
 
       if (platform === 'phabricator' && e.platform.toLowerCase() === platform) {
-        if (e.assigned && !e.owned) {
+        if (e.assigned && !e.authored) {
             if (index === et_m && index_year === et_y) {
               current_month[0] += 1;
               current_month[2] += 1;
@@ -316,7 +316,7 @@ class QueryResult extends React.Component {
               data.datasets[0].data[index] += 1;
               data.datasets[2].data[index] += 1;
             }
-        } else if (e.owned && !e.assigned) {
+        } else if (e.authored && !e.assigned) {
           if (index === et_m && index_year === et_y) {
             current_month[1] += 1;
             current_month[2] += 1;
