@@ -33,7 +33,7 @@ So, even if I want to get some page **n** you have to get all the details from *
 
 In this tool, all the contributions of the user from gerrit are being fetched. But in case of phabricator, two kinds of tasks are taken into count:
 
-1. Tasks owned by the user.
+1. Tasks authored by the user.
 2. Tasks assigned to the user.
 
 **DisplayResult** view actually gets all the data required to perform the extrnal API requests and call another function ``getDetails``. This function takes the data and format them according to the requirement. It also creates a new **asyncio event loop**.
@@ -52,7 +52,7 @@ This loop is given with three different co-routines. (If you are not familiar wi
 The above code adds three tasks to the event loop. Each of the task fetches APIs and get information. 
 
 1. ``get_gerrit_data()``: fetch contributions user from gerrit.
-2. ``get_task_authors()``: fetch tasks owned by a user in phabricator.
+2. ``get_task_authors()``: fetch tasks authored by a user in phabricator.
 3. ``get_task_assigner()``: fetch tasks assigned to a user in phabricator.
 
 ``get_gerrit_data()`` perform a single API request and gets all the details of the users.

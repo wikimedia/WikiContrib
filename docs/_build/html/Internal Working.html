@@ -194,7 +194,7 @@ be parallel because each page has to be requested with a reference(except the fi
 <p>So, even if I want to get some page <strong>n</strong> you have to get all the details from <strong>1 to n</strong>.</p>
 <p>In this tool, all the contributions of the user from Gerrit are being fetched. But in the case of phabricator, two kinds of tasks are taken into count:</p>
 <ol class="arabic simple">
-<li><p>Tasks owned by the user.</p></li>
+<li><p>Tasks authored by the user.</p></li>
 <li><p>Tasks assigned to the user.</p></li>
 </ol>
 <p>For Github, we are only concerned with the contributors commits.</p>
@@ -222,7 +222,7 @@ If the query is not in the cache or is more than a day old in the cache, we call
 <p>The above code adds four tasks to the event loop. Each of the tasks fetches contributions data through the various APIs.</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">get_gerrit_data()</span></code>: fetch contributions user from gerrit.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code>: fetch tasks owned by a user in phabricator.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_task_authors()</span></code>: fetch tasks authored by a user in phabricator.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_task_assigner()</span></code>: fetch tasks assigned to a user in phabricator.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_github_data()</span></code>: fetches contributions to a given set of Wikimedia repositories on github.</p></li>
 </ol>

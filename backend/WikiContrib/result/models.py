@@ -16,7 +16,7 @@ class ListCommit(models.Model):
     createdEnd = models.DateTimeField(default=timezone.now)
     redirect = models.CharField(max_length=200)
     status = models.CharField(max_length=20)
-    owned = models.BooleanField(default=False)
+    authored = models.BooleanField(default=False)
     assigned = models.BooleanField(default=False)
 
     def __str__(self):
