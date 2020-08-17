@@ -22,6 +22,7 @@ import {
   fetchDetails,
   full_months,
   get_num_days,
+  get_num_months,
   filterDetailApi,
 } from './api';
 // import UserSearch from './components/dropdown';
@@ -309,7 +310,7 @@ class QueryResult extends React.Component {
 
       if (platform === 'phabricator' && e.platform.toLowerCase() === platform) {
         if (e.assigned && !e.authored) {
-            if (index === et_m && index_year === et_y) {
+            if (index === et_m && index_year === et_y) {//if contributions was made in the current_month;
               current_month[0] += 1;
               current_month[2] += 1;
             } else {
@@ -317,7 +318,7 @@ class QueryResult extends React.Component {
               data.datasets[2].data[index] += 1;
             }
         } else if (e.authored && !e.assigned) {
-          if (index === et_m && index_year === et_y) {
+          if (index === et_m && index_year === et_y) {//if contributions was made in the current_month;
             current_month[1] += 1;
             current_month[2] += 1;
           } else {
@@ -325,7 +326,7 @@ class QueryResult extends React.Component {
             data.datasets[2].data[index] += 1;
           }
         } else {
-          if (index === et_m && index_year === et_y) {
+          if (index === et_m && index_year === et_y) {//if contributions was made in the current_month;
             current_month[0] += 1;
             current_month[1] += 1;
             current_month[2] += 1;
@@ -336,7 +337,7 @@ class QueryResult extends React.Component {
           }
         }
       } else if (platform !== 'phabricator' && e.platform.toLowerCase() === platform) {
-          if(index === et_m && index_year === et_y){
+          if(index === et_m && index_year === et_y){//if contributions was made in the current_month;
             current_month[0] += 1;
           } else {
             data.datasets[0].data[index] += 1;
@@ -352,19 +353,32 @@ class QueryResult extends React.Component {
      */
 
     let data_len = data.datasets.length,
+      start_time = this.state.current_filters.start_time,
       end_time = this.state.current_filters.end_time,
-      m_index = new Date(end_time).getMonth(),
-      lbl_a = months.slice(0, m_index),
-      lbl_b = months.slice(m_index);
+      month_index = new Date(end_time).getMonth(),
+      labels_upper = months.slice(0, month_index),
+      labels_lower = months.slice(month_index);
 
-    data.labels = lbl_b.concat(lbl_a, lbl_b[0]);
+    start_time = new Date(start_time);
+    end_time = new Date(end_time);
+    let num_months = get_num_months(get_num_days(start_time, end_time));
+
+    data.labels = labels_lower.concat(labels_upper, labels_lower[0]);
 
     for (var i = 0; i < data_len; i++) {
       if (data.datasets[i]) {
-        let set_a = data.datasets[i].data,
-          set_b = set_a.splice(m_index);
+        let contrib_upper = data.datasets[i].data,
+          contrib_lower = contrib_upper.splice(month_index);
 
-        data.datasets[i].data = set_b.concat(set_a, [current_month[i]]);
+        data.datasets[i].data = contrib_lower.concat(contrib_upper, [current_month[i]]);//add curent_month at the end of contributions array;
+
+        if(num_months < months.length){//if diff between start_time and end_time less than 12 months, update graphs;
+          data.datasets[i].data = data.datasets[i].data.slice(
+                                  data.datasets[i].data.length - num_months);
+          if(data.labels.length === 13){
+            data.labels = data.labels.slice(data.labels.length - num_months);
+          }
+        }
       }
     }
 
