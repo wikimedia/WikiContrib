@@ -9,7 +9,7 @@ Django==2.2.10
 django-cleanup==3.2.0
 django-cors-headers==3.0.2
 django-environ==0.4.5
-djangorestframework==3.9.4
+djangorestframework==3.11.2
 idna==2.8
 idna-ssl==1.1.0
 multidict==4.5.2
