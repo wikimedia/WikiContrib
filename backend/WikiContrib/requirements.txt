@@ -5,7 +5,7 @@ attrs==19.1.0
 cffi==1.12.3
 chardet==3.0.4
 cryptography==2.7
-Django==2.2.10
+Django==2.2.21
 django-cleanup==3.2.0
 django-cors-headers==3.0.2
 django-environ==0.4.5
