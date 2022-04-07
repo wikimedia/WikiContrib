@@ -17,5 +17,5 @@ cp -r dep/build/. public_html/
 cd dep/
 rm -rf build/ package.json package-lock.json public/ README.md src/ Install.md
 echo "Performed all the shell operations."
-webservice lighttpd restart
+webservice --backend=gridengine --release buster lighttpd restart
 EOT

@@ -4,11 +4,11 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-if (process.env.NODE_ENV === 'production') {
-  require('./dist/semantic.min.css');
-} else {
-  require('semantic-ui-css/semantic.min.css');
-}
+// if (process.env.NODE_ENV === 'production') {
+//   require('./dist/semantic.min.css');
+// } else {
+//   require('fomantic-ui-css/semantic.min.css');
+// }
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
