@@ -3,3 +3,4 @@ WikiContrib/.env
 uploads/
 migrations/
 __pycache__/
+venv/
